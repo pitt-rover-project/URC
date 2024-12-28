@@ -3,6 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import serial
 import time
+import threading # To handle the terminal input without blocking the main ROS 2 loop
 
 
 class ArduinoBridge(Node):
@@ -64,6 +65,32 @@ class ArduinoBridge(Node):
         # Log the command sent to the Arduino
         self.get_logger().info(f"Sent to Arduino: {command}")
 
+class TerminalInputPublisher(Node):
+    def __init__(self):
+        # Initialize the ROS 2 node
+        super().__init__("terminal_input_publisher")
+
+        # Publisher to send user input to the `drive_arduino_commands` topic
+        self.command_publisher = self.create_publisher(String, "drive_arduino_commands", 10)
+
+        self.get_logger().info("Terminal Input Publisher Node Started")
+        threading.Thread(target=self.publish_user_input, daemon=True).start()
+
+    def publish_user_input(self):
+        while rclpy.ok():
+            try:
+                # Continuously prompt the user for input
+                user_input = input("Enter command for Arduino: ").strip()
+
+                if user_input:
+                    # Publish the input to the topic
+                    msg = String()
+                    msg.data = user_input
+                    self.command_publisher.publish(msg)
+
+                    self.get_logger().info(f"Published: {user_input}")
+            except Exception as e:
+                self.get_logger().error(f"Error reading terminal input: {e}")
 
 def main(args=None):
     # Initialize the ROS 2 system
