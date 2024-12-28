@@ -1,5 +1,3 @@
 #! /bin/bash
 
-# TODO : properly do this
-
-sudo docker exec -it {docker_id} python ./guis/arduino_gui.py
+sudo docker exec -it pitt_urc_jetson python ./app/guis/gen_gui.py
