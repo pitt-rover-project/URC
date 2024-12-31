@@ -1,8 +1,0 @@
-prefix=/home/alexander/ultrasonic_sensors/install
-
-Name: ros_nodes
-Description: Description of ros_nodes
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

@@ -1,2 +1,0 @@
-ros_nodes
--DCATKIN_DEVEL_PREFIX=/home/alexander/ultrasonic_sensors/devel -DCMAKE_INSTALL_PREFIX=/home/alexander/ultrasonic_sensors/install -G Unix Makefiles
