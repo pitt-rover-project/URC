@@ -1,0 +1,161 @@
+<?xml version = "1.0"?>
+<robot name = "RAS_Rover">
+
+  <!--Materials for links-->
+  <material name = "yellow">
+    <color rgba = "1 1 0 1" />
+  </material>
+
+  <material name = "blue">
+    <color rgba = "0 0 1 1" />
+  </material>
+
+  <material name = "grey">
+    <color rgba = "0.7 0.7 0.7 1" />
+  </material>
+
+  <material name = "white">
+    <color rgba = "1 1 1 1" />
+  </material>
+  
+  <!--Base box-->
+  <link name = "base_link">
+    <visual>
+      <geometry>
+        <box size = "0.6 0.4 0.1" />
+      </geometry>
+      <origin xyz = "0 0 0.1" rpy = "0 0 0" />
+      <material name = "yellow" />
+    </visual>
+  </link>
+  
+  <!--Lidar-->
+  <link name = "lidar">
+    <visual>
+      <geometry>
+        <cylinder radius = "0.1" length = "0.0225" />
+      </geometry>
+      <origin xyz = "0 0 0" rpy = "0 0 0" />
+      <material name = "white" />
+    </visual>
+  </link>
+
+  <joint name = "base_lidar_joint" type = "fixed">
+    <parent link = "base_link" />
+    <child link = "lidar" />
+    <origin xyz = "0 0 0.16" rpy = "0 0 0" />
+  </joint>
+
+  <!--Wheels-->
+  <link name = "left_wheel_1">
+    <visual>
+      <geometry>
+        <cylinder radius = "0.1" length = "0.05" />
+      </geometry>
+      <origin xyz = "0 0 0" rpy = "1.57 0 0" />
+      <material name = "blue" />
+    </visual>
+  </link>
+
+  <joint name = "base_left_wheel_joint_1" type = "continuous">
+    <parent link = "base_link" />
+    <child link = "left_wheel_1" />
+    <origin xyz = "0 0.225 0" rpy = "0 0 0" />
+    <axis xyz = "0 1 0" />
+  </joint>
+
+  <link name = "left_wheel_2">
+    <visual>
+      <geometry>
+        <cylinder radius = "0.1" length = "0.05" />
+      </geometry>.
+      <origin xyz = "0 0 0" rpy = "1.57 0 0" />
+      <material name = "blue" />
+    </visual>
+  </link>
+
+  <joint name = "base_left_wheel_joint_2" type = "continuous">
+    <parent link = "base_link" />
+    <child link = "left_wheel_2" />
+    <origin xyz = "-0.3 0.225 0" rpy = "0 0 0" />
+    <axis xyz = "0 1 0" />
+  </joint>
+
+  <link name = "left_wheel_3">
+    <visual>
+      <geometry>
+        <cylinder radius = "0.1" length = "0.05" />
+      </geometry>
+      <origin xyz = "0 0 0" rpy = "1.57 0 0" />
+      <material name = "blue" />
+    </visual>
+  </link>
+
+  <joint name = "base_left_wheel_joint_3" type = "continuous">
+    <parent link = "base_link" />
+    <child link = "left_wheel_3" />
+    <origin xyz = "0.3 0.225 0" rpy = "0 0 0" />
+    <axis xyz = "0 1 0" />
+  </joint>
+
+  <link name = "right_wheel_1">
+      <visual>
+        <geometry>
+          <cylinder radius = "0.1" length = "0.05" />
+        </geometry>
+        <origin xyz = "0 0 0" rpy = "1.57 0 0" />
+        <material name = "blue" />
+      </visual>
+  </link>
+
+  <joint name = "base_right_wheel_joint_1" type = "continuous">
+      <parent link = "base_link" />
+      <child link = "right_wheel_1" />
+      <origin xyz = "0 -0.225 0" rpy = "0 0 0" />
+      <axis xyz = "0 1 0" />
+  </joint>
+
+  <link name = "right_wheel_2">
+      <visual>
+        <geometry>
+          <cylinder radius = "0.1" length = "0.05" />
+        </geometry>
+        <origin xyz = "0 0 0" rpy = "1.57 0 0" />
+        <material name = "blue" />
+      </visual>
+  </link>
+
+  <joint name = "base_right_wheel_joint_2" type = "continuous">
+      <parent link = "base_link" />
+      <child link = "right_wheel_2" />
+      <origin xyz = "-0.3 -0.225 0" rpy = "0 0 0" />
+      <axis xyz = "0 1 0" />
+  </joint>
+
+  <link name = "right_wheel_3">
+    <visual>
+      <geometry>
+        <cylinder radius = "0.1" length = "0.05" />
+      </geometry>
+      <origin xyz = "0 0 0" rpy = "1.57 0 0" />
+      <material name = "blue" />
+    </visual>
+  </link>
+
+  <joint name = "base_right_wheel_joint_3" type = "continuous">
+    <parent link = "base_link" />
+    <child link = "right_wheel_3" />
+    <origin xyz = "0.3 -0.225 0" rpy = "0 0 0" />
+    <axis xyz = "0 1 0" />
+  </joint>
+
+  <!--Base foot-->
+  <link name = "base_footprint" />
+
+  <joint name = "base_footprint_joint" type = "fixed">
+    <parent link = "base_footprint" />
+    <child link = "base_link" />
+    <origin xyz = "0 0 0.1" rpy = "0 0 0" />
+  </joint>
+
+</robot>
