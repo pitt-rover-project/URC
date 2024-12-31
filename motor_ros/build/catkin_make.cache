@@ -1,2 +1,0 @@
-motor_nodes
--DCATKIN_DEVEL_PREFIX=/home/alexander/motor_ros/devel -DCMAKE_INSTALL_PREFIX=/home/alexander/motor_ros/install -G Unix Makefiles
