@@ -12,7 +12,7 @@ class ArduinoBridge(Node):
         super().__init__("arduino_bridge")
 
         # Initialize the serial connection to the Arduino
-        self.serial = serial.Serial("/dev/ttyACM0", 9600)  # Update with your port
+        self.serial = serial.Serial("/dev/ttyACM0", 115200)  # Update with your port
         time.sleep(2)  # Wait for the Arduino to reset
 
         # Publisher to publish data read from the ultrasonic sensors
