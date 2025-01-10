@@ -39,7 +39,7 @@ class ArduinoBridge(Node):
             # Publish the data to the ROS 2 topic
             msg = String()
             msg.data = response
-            self.publisher.publish(msg)
+            self.ultrasonic_publisher.publish(msg)
 
 
 def main(args=None):
