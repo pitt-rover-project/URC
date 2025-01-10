@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y python3-pip && \
     pip install supervisor &&\
     pip3 install --no-cache-dir pyserial
 
+RUN mkdir -p /etc/supervisor/conf.d/
+
 RUN cp /app/docker/jetson/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
