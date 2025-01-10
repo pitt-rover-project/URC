@@ -1,8 +1,8 @@
 // This code is for checking the distance between a number of arduino ultrasonic sensors and the object directly infront of the sensors
 
 //trig and echo pins for each ultrasonic sensor (no pwm needed)
-int trigPin1 = 52;
-int echoPin1 = 53;
+int trigPin1 = 8;
+int echoPin1 = 9;
 int trigPin2 = 50;
 int echoPin2 = 51;
 int trigPin3 = 48;
