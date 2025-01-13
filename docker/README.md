@@ -1,0 +1,1 @@
+We need docker to package all code/work to ensure it runs smoothly and without weird errors from environoment stuff. 
