@@ -52,7 +52,7 @@ class MainWindow(QWidget):
         ex_deli_gui = QPushButton("ex_deli_gui", self)
         ex_deli_gui.clicked.connect(self.ex_deli_gui)
         json_motorGUI = QPushButton("json_motorGUI", self)
-        json_motorGUI.clicked.connect(self.json_motorGUI)
+        json_motorGUI.clicked.connect(self.json_motorGUI_gui)
         
         bottom_layout.addWidget(arduino_gui, 0, 0)
         bottom_layout.addWidget(auto_gui, 0, 1)
