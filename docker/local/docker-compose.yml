@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  pitt_urc_local:
+    image: urc_local
+    container_name: pitt_urc_local
+    stdin_open: true     # Equivalent to `-it`
+    tty: true            # Keeps the container interactive
+    restart: unless-stopped
