@@ -4,6 +4,7 @@ services:
     image: urc_jetson
     container_name: pitt_urc_jetson
     runtime: nvidia
+    privileged: true
     network_mode: host
     deploy:
       resources:
