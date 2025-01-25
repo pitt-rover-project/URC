@@ -13,7 +13,6 @@ services:
     environment:
       - DISPLAY
     devices:
-      # - "/dev/ttyACM0:/dev/ttyACM0"
       - "/dev/video0:/dev/video0"
       - "/dev/iio:device0:/dev/iio:device0"
     restart: unless-stopped
