@@ -68,19 +68,19 @@ class MainWindow(QWidget):
         self.setLayout(main_layout)
     
     def arduino_gui(self):
-        subprocess.Popen(["python3", "arduino_gui.py"])
+        subprocess.Popen(["python3", "guis/arduino_gui.py"])
     
     def auto_gui(self):
-        subprocess.Popen(["python3", "auto_gui.py"])
+        subprocess.Popen(["python3", "guis/auto_gui.py"])
     
     def equip_serv_gui(self):
-        subprocess.Popen(["python3", "equip_serv_gui.py"])
+        subprocess.Popen(["python3", "guis/equip_serv_gui.py"])
     
     def ex_deli_gui(self):
-        subprocess.Popen(["python3", "ex_deli_gui.py"])
+        subprocess.Popen(["python3", "guis/ex_deli_gui.py"])
     
     def json_motorGUI_gui(self):
-        subprocess.Popen(["python3", "json_motorGUI.py"])
+        subprocess.Popen(["python3", "guis/json_motorGUI.py"])
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
