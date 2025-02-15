@@ -13,7 +13,7 @@
 #define DIR2Back 49
 
 // REPLACE
-#define WHEEL_BASE 1.0    // distance between the left and right wheels in meters
+#define WHEEL_BASE 0.7384    // distance between the left and right wheels in meters
 #define MAX_LINEAR_SPEED 1.0    // maximum linear speed in m/s
 #define MAX_PWM 255
 
