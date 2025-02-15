@@ -1,0 +1,23 @@
+[0.009s] Invoking command in '/home/parth-p-24/colcon_ws/build/my_robot_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/parth-p-24/ros2_ws/install/launch_testing_examples:/home/parth-p-24/ros2_ws/install/examples_rclpy_pointcloud_publisher:/home/parth-p-24/ros2_ws/install/examples_rclpy_minimal_subscriber:/home/parth-p-24/ros2_ws/install/examples_rclpy_minimal_service:/home/parth-p-24/ros2_ws/install/examples_rclpy_minimal_publisher:/home/parth-p-24/ros2_ws/install/examples_rclpy_minimal_client:/home/parth-p-24/ros2_ws/install/examples_rclpy_minimal_action_server:/home/parth-p-24/ros2_ws/install/examples_rclpy_minimal_action_client:/home/parth-p-24/ros2_ws/install/examples_rclpy_guard_conditions:/home/parth-p-24/ros2_ws/install/examples_rclpy_executors:/opt/ros/humble /usr/bin/cmake /home/parth-p-24/colcon_ws/src/my_robot_description -DCMAKE_INSTALL_PREFIX=/home/parth-p-24/colcon_ws/install/my_robot_description
+[0.131s] -- The C compiler identification is GNU 11.4.0
+[0.188s] -- The CXX compiler identification is GNU 11.4.0
+[0.199s] -- Detecting C compiler ABI info
+[0.267s] -- Detecting C compiler ABI info - done
+[0.271s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.271s] -- Detecting C compile features
+[0.272s] -- Detecting C compile features - done
+[0.273s] -- Detecting CXX compiler ABI info
+[0.348s] -- Detecting CXX compiler ABI info - done
+[0.353s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.353s] -- Detecting CXX compile features
+[0.353s] -- Detecting CXX compile features - done
+[0.358s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.489s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.598s] -- Found ament_lint_auto: 0.12.11 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[0.671s] -- Added test 'flake8' to check Python code syntax and style conventions
+[0.671s] -- Added test 'lint_cmake' to check CMake code style
+[0.672s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[0.673s] -- Added test 'xmllint' to check XML markup files
+[0.675s] -- Configuring done
+[0.677s] -- Generating done
+[0.678s] -- Build files have been written to: /home/parth-p-24/colcon_ws/build/my_robot_description
