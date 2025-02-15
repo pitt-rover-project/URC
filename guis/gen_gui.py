@@ -1,3 +1,5 @@
+# General Gui Script
+
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
