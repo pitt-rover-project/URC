@@ -4,6 +4,7 @@ from std_msgs.msg import String
 import serial
 import time
 import threading # To handle the terminal input without blocking the main ROS 2 loop
+from geometry_msgs.msg import Twist
 
 
 class ArduinoBridge(Node):
@@ -22,6 +23,13 @@ class ArduinoBridge(Node):
         # Publisher to publish data read from the Arduino
         self.drive_publisher = self.create_publisher(
             msg_type=String, topic="drive_data", qos_profile=10
+        )
+
+        self.teleop_subscriber = self.create_subscription(
+            msg_type=Twist,
+            topic="/teleop_cmd_vel",
+            callback=self.teleop_callback,
+            qos_profile=10,
         )
 
         # Subscriber to receive data and send it to the Arduino
@@ -64,6 +72,9 @@ class ArduinoBridge(Node):
 
         # Log the command sent to the Arduino
         self.get_logger().info(f"Sent to Arduino: {command}")
+    
+    def teleop_callback(self, msg: Twist):
+        self.serial.write(f"{msg.linear.x},{msg.linear.y},{msg.linear.z},{msg.angular.x},{msg.angular.y},{msg.angular.z}\n")
 
 class TerminalInputPublisher(Node):
     def __init__(self):
