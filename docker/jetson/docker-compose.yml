@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   pitt_urc_jetson:
     image: urc_jetson
@@ -14,8 +13,7 @@ services:
     environment:
       - DISPLAY
     devices:
-      - "/dev/video0:/dev/video0"
-      - "/dev/iio:device0:/dev/iio:device0"
+      - /dev:/dev
     restart: unless-stopped
     stdin_open: true
     tty: true
