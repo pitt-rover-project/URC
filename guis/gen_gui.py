@@ -1,91 +1,86 @@
-# import serial
 import sys
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout,
+    QGridLayout, QPushButton, QLabel
+)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import *
-from PyQt5 import *
-from threading import Timer
 import subprocess
+
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.speed = 0
-        self.ultrasonic = [0, 0, 0]
-        self.ultrasonicLabels = [QLabel(""), QLabel(""), QLabel("")]
-        self.UI()
+        self.ultrasonic_distances = [0, 0, 0]
+        self.ultrasonic_labels = [QLabel("") for _ in range(3)]
+        self.setup_ui()
 
-    def UI(self):
+    def setup_ui(self):
         self.setWindowTitle("General GUI")
         self.setGeometry(700, 300, 1200, 900)
 
         main_layout = QVBoxLayout()
         top_layout = QHBoxLayout()
         top_left_layout = QGridLayout()
-        top_right_layout = QGridLayout()
         bottom_layout = QGridLayout()
 
-        camera_feed_1 = QPushButton("camera feed 1")
-        camera_feed_2 = QPushButton("camera feed 2")
-        camera_feed_3 = QPushButton("camera feed 3 (for other thing)")
-        ultrasonic_data = QPushButton("ultrasonic data") 
-        imu_speed = QPushButton("imu speed")
-        imu_orientation = QPushButton("imu orientation")
-        gps_data = QPushButton("gpu data")
-        kill_switch = QPushButton("kill")
-        
-        top_left_layout.addWidget(camera_feed_1, 0, 1)
-        top_left_layout.addWidget(camera_feed_2, 0, 2)
-        top_left_layout.addWidget(camera_feed_3, 0, 3)
-        top_left_layout.addWidget(ultrasonic_data, 1, 2)
-        top_left_layout.addWidget(imu_speed, 2, 1)
-        top_left_layout.addWidget(imu_orientation, 2, 3)
-        top_left_layout.addWidget(gps_data, 2, 2)
-        top_left_layout.addWidget(kill_switch, 3, 2)
+        camera_feed_buttons = [
+            QPushButton(f"camera feed {i+1}") for i in range(3)
+        ]
+        camera_feed_buttons[2].setText("camera feed 3 (for other thing)")
 
-        arduino_gui = QPushButton("arduino_gui", self)
-        arduino_gui.clicked.connect(self.arduino_gui)
-        auto_gui = QPushButton("auto_gui", self)
-        auto_gui.clicked.connect(self.auto_gui)
-        equip_serv_gui = QPushButton("equip_serv_gui", self)
-        equip_serv_gui.clicked.connect(self.equip_serv_gui)
-        ex_deli_gui = QPushButton("ex_deli_gui", self)
-        ex_deli_gui.clicked.connect(self.ex_deli_gui)
-        json_motorGUI = QPushButton("json_motorGUI", self)
-        json_motorGUI.clicked.connect(self.json_motorGUI_gui)
-        
-        bottom_layout.addWidget(arduino_gui, 0, 0)
-        bottom_layout.addWidget(auto_gui, 0, 1)
-        bottom_layout.addWidget(equip_serv_gui, 0, 2)
-        bottom_layout.addWidget(ex_deli_gui, 0, 3)
-        bottom_layout.addWidget(json_motorGUI, 0, 4)
+        data_buttons = {
+            "ultrasonic_data": QPushButton("ultrasonic data"),
+            "imu_speed": QPushButton("imu speed"),
+            "imu_orientation": QPushButton("imu orientation"),
+            "gps_data": QPushButton("gps data"),
+            "kill_switch": QPushButton("kill")
+        }
+
+        for i, button in enumerate(camera_feed_buttons, start=1):
+            top_left_layout.addWidget(button, 0, i)
+
+        top_left_layout.addWidget(data_buttons["ultrasonic_data"], 1, 2)
+        top_left_layout.addWidget(data_buttons["imu_speed"], 2, 1)
+        top_left_layout.addWidget(data_buttons["imu_orientation"], 2, 3)
+        top_left_layout.addWidget(data_buttons["gps_data"], 2, 2)
+        top_left_layout.addWidget(data_buttons["kill_switch"], 3, 2)
+
+        gui_buttons = {
+            "arduino_gui": QPushButton("arduino_gui"),
+            "auto_gui": QPushButton("auto_gui"),
+            "equip_serv_gui": QPushButton("equip_serv_gui"),
+            "ex_deli_gui": QPushButton("ex_deli_gui"),
+            "json_motorGUI": QPushButton("json_motorGUI")
+        }
+
+        gui_button_actions = {
+            "arduino_gui": lambda: self.launch_gui("arduino_gui"),
+            "auto_gui": lambda: self.launch_gui("auto_gui"),
+            "equip_serv_gui": lambda: self.launch_gui("equip_serv_gui"),
+            "ex_deli_gui": lambda: self.launch_gui("ex_deli_gui"),
+            "json_motorGUI": lambda: self.launch_gui("json_motorGUI")
+        }
+
+        for col, (name, button) in enumerate(gui_buttons.items()):
+            bottom_layout.addWidget(button, 0, col)
+            button.clicked.connect(gui_button_actions[name])
 
         top_layout.addLayout(top_left_layout)
-        top_layout.addLayout(top_right_layout)
         main_layout.addLayout(top_layout)
         main_layout.addLayout(bottom_layout)
 
         self.setLayout(main_layout)
-    
-    def arduino_gui(self):
-        subprocess.Popen(["python3", "guis/arduino_gui.py"])
-    
-    def auto_gui(self):
-        subprocess.Popen(["python3", "guis/auto_gui.py"])
-    
-    def equip_serv_gui(self):
-        subprocess.Popen(["python3", "guis/equip_serv_gui.py"])
-    
-    def ex_deli_gui(self):
-        subprocess.Popen(["python3", "guis/ex_deli_gui.py"])
-    
-    def json_motorGUI_gui(self):
-        subprocess.Popen(["python3", "guis/json_motorGUI.py"])
+
+    @staticmethod
+    def launch_gui(name):
+        subprocess.Popen(["python3", f"guis/{name}.py"])
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    main = MainWindow()
-    main.show()
+    main_window = MainWindow()
+    main_window.show()
 
     sys.exit(app.exec())
