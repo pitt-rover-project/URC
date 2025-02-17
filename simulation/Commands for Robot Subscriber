@@ -1,0 +1,5 @@
+1. ros2 run rqt_console rqt_console **(to get the log of the linear and angular)**
+2. ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/teleop_cmd_vel **(to get the keyboard inputs)**
+3. python3 robot_controller.py **(to launch the subscriber that Twist publishes to)**
+4. ros2 launch my_robot_description display.launch.py use_sim_time:=true **(launches the robot)**
+5. gazebo --verbose -s libgazebo_ros_factory.so **(launches Gazebo)**
