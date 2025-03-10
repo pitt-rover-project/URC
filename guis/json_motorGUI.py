@@ -12,7 +12,8 @@ REVERSE = 2
 TURNLEFT = 3
 TURNRIGHT = 4
 BOOST = 5
-STOP = 6
+SLOWDOWN = 6
+STOP = 7
 # arm movement definitions
 CLAW_OPEN = 0
 CLAW_CLOSE = 1
@@ -67,8 +68,8 @@ class MainWindow(QWidget):
         print("arm clicked")
         self.window_3.show()
 
-commPort = '/dev/ttyACM0'
-serMotor = serial.Serial(commPort, baudrate = 115200)
+#commPort = '/dev/ttyACM0'
+#serMotor = serial.Serial(commPort, baudrate = 115200)
 
 class MotorWindow(QWidget):
     def __init__(self):
@@ -79,8 +80,8 @@ class MotorWindow(QWidget):
         self.setWindowTitle("Motor Control")
         self.setGeometry(1600,430,600,350)
 
-        self.text = QLabel('Fowards = W || Backwards = S || Right = D || Left = A', self)  
-        self.text2 = QLabel('Speed Up = Shift || Stop = Escape', self)
+        self.text = QLabel('Fowards = I || Backwards = , || Right = L || Left = J', self)  
+        self.text2 = QLabel('Speed Up = Q || Slow Down = Z || Stop = K', self)
         self.text.setFont(QFont('Arial', 15))      
         self.text.move(60,50)
         self.text2.setFont(QFont('Arial', 15))      
@@ -95,22 +96,25 @@ class MotorWindow(QWidget):
         self.close()
 
     def keyPressEvent(self, event):
-        if(event.key() == Qt.Key_W):
+        if(event.key() == Qt.Key_I):
             print('Foward')
             self.foward()
-        if(event.key() == Qt.Key_S):
+        if(event.key() == Qt.Key_Comma):
             print("backwards")
             self.backward()     
-        if(event.key() == Qt.Key_A):
+        if(event.key() == Qt.Key_J):
             print('Left')
             self.right()
-        if(event.key() == Qt.Key_D):
+        if(event.key() == Qt.Key_L):
             print('Right')
             self.left()
-        if(event.key() == Qt.Key_Shift):
+        if(event.key() == Qt.Key_Q):
             print('Speed Up')
             self.speed_up()
-        if(event.key() == Qt.Key_Escape):
+        if(event.key() == Qt.Key_Z):
+            print('Slow Down')
+            self.slow_down()
+        if(event.key() == Qt.Key_K):
             print('stop')
             self.stop()
 
@@ -133,13 +137,17 @@ class MotorWindow(QWidget):
     def speed_up(self):
         jsonData = {"rover": BOOST}
         requests.post(address, json=jsonData)
+    
+    def slow_down(self):
+        jsonData = {"rover": SLOWDOWN}
+        requests.post(address, json=jsonData)
 
     def stop(self):
         jsonData = {"rover": STOP}
         requests.post(address, json=jsonData)
 
-commPort2 = '/dev/ttyACM1'
-serArm = serial.Serial(commPort2, baudrate = 115200)
+# commPort2 = '/dev/ttyACM1'
+#serArm = serial.Serial(commPort2, baudrate = 115200)
 class ArmWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -151,7 +159,7 @@ class ArmWindow(QWidget):
 
         self.text = QLabel('Claw Opened = X || Claw Closed = C', self)  
         self.text2 = QLabel('Base Shift Right = D || Base Shift Left = A', self)
-        self.text3 = QLabel('Fowards:', self)
+        self.text3 = QLabel('Forwards:', self)
         self.text4 = QLabel('Bottom Joint = U || Middle Joint = I || Top Joint = O', self)
         self.text5 = QLabel('Backwards: ', self)
         self.text6 = QLabel('Bottom Joint = J || Middle Joint = K || Top Joint = L', self)

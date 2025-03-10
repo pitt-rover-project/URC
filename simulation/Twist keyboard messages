@@ -19,3 +19,9 @@ o= move forward and turn right
 m= move backward and turn left
 .= move backward and turn right
 k= stop (linear.x = 0, angular.z = 0)
+
+positive angular = right
+negative angular = left
+
+positive linear = forward
+negative linear = backwards
