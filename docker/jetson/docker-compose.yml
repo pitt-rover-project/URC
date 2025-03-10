@@ -11,7 +11,9 @@ services:
           devices:
             - capabilities: [gpu]
     environment:
-      - DISPLAY
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
     devices:
       - /dev:/dev
     restart: unless-stopped
