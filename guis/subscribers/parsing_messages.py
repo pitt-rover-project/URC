@@ -77,4 +77,4 @@ class IMUDataParser:
         Returns:
             float: The Euclidean distance between the two coordinates.
         """
-        return math.sqrt(sum((c2 - c1) ** 2 for c1, c2 in zip(past_coordinates, current_coordinates)))
+        return math.dist(past_coordinates, current_coordinates)
