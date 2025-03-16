@@ -8,6 +8,8 @@ from threading import Timer
 import math
 import random
 
+from subscribers.subscriber import GenericSubscriber
+
 
 # https://stackoverflow.com/a/13151299
 class RepeatedTimer(object):
@@ -54,7 +56,7 @@ class MainWindow(QWidget):
         self.ultrasonic = [0, 0, 0]
         self.ultrasonicLabels = [QLabel(""), QLabel(""), QLabel("")]
         self.UI()
-
+        
     def UI(self):
         self.setWindowTitle("URC Gui")
         self.setGeometry(1600, 0, 1200, 900)
