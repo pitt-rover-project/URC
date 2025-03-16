@@ -12,8 +12,14 @@ services:
             - capabilities: [gpu]
     environment:
       - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/.X11-unix:/tmp/.X11-unix:rws
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
     devices:
       - /dev:/dev
     restart: unless-stopped
