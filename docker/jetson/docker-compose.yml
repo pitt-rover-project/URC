@@ -20,7 +20,7 @@ services:
       - LIBGL_ALWAYS_INDIRECT=1
       - __GLX_VENDOR_LIBRARY_NAME=nvidia
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rws
       - /usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu
       - /usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu
       - /dev/bus/usb:/dev/bus/usb
