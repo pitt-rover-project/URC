@@ -20,6 +20,7 @@ from rclpy.executors import MultiThreadedExecutor
 
 # Import a standard message type for demonstration purposes. Replace with the appropriate message type as needed.
 from std_msgs.msg import String
+from parsing_messages import IMUDataParser
 
 
 class GenericSubscriber(Node):
@@ -75,6 +76,31 @@ class GenericSubscriber(Node):
         self.get_logger().info(f"Received message on {self.topic_name}: {msg}")
 
 
+class IMUSubscriber(GenericSubscriber):
+    """
+    A ROS2 subscriber that parses IMU messages using the IMUDataParser.
+
+    This class overrides the default callback of the GenericSubscriber to parse
+    the incoming IMU message and compute the distance traveled and velocity.
+    """
+    def __init__(self, topic_name: str = 'imu_data', msg_type=String, node_name: str = 'imu_subscriber', callback=None):
+        super().__init__(topic_name, msg_type, node_name, callback)
+        self.parser = IMUDataParser()
+
+    def default_callback(self, msg):
+        """
+        Overrides the default callback to parse the IMU message.
+
+        The message is expected to be of type String, with the actual IMU data in msg.data.
+        It computes the distance and velocity, then logs the results.
+        """
+        try:
+            distance, velocity = self.parser.parse_imu_data(msg.data)
+            self.get_logger().info(f"IMU data parsed: distance = {distance:.2f}, velocity = {velocity:.2f}")
+        except Exception as e:
+            self.get_logger().error(f"Failed to parse IMU data: {e}")
+
+
 def main(args=None):
     """
     Main function to run the GenericSubscribers for Arduino bridge topics.
@@ -94,7 +120,7 @@ def main(args=None):
     motor_subscriber = GenericSubscriber("motor_data", String, node_name="motor_subscriber")
     ultrasonic_subscriber = GenericSubscriber("ultrasonic_data", String, node_name="ultrasonic_subscriber")
     gps_subscriber = GenericSubscriber("gps_data", String, node_name="gps_subscriber")
-    imu_subscriber = GenericSubscriber("imu_data", String, node_name="imu_subscriber")
+    imu_subscriber = IMUSubscriber("imu_data", String, node_name="imu_subscriber")
 
     # Use a MultiThreadedExecutor to handle multiple nodes concurrently
     executor = MultiThreadedExecutor()
