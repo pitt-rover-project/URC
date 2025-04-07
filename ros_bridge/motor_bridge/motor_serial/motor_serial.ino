@@ -173,7 +173,7 @@ void loop() {
     float linear_x, linear_y, linear_z;
     float angular_x, angular_y, angular_z;
 
-    int parsed = sscanf(data.c_str(), "%f,%f,%f,%f,%f,%f",
+    int parsed = scanf(data.c_str(), "%f,%f,%f,%f,%f,%f",
                         &linear_x, &linear_y, &linear_z,
                         &angular_x, &angular_y, &angular_z);
 
