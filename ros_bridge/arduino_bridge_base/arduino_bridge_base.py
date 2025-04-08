@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor
-
-# Import a standard message type for demonstration purposes. Replace with the appropriate message type as needed.
 from std_msgs.msg import String
 import serial
 import time
@@ -16,10 +13,6 @@ from std_msgs.msg import String
 class ArduinoBridgeBase(Node):
     def __init__(self, node_name, topic_name, serial_port, baud_rate=115200, timer_period=0.1):
         super().__init__(node_name)
-        self.topic_name = topic_name
-        self.msg_type = msg_type
-        # Use the provided callback function or fall back to the default callback
-        self.callback = callback if callback is not None else self.default_callback
 
         # Initialize the serial connection
         self.serial = serial.Serial(serial_port, baud_rate)
