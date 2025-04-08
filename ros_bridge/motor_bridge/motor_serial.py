@@ -1,6 +1,7 @@
 from ros_bridge.arduino_bridge_base import MotorBridge
 from rlcpy import init, spin, shutdown
 
+
 def main(args=None):
     # Initialize the ROS2 system
     rclpy.init(args=args)
