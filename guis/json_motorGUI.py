@@ -80,7 +80,7 @@ class MotorWindow(QWidget):
         self.setWindowTitle("Motor Control")
         self.setGeometry(1600,430,600,350)
 
-        self.text = QLabel('Fowards = I || Backwards = , || Right = L || Left = J', self)  
+        self.text = QLabel('forwards = I || Backwards = , || Right = L || Left = J', self)  
         self.text2 = QLabel('Speed Up = Q || Slow Down = Z || Stop = K', self)
         self.text.setFont(QFont('Arial', 15))      
         self.text.move(60,50)
@@ -97,10 +97,10 @@ class MotorWindow(QWidget):
 
     def keyPressEvent(self, event):
         if(event.key() == Qt.Key_I):
-            print('Foward')
-            self.foward()
+            print('forward')
+            self.forward()
         if(event.key() == Qt.Key_Comma):
-            print("backwards")
+            print('backwards')
             self.backward()     
         if(event.key() == Qt.Key_J):
             print('Left')
@@ -118,7 +118,7 @@ class MotorWindow(QWidget):
             print('stop')
             self.stop()
 
-    def foward(self):
+    def forward(self):
         jsonData = {"rover": FORWARD}
         requests.post(address, json=jsonData)
     
@@ -196,29 +196,29 @@ class ArmWindow(QWidget):
             print('Claw Opened')
             self.claw_open()
         if(event.key() == Qt.Key_9):
-            print("Claw Closed")
+            print('Claw Closed')
             self.claw_closed()     
         if(event.key() == Qt.Key_M):
             print('Base Shift Right')
             self.base_right()
         if(event.key() == Qt.Key_N):
-            print('Bace Shift Left')
+            print('Base Shift Left')
             self.base_left()
         if(event.key() == Qt.Key_U):
-            print('Bottom Joint Foward')
-            self.bottom_joint_foward()
+            print('Bottom Joint forward')
+            self.bottom_joint_forward()
         if(event.key() == Qt.Key_J):
             print('Bottom Joint Backwards')
             self.bottom_joint_backwards()
         if(event.key() == Qt.Key_I):
-            print('Middle Joint Foward')
-            self.middle_joint_foward()
+            print('Middle Joint forward')
+            self.middle_joint_forward()
         if(event.key() == Qt.Key_K):
             print('Middle Joint Backwards')
             self.middle_joint_backwards()
         if(event.key() == Qt.Key_O):
-            print('Middle Joint Foward')
-            self.top_joint_foward()
+            print('Middle Joint forward')
+            self.top_joint_forward()
         if(event.key() == Qt.Key_L):
             print('Middle Joint Backwards')
             self.top_joint_backwards()
@@ -248,7 +248,7 @@ class ArmWindow(QWidget):
         jsonData = {"arm": BS_LEFT}
         requests.post(address, json=jsonData)
     
-    def bottom_joint_foward(self):
+    def bottom_joint_forward(self):
         jsonData = {"arm": BOTTOM_FORWARD}
         requests.post(address, json=jsonData)
 
@@ -256,7 +256,7 @@ class ArmWindow(QWidget):
         jsonData = {"arm": BOTTOM_REVERSE}
         requests.post(address, json=jsonData)
 
-    def middle_joint_foward(self):
+    def middle_joint_forward(self):
         jsonData = {"arm": MIDDLE_FORWARD}
         requests.post(address, json=jsonData)
 
@@ -264,7 +264,7 @@ class ArmWindow(QWidget):
         jsonData = {"arm": MIDDLE_REVERSE}
         requests.post(address, json=jsonData)
 
-    def top_joint_foward(self):
+    def top_joint_forward(self):
         jsonData = {"arm": TOP_FORWARD}
         requests.post(address, json=jsonData)
 

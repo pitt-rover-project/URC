@@ -17,7 +17,7 @@ class IMUDataParser:
         self.past_coordinates = None
         self.past_time = None
 
-    def parse_imu_data(self, imu_message: str):
+    def parse_imu_data(self, imu_message: str): 
         """
         Parses the IMU data message and calculates the distance traveled and velocity between the current and previous readings.
         
