@@ -3,6 +3,9 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import serial
 import time
+from geometry_msgs.msg import Twist
+from std_msgs.msg import String
+
 
 """ Parent class """
 # Base class for Arduino bridges
@@ -40,8 +43,6 @@ class MotorBridge(ArduinoBridgeBase):
             baud_rate=9600,
             timer_period=0.1
         )
-        from geometry_msgs.msg import Twist
-        from std_msgs.msg import String
         # Subscriber to receive teleoperation commands (Twist messages) from teleop node
         self.teleop_subscriber = self.create_subscription(
             Twist,
@@ -59,7 +60,6 @@ class MotorBridge(ArduinoBridgeBase):
         self.get_logger().info("Motor Bridge Node Started")
 
     def read_from_arduino(self):
-        from std_msgs.msg import String
         if self.serial.in_waiting > 0:
             response = self.serial.readline().decode("utf-8").strip()
             self.get_logger().info(f"Received from Arduino: {response}")
