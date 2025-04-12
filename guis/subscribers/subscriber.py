@@ -20,8 +20,8 @@ from rclpy.executors import MultiThreadedExecutor
 
 # Import a standard message type for demonstration purposes. Replace with the appropriate message type as needed.
 from std_msgs.msg import String
-from parsing_messages import IMUDataParser
-
+from guis.subscribers.IMUDataParser import IMUDataParser
+from guis.subscribers.GPSDataParser import GPSDataParser
 
 class GenericSubscriber(Node):
     """
@@ -100,6 +100,30 @@ class IMUSubscriber(GenericSubscriber):
         except Exception as e:
             self.get_logger().error(f"Failed to parse IMU data: {e}")
 
+class GPSSubscriber(GenericSubscriber):
+    """
+    A ROS2 subscriber that parses GPS messages using the GPSDataParser.
+
+    This class overrides the default callback of the GenericSubscriber to parse
+    the incoming GPS message and compute the average SNR.
+    """
+    def __init__(self, topic_name: str = 'gps_data', msg_type=String, node_name: str = 'gps_subscriber', callback=None):
+        super().__init__(topic_name, msg_type, node_name, callback)
+        self.parser = GPSDataParser()
+
+    def default_callback(self, msg):
+        """
+        Overrides the default callback to parse the GPS message.
+
+        The message is expected to be of type String, with the actual GPS data in msg.data.
+        It computes the average SNR and logs it.
+        """
+        try:
+            snr_values, average_snr, coordinates = self.parser.parse_message(msg.data)
+            self.get_logger().info(f"GPS data parsed: SNR values = {snr_values}, Average SNR = {average_snr:.2f}, Coordinates = {coordinates}")
+        except Exception as e:
+            self.get_logger().error(f"Failed to parse GPS data: {e}")
+
 
 def main(args=None):
     """
@@ -118,14 +142,14 @@ def main(args=None):
 
     # Create subscribers for each Arduino bridge topic with unique node names
     motor_subscriber = GenericSubscriber("motor_data", String, node_name="motor_subscriber")
-    ultrasonic_subscriber = GenericSubscriber("ultrasonic_data", String, node_name="ultrasonic_subscriber")
+    # ultrasonic_subscriber = GenericSubscriber("ultrasonic_data", String, node_name="ultrasonic_subscriber")
     gps_subscriber = GenericSubscriber("gps_data", String, node_name="gps_subscriber")
     imu_subscriber = IMUSubscriber("imu_data", String, node_name="imu_subscriber")
 
     # Use a MultiThreadedExecutor to handle multiple nodes concurrently
     executor = MultiThreadedExecutor()
     executor.add_node(motor_subscriber)
-    executor.add_node(ultrasonic_subscriber)
+    # executor.add_node(ultrasonic_subscriber)
     executor.add_node(gps_subscriber)
     executor.add_node(imu_subscriber)
 
@@ -136,7 +160,7 @@ def main(args=None):
     finally:
         # Destroy nodes and shutdown properly
         motor_subscriber.destroy_node()
-        ultrasonic_subscriber.destroy_node()
+        # ultrasonic_subscriber.destroy_node()
         gps_subscriber.destroy_node()
         imu_subscriber.destroy_node()
         rclpy.shutdown()

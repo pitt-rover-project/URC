@@ -145,7 +145,7 @@ class MainWindow(QWidget):
     #             )
 
     def getint(self):
-        num, ok = QInputDialog.getInt(self, "integer input dualog", "enter a number (10-255)")
+        num, ok = QInputDialog.getInt(self, "integer input dialog", "enter a number (10-255)")
         if ok:
             self.speed = num
             self.le1.setText("Set Speed (UP/DOWN): " + str(self.speed))
@@ -189,8 +189,8 @@ class MainWindow(QWidget):
 
     def motorEvent(self, keyEvent):
         if keyEvent == "I":
-            print("Foward")
-            self.foward()
+            print("forward")
+            self.forward()
         if keyEvent == ",":
             print("backwards")
             self.backward()
@@ -210,7 +210,7 @@ class MainWindow(QWidget):
             print("stop")
             self.stop()
 
-    def foward(self):
+    def forward(self):
         serMotor.write("1".encode())
         return
 
@@ -257,7 +257,7 @@ class ArmWindow(QWidget):
 
         self.text = QLabel("Claw Opened = X || Claw Closed = C", self)
         self.text2 = QLabel("Base Shift Right = D || Base Shift Left = A", self)
-        self.text3 = QLabel("Fowards:", self)
+        self.text3 = QLabel("forwards:", self)
         self.text4 = QLabel(
             "Bottom Joint = U || Middle Joint = I || Top Joint = O", self
         )
@@ -304,23 +304,23 @@ class ArmWindow(QWidget):
             print("Base Shift Right")
             # self.base_right()
         if event.key() == Qt.Key_N:
-            print("Bace Shift Left")
+            print("Base Shift Left")
             # self.base_left()
         if event.key() == Qt.Key_U:
-            print("Bottom Joint Foward")
-            # self.bottom_joint_foward()
+            print("Bottom Joint forward")
+            # self.bottom_joint_forward()
         if event.key() == Qt.Key_J:
             print("Bottom Joint Backwards")
             # self.bottom_joint_backwards()
         if event.key() == Qt.Key_I:
-            print("Middle Joint Foward")
-            # self.middle_joint_foward()
+            print("Middle Joint forward")
+            # self.middle_joint_forward()
         if event.key() == Qt.Key_K:
             print("Middle Joint Backwards")
             # self.middle_joint_backwards()
         if event.key() == Qt.Key_O:
-            print("Middle Joint Foward")
-            # self.top_joint_foward()
+            print("Middle Joint forward")
+            # self.top_joint_forward()
         if event.key() == Qt.Key_L:
             print("Middle Joint Backwards")
             # self.top_joint_backwards()
@@ -346,20 +346,20 @@ class ArmWindow(QWidget):
     def base_left(self):
         serArm.write("Base Shift Left".encode)
     
-    def bottom_joint_foward(self):
-        serArm.write("Bottom Joint Foward".encode)
+    def bottom_joint_forward(self):
+        serArm.write("Bottom Joint forward".encode)
 
     def bottom_joint_backwards(self):
         serArm.write("Bottom Joint Backwards".encode)
 
-    def middle_joint_foward(self):
-        serArm.write("Middle Joint Foward".encode)
+    def middle_joint_forward(self):
+        serArm.write("Middle Joint forward".encode)
 
     def middle_joint_backwards(self):
         serArm.write("Middle Joint Backwards".encode)
 
-    def top_joint_foward(self):
-        serArm.write("Top Joint Foward".encode)
+    def top_joint_forward(self):
+        serArm.write("Top Joint forward".encode)
 
     def top_joint_backwards(self):
         serArm.write("Top Joint Backwards".encode)

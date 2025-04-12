@@ -37,7 +37,7 @@ void setup()
 }
 
 /*
-void foward() {
+void forward() {
   digitalWrite(DIR1Front, HIGH);
   digitalWrite(DIR1Middle, HIGH);
   digitalWrite(DIR1Back, HIGH);
@@ -236,7 +236,7 @@ void loop() {
     if (input.equals("1"))
     {
       Serial.println("Moving forward");
-      foward();
+      forward();
     }
     else if(input.equals("2")){
       Serial.println("Moving reverse");
