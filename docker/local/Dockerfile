@@ -12,7 +12,6 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install locales -y &&\
 RUN apt-get install software-properties-common -y &&\
     add-apt-repository universe
 
-
 RUN apt-get update && apt-get install -y tzdata
 
 RUN ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
@@ -41,6 +40,11 @@ RUN apt-get install ros-humble-librealsense2* -y
 
 RUN apt-get install ros-humble-realsense2-* -y
 
+# teleop
+RUN apt update
+RUN apt install ros-humble-teleop-twist-keyboard
+RUN apt install ros-humble-joy ros-humble-teleop-twist-joy
+
 RUN git clone https://github.com/pitt-rover-project/URC.git /app
 
-RUN apt-get install ros-humble-urdf-tutorial -y
+# RUN apt-get install ros-humble-urdf-tutorial -y

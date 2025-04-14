@@ -29,29 +29,28 @@ class MainWindow(QWidget):
         ]
         camera_feed_buttons[2].setText("camera feed 3 (for other thing)")
 
-        data_buttons = {
-            "ultrasonic_data": QPushButton("ultrasonic data"),
-            "imu_speed": QPushButton("imu speed"),
-            "imu_orientation": QPushButton("imu orientation"),
-            "gps_data": QPushButton("gps data"),
-            "kill_switch": QPushButton("kill")
+        kill_button = QPushButton("kill")
+
+        data_display = {
+            "imu_speed": QLabel("imu speed"),
+            "imu_orientation": QLabel("imu orientation"),
+            "gps_data": QLabel("gps data")
         }
 
         for i, button in enumerate(camera_feed_buttons, start=1):
             top_left_layout.addWidget(button, 0, i)
 
-        top_left_layout.addWidget(data_buttons["ultrasonic_data"], 1, 2)
-        top_left_layout.addWidget(data_buttons["imu_speed"], 2, 1)
-        top_left_layout.addWidget(data_buttons["imu_orientation"], 2, 3)
-        top_left_layout.addWidget(data_buttons["gps_data"], 2, 2)
-        top_left_layout.addWidget(data_buttons["kill_switch"], 3, 2)
+        top_left_layout.addWidget(data_display["imu_speed"], 2, 1)
+        top_left_layout.addWidget(data_display["imu_orientation"], 2, 3)
+        top_left_layout.addWidget(data_display["gps_data"], 2, 2)
+        top_left_layout.addWidget(kill_button, 3, 2)
 
         gui_buttons = {
-            "arduino_gui": QPushButton("arduino_gui"),
-            "auto_gui": QPushButton("auto_gui"),
-            "equip_serv_gui": QPushButton("equip_serv_gui"),
-            "ex_deli_gui": QPushButton("ex_deli_gui"),
-            "json_motorGUI": QPushButton("json_motorGUI")
+            "arduino_gui": QPushButton("Control"),
+            "auto_gui": QPushButton("Autonomous"),
+            "equip_serv_gui": QPushButton("Equipment Service"),
+            "ex_deli_gui": QPushButton("Extreme Delivery"),
+            "json_motorGUI": QPushButton("Motor and Arm")
         }
 
         gui_button_actions = {

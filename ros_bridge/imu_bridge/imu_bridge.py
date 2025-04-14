@@ -1,11 +1,11 @@
 # This bridge uses the ros 2 python library and pyserial to communicate between the jetson nano and an arduino.
 from rclpy import init, spin, shutdown
-from ros_bridge.arduino_bridge_base import GPSBridge
+from ros_bridge.arduino_bridge_base import IMUBridge
 
 def main(args=None):
     # Initialize the ROS2 system
     rclpy.init(args=args)
-    node = GPSBridge()
+    node = IMUBridge()
     try:
         # Start the node
         rclpy.spin(node)
