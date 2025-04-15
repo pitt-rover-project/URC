@@ -10,7 +10,7 @@ from std_msgs.msg import String
 """ Parent class """
 # Base class for Arduino bridges
 class ArduinoBridgeBase(Node):
-    def __init__(self, node_name, topic_name, serial_port, baud_rate=9600, timer_period=0.1):
+    def __init__(self, node_name, topic_name, serial_port, baud_rate=115200, timer_period=0.1):
         super().__init__(node_name)
 
         # Initialize the serial connection
@@ -40,7 +40,7 @@ class MotorBridge(ArduinoBridgeBase):
             node_name="motor_bridge",
             topic_name="drive_data",
             serial_port="/dev/ttyACM0",
-            baud_rate=9600,
+            baud_rate=115200,
             timer_period=0.1
         )
         # Subscriber to receive teleoperation commands (Twist messages) from teleop node
@@ -94,7 +94,7 @@ class GPSBridge(ArduinoBridgeBase):
             node_name="gps_bridge",
             topic_name="gps_data",
             serial_port="/dev/ttyACM0",
-            baud_rate=9600
+            baud_rate=115200
         )
 
 # IMU Bridge
@@ -104,5 +104,5 @@ class IMUBridge(ArduinoBridgeBase):
             node_name="imu_bridge",
             topic_name="imu_data",
             serial_port="/dev/ttyACM0",
-            baud_rate=9600
+            baud_rate=115200
         )
