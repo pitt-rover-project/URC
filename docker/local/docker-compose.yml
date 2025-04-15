@@ -6,5 +6,5 @@ services:
     stdin_open: true     # Equivalent to `-it`
     tty: true            # Keeps the container interactive
     restart: unless-stopped
-    version:
+    volumes: 
       - ./../../:/app
