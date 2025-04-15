@@ -143,7 +143,7 @@ def main(args=None):
     # Create subscribers for each Arduino bridge topic with unique node names
     motor_subscriber = GenericSubscriber("motor_data", String, node_name="motor_subscriber")
     # ultrasonic_subscriber = GenericSubscriber("ultrasonic_data", String, node_name="ultrasonic_subscriber")
-    gps_subscriber = GenericSubscriber("gps_data", String, node_name="gps_subscriber")
+    gps_subscriber = GPSSubscriber("gps_data", String, node_name="gps_subscriber")
     imu_subscriber = IMUSubscriber("imu_data", String, node_name="imu_subscriber")
 
     # Use a MultiThreadedExecutor to handle multiple nodes concurrently
