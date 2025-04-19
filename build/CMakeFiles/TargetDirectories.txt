@@ -1,9 +1,0 @@
-/home/parth-p-24/Documents/URC/build/CMakeFiles/uninstall.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/my_robot_description_uninstall.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/test.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/edit_cache.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/rebuild_cache.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/list_install_components.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/install.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/install/local.dir
-/home/parth-p-24/Documents/URC/build/CMakeFiles/install/strip.dir

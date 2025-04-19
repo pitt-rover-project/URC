@@ -14,6 +14,7 @@ Additionally, this file demonstrates how to subscribe to each Arduino bridge top
 Each subscriber is instantiated with a unique node name and is spun concurrently using a MultiThreadedExecutor.
 """
 
+import sys
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
@@ -138,7 +139,7 @@ def main(args=None):
         - GPSBridge: 'gps_data'
         - IMUBridge: 'imu_data'
     """
-    rclpy.init(args=args)
+    rclpy.init(args=sys.argv)
 
     # Create subscribers for each Arduino bridge topic with unique node names
     motor_subscriber = GenericSubscriber("motor_data", String, node_name="motor_subscriber")

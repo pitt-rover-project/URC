@@ -73,7 +73,7 @@ class MainWindow(QWidget):
 
     @staticmethod
     def launch_gui(name):
-        subprocess.Popen(["python3", f"guis/{name}.py"])
+        subprocess.Popen(["python3", f"{name}.py"])
 
 
 if __name__ == "__main__":
