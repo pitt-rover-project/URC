@@ -32,7 +32,7 @@ class SNR:
         count += 1
 
     average = sum / count
-    print ("Average SNR: ", average)
+    print ("Average SNR: ", average) 
 
 class Coordinates:
     def parse_gngll(nmea_sentence):
