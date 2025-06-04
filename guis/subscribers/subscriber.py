@@ -86,6 +86,10 @@ class IMUSubscriber(GenericSubscriber):
     def __init__(self, topic_name: str = 'imu_data', msg_type=String, node_name: str = 'imu_subscriber', callback=None):
         super().__init__(topic_name, msg_type, node_name, callback)
         self.parser = IMUDataParser()
+        self.distance = 0.0
+        self.velocity = 0.0
+        self.vertical_tilt_angle = 0.0
+        self.horizontal_tilt_angle = 0.0
 
     def default_callback(self, msg):
         """
@@ -95,10 +99,39 @@ class IMUSubscriber(GenericSubscriber):
         It computes the distance and velocity, then logs the results.
         """
         try:
-            distance, velocity = self.parser.parse_imu_data(msg.data)
-            self.get_logger().info(f"IMU data parsed: distance = {distance:.2f}, velocity = {velocity:.2f}")
+            self.distance, self.velocity, self.vertical_tilt_angle, self.horizontal_tilt_angle = self.parser.parse_imu_data(msg.data)
+            self.get_logger().info(f"IMU data parsed: distance = {self.distance:.2f}, velocity = {self.velocity:.2f}, vertical tilt = {self.vertical_tilt_angle:.2f}, horizontal tilt = {self.horizontal_tilt_angle:.2f}")
         except Exception as e:
             self.get_logger().error(f"Failed to parse IMU data: {e}")
+
+    @property
+    def imu_distance(self):
+        """
+        Returns the distance traveled based on the last parsed IMU data.
+        This property allows access to the distance without needing to call a method.
+        """
+        return self.distance
+    @property
+    def imu_velocity(self):
+        """
+        Returns the velocity based on the last parsed IMU data.
+        This property allows access to the velocity without needing to call a method.
+        """
+        return self.velocity
+    @property
+    def imu_vertical_tilt_angle(self):
+        """
+        Returns the vertical tilt angle based on the last parsed IMU data.
+        This property allows access to the vertical tilt angle without needing to call a method.
+        """
+        return self.vertical_tilt_angle
+    @property
+    def imu_horizontal_tilt_angle(self):
+        """
+        Returns the horizontal tilt angle based on the last parsed IMU data.
+        This property allows access to the horizontal tilt angle without needing to call a method.
+        """
+        return self.horizontal_tilt_angle
 
 class GPSSubscriber(GenericSubscriber):
     """

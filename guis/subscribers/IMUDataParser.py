@@ -46,11 +46,19 @@ class IMUDataParser:
         # Calculate velocity as distance divided by time difference (avoid division by zero)
         velocity = distance / time_diff if time_diff > 0 else 0.0
 
+        # Calculates the tilt angle based on the Z-X plane and the Y-Z plane
+        x_distance = current_coordinates[0] - self.past_coordinates[0]
+        y_distance = current_coordinates[1] - self.past_coordinates[1]
+        z_distance = current_coordinates[2] - self.past_coordinates[2]
+
+        yz_tilt_angle = math.degrees(math.atan2(y_distance, z_distance)) # Vertical tilt angle
+        yx_tilt_angle = math.degrees(math.atan2(y_distance, x_distance)) # Horizontal tilt angle
+
         # Update the state for the next reading
         self.past_coordinates = current_coordinates
         self.past_time = current_time
 
-        return (distance, velocity)
+        return (distance, velocity, yz_tilt_angle, yx_tilt_angle)
 
     @staticmethod
     def parse_coordinates(imu_coordinates_data: str):
@@ -78,3 +86,4 @@ class IMUDataParser:
             float: The Euclidean distance between the two coordinates.
         """
         return math.dist(past_coordinates, current_coordinates)
+    
