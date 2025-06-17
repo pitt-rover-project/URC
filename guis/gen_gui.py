@@ -9,9 +9,10 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 import subprocess
 from pathlib import Path
+import rclpy
 
 # Import subscribers and publishers
-import subscribers.subscriber as sub
+import guis.subscribers.subscriber as sub
 
 # Main window extends QWidget
 class MainWindow(QWidget):
@@ -128,6 +129,8 @@ class MainWindow(QWidget):
         subprocess.Popen([sys.executable, str(script_path)])
 
 if __name__ == "__main__":
+    rclpy.init()
+    
     # Creates the application and main window (takes in command line arguments)
     app = QApplication(sys.argv)
     main_window = MainWindow()

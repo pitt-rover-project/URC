@@ -8,7 +8,7 @@ from threading import Timer
 import math
 import random
 
-from subscribers.subscriber import GenericSubscriber
+# from guis.subscribers.subscriber import GenericSubscriber
 
 
 # https://stackoverflow.com/a/13151299

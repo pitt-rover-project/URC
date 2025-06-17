@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   pitt_urc_local:
     image: urc_local
@@ -6,5 +5,10 @@ services:
     stdin_open: true     # Equivalent to `-it`
     tty: true            # Keeps the container interactive
     restart: unless-stopped
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
     volumes: 
       - ./../../:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    network_mode: host
