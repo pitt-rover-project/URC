@@ -1,14 +1,37 @@
-## Running ROS2 in a Specialized Ubuntu Environment - Docker: Local Machine
+# ROS 2 Humble in Docker (Local Machine)
 
-### On your local machine, run one of the following commands:
-- `./start_mac.sh` _(for MacOS)_
-- `./start_ubuntu.sh` _(for Linux and (maybe?) Windows)_
+A Dockerized Ubuntu environment pre-configured with ROS 2 Humble, with X11 forwarding enabled for GUI applications.
 
-<p> This shell script will build a Docker image based on the Dockerfile provided. After the build stage is complete, the shell script boots up an X server that will allow the gui application to be forwarded to the local machine (it will make the GUI launched in the Ubuntu Docker container visible in the machine used to launch the Docker container (MacOS, Linux, Windows)). Afterwards, the image is "booted" following the specifications in the docker-compose file and one enters the shell of the container. </p> 
+## Prerequisites
+- Docker & Docker Compose installed
+- For macOS: XQuartz (enable "Allow connections from network clients")
+- For Linux: an X server (ensure `x11-xserver-utils` or equivalent is installed)
+- Permissions to run `xhost`
 
-### Once Inside the Shell of the Docker Container, run the following command:
-- `source /opt/ros/humble/local_setup.bash`
-#### NOTE: This must be done __*everytime*__ a new shell of the container is opened.
+## Inside the Local Machine
+### Docker Container Initialization
+```bash
+# macOS
+./start_mac.sh
 
-### From the main directory `/app`, run the following command (which launches the general_gui):
-- `python3 -m guis.gen_gui`
+# Linux
+./start_linux.sh
+```
+
+These scripts build the Docker image, configure X11 forwarding, start the containers via Docker Compose, and open an interactive shell inside the container.
+
+## Inside the Container
+### Sourcing ROS 2 Humble Setup Script
+This step configures your shell to use the ROS 2 Humble installation within the container by sourcing the setup script, setting up all necessary environment variables and paths for ROS 2 commands.
+
+```bash
+source /opt/ros/humble/local_setup.bash
+```
+
+> **Note:** You must run this in every new shell session inside the container.
+
+### Launching the GUI 
+```bash
+cd /app                 # Should be here by default!
+python3 -m guis.gen_gui # Starts the General Gui
+```
