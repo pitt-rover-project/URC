@@ -33,6 +33,13 @@ class ArduinoBridgeBase(Node):
             msg = String()
             msg.data = response
             self.publisher.publish(msg)
+            
+    # Overrides the parent class's destroy_node method to close the serial port before shutting down node
+    def destroy_node(self):
+        if self.serial and self.serial.is_open:
+            self.get_logger().info("Closing serial port...")
+            self.serial.close()
+        super().destroy_node()
 
 """ Child Classes """
 class MotorBridge(ArduinoBridgeBase):

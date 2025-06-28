@@ -14,7 +14,7 @@ export DISPLAY=$(ipconfig getifaddr en0):0
 xhost +$(ipconfig getifaddr en0)
 
 # Launches the docker container in detached mode using compose (docker-compose.yml)
-sudo docker-compose up -d
+sudo docker compose up -d
 
 # Wait for the container to be fully up and running (not really needed, just for "safety")
 sleep 10

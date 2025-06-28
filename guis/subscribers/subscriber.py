@@ -52,6 +52,7 @@ class GenericSubscriber(Node):
         super().__init__(node_name)
         self.topic_name = topic_name
         self.msg_type = msg_type
+        
         # Use the provided callback function or fall back to the default callback
         self.callback = callback if callback is not None else self.default_callback
 
@@ -63,6 +64,7 @@ class GenericSubscriber(Node):
             10                 # Queue size
         )
         self.get_logger().info(f"Subscribed to topic: {self.topic_name}")
+        
 
     def default_callback(self, msg):
         """
@@ -99,9 +101,19 @@ class IMUSubscriber(GenericSubscriber):
         It computes the distance and velocity, then logs the results.
         """
         try:
-            self.distance, self.velocity, self.vertical_tilt_angle, self.horizontal_tilt_angle = self.parser.parse_imu_data(msg.data)
-            self.get_logger().info(f"IMU data parsed: distance = {self.distance:.2f}, velocity = {self.velocity:.2f}, vertical tilt = {self.vertical_tilt_angle:.2f}, horizontal tilt = {self.horizontal_tilt_angle:.2f}")
+            parsed_data = self.parser.parse_imu_data(msg.data)
+            # TODO: In the event that part of the IMU msg is missing, logger generated warning - is this even an issue?
+            if len(parsed_data) == 4:
+                self.distance, self.velocity, self.vertical_tilt_angle, self.horizontal_tilt_angle = parsed_data
+                self.get_logger().info(f"IMU data parsed: distance = {self.distance:.2f}, velocity = {self.velocity:.2f}, vertical tilt = {self.vertical_tilt_angle:.2f}, horizontal tilt = {self.horizontal_tilt_angle:.2f}")
+            else:
+                self.get_logger().warn("Incomplete IMU data received.")
         except Exception as e:
+            # Resets all the values to -0.1 in the event of an error (easier to detect vs 0.0)?
+            self.distance = -0.1
+            self.velocity = -0.1
+            self.vertical_tilt_angle = -0.1
+            self.horizontal_tilt_angle = -0.1
             self.get_logger().error(f"Failed to parse IMU data: {e}")
 
     @property
