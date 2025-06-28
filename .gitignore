@@ -1,3 +1,14 @@
-.vscode
+# Ignore Visual Studio Code settings
+.vscode/
+
+# Ignore macOS system files
 *.DS_Store
-__pycache__
+
+# Ignore the build directory
+build/
+
+# Ignore Python bytecode files
+*.pyc
+
+# Ignore Python cache directories
+__pycache__/
