@@ -1,10 +1,10 @@
 # This bridge uses the ros 2 python library and pyserial to communicate between the jetson nano and an arduino.
-from rclpy import init, spin, shutdown
-from ros_bridge.arduino_bridge_base import IMUBridge
+import rclpy
+from ros_bridge.arduino_bridge_base.arduino_bridge_base import IMUBridge
 
 def main(args=None):
     # Initialize the ROS2 system
-    rclpy.init(args=args)
+    rclpy.init()
     node = IMUBridge()
     try:
         # Start the node
