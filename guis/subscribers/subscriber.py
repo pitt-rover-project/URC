@@ -107,7 +107,7 @@ class IMUSubscriber(GenericSubscriber):
                 self.distance, self.velocity, self.vertical_tilt_angle, self.horizontal_tilt_angle = parsed_data
                 self.get_logger().info(f"IMU data parsed: distance = {self.distance:.2f}, velocity = {self.velocity:.2f}, vertical tilt = {self.vertical_tilt_angle:.2f}, horizontal tilt = {self.horizontal_tilt_angle:.2f}")
             else:
-                self.get_logger().warn("Incomplete IMU data received.")
+                self.get_logger().warning("Incomplete IMU data received.")
         except Exception as e:
             # Resets all the values to -0.1 in the event of an error (easier to detect vs 0.0)?
             self.distance = -0.1
