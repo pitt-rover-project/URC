@@ -18,6 +18,7 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
+      - ./../../:/app
       - /tmp/.X11-unix:/tmp/.X11-unix:rws
       - /dev/bus/usb:/dev/bus/usb
       - /dev/video0:/dev/video0
