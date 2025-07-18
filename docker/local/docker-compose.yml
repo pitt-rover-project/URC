@@ -2,13 +2,16 @@ services:
   pitt_urc_local:
     image: urc_local
     container_name: pitt_urc_local
-    stdin_open: true     # Equivalent to `-it`
-    tty: true            # Keeps the container interactive
+    stdin_open: true # Equivalent to `-it`
+    tty: true # Keeps the container interactive
     restart: unless-stopped
+    network_mode: host
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
-    volumes: 
+      - ROS_DOMAIN_ID=0
+      - ROS_LOCALHOST_ONLY=0
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    volumes:
       - ./../../:/app
       - /tmp/.X11-unix:/tmp/.X11-unix
-    network_mode: host

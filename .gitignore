@@ -12,3 +12,10 @@ build/
 
 # Ignore Python cache directories
 __pycache__/
+
+# Ignore ROS build artifacts
+install/
+log/
+
+# Claude related files
+Claude.md
