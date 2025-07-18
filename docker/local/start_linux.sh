@@ -10,7 +10,7 @@ sudo docker build -t urc_local .
 xhost +local:docker
 
 # Launches the docker container in detached mode using compose (docker-compose.yml)
-sudo docker-compose up -d
+sudo docker compose up -d
 
 # Wait for the container to be fully up and running (not really needed, just for "safety")
 sleep 10

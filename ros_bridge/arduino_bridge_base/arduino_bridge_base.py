@@ -12,7 +12,7 @@ from geometry_msgs.msg import Twist
 class ArduinoBridgeBase(Node):
     def __init__(self, node_name, topic_name, serial_port, baud_rate=115200, timer_period=0.1):
         super().__init__(node_name)
-
+        self.node_name = node_name
         # Initialize the serial connection with error handling
         try:
             self.serial = serial.Serial(serial_port, baud_rate, timeout=1)
@@ -33,11 +33,14 @@ class ArduinoBridgeBase(Node):
 
     def read_from_arduino(self):
         if self.serial is None:
+            self.get_logger().info(f"{self.node_name} Node: Serial connection not available")
             return
             
         try:
             if self.serial.in_waiting > 0:
+                self.get_logger().info(f"{self.node_name} Node: Reading from Arduino...")
                 response = self.serial.readline().decode("utf-8").strip()
+                self.get_logger().debug(f"Raw response: {response}")
                 if response:  # Only process non-empty responses
                     self.get_logger().info(f"Received from Arduino: {response}")
                     msg = String()
