@@ -1,5 +1,5 @@
 from ros_bridge.arduino_bridge_base import MotorBridge
-from rlcpy import init, spin, shutdown
+import rclpy
 
 
 def main(args=None):

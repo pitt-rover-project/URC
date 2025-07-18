@@ -52,7 +52,7 @@ class GenericSubscriber(Node):
         super().__init__(node_name)
         self.topic_name = topic_name
         self.msg_type = msg_type
-        
+
         # Use the provided callback function or fall back to the default callback
         self.callback = callback if callback is not None else self.default_callback
 
@@ -64,14 +64,14 @@ class GenericSubscriber(Node):
             10                 # Queue size
         )
         self.get_logger().info(f"Subscribed to topic: {self.topic_name}")
-        
+
 
     def default_callback(self, msg):
         """
         Default callback function for processing incoming messages.
 
         This function logs the received message to the console.
-        
+
         Args:
             msg: The message received from the subscribed topic.
         """
@@ -86,7 +86,9 @@ class IMUSubscriber(GenericSubscriber):
     the incoming IMU message and compute the distance traveled and velocity.
     """
     def __init__(self, topic_name: str = 'imu_data', msg_type=String, node_name: str = 'imu_subscriber', callback=None):
-        super().__init__(topic_name, msg_type, node_name, callback)
+        default_callback = lambda msg: self.default_callback(msg)
+
+        super().__init__(topic_name, msg_type, node_name, callback or default_callback)
         self.parser = IMUDataParser()
         self.distance = 0.0
         self.velocity = 0.0
@@ -184,6 +186,8 @@ def main(args=None):
         - IMUBridge: 'imu_data'
     """
     rclpy.init(args=args)
+    rclpy.logging.get_logger('subscriber').info(">> subscriber.py main() starting")
+
 
     # Create subscribers for each Arduino bridge topic with unique node names
     motor_subscriber = GenericSubscriber("motor_data", String, node_name="motor_subscriber")
