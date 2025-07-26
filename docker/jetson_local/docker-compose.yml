@@ -1,19 +1,13 @@
+# Note, removed nvidia related code
+
 services:
   pitt_urc_jetson:
     image: urc_jetson
     container_name: pitt_urc_jetson
-    runtime: nvidia
     privileged: true
     network_mode: host
     pid: host
     ipc: host
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
-              count: 1
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
