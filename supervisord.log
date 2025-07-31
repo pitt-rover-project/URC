@@ -37,3 +37,233 @@
 2025-07-22 01:52:58,762 WARN exited: setup (exit status 1; not expected)
 2025-07-22 01:52:58,763 INFO gave up: setup entered FATAL state, too many start retries too quickly
 2025-07-22 17:48:22,548 WARN received SIGTERM indicating exit request
+2025-07-30 22:38:10,811 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-07-30 22:38:10,812 INFO supervisord started with pid 86659
+2025-07-30 22:38:11,819 INFO spawned: 'gps_bridge' with pid 86676
+2025-07-30 22:38:11,824 INFO spawned: 'motor_bridge' with pid 86677
+2025-07-30 22:38:11,828 INFO spawned: 'setup' with pid 86678
+2025-07-30 22:38:11,831 INFO spawned: 'ultrasonic_bridge' with pid 86679
+2025-07-30 22:38:11,842 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:38:11,843 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:38:11,850 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:38:11,850 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:38:12,862 INFO spawned: 'gps_bridge' with pid 86682
+2025-07-30 22:38:12,866 INFO spawned: 'motor_bridge' with pid 86683
+2025-07-30 22:38:12,869 INFO spawned: 'setup' with pid 86684
+2025-07-30 22:38:12,872 INFO spawned: 'ultrasonic_bridge' with pid 86685
+2025-07-30 22:38:12,885 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:38:12,890 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:38:12,890 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:38:12,893 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:38:14,905 INFO spawned: 'gps_bridge' with pid 86689
+2025-07-30 22:38:14,909 INFO spawned: 'motor_bridge' with pid 86690
+2025-07-30 22:38:14,913 INFO spawned: 'setup' with pid 86691
+2025-07-30 22:38:14,915 INFO spawned: 'ultrasonic_bridge' with pid 86692
+2025-07-30 22:38:14,927 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:38:14,931 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:38:14,935 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:38:14,935 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:38:17,950 INFO spawned: 'gps_bridge' with pid 86705
+2025-07-30 22:38:17,953 INFO spawned: 'motor_bridge' with pid 86706
+2025-07-30 22:38:17,955 INFO spawned: 'setup' with pid 86707
+2025-07-30 22:38:17,958 INFO spawned: 'ultrasonic_bridge' with pid 86708
+2025-07-30 22:38:17,960 WARN received SIGTERM indicating exit request
+2025-07-30 22:38:17,961 INFO waiting for gps_bridge, motor_bridge, setup, ultrasonic_bridge to die
+2025-07-30 22:38:17,961 WARN stopped: ultrasonic_bridge (terminated by SIGTERM)
+2025-07-30 22:38:17,962 WARN stopped: setup (terminated by SIGTERM)
+2025-07-30 22:38:17,962 WARN stopped: motor_bridge (terminated by SIGTERM)
+2025-07-30 22:38:17,962 WARN stopped: gps_bridge (terminated by SIGTERM)
+2025-07-30 22:38:20,457 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-07-30 22:38:20,458 INFO supervisord started with pid 86776
+2025-07-30 22:38:21,467 INFO spawned: 'gps_bridge' with pid 86793
+2025-07-30 22:38:21,470 INFO spawned: 'motor_bridge' with pid 86794
+2025-07-30 22:38:21,473 INFO spawned: 'setup' with pid 86795
+2025-07-30 22:38:21,478 INFO spawned: 'ultrasonic_bridge' with pid 86796
+2025-07-30 22:38:21,492 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:38:21,492 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:38:21,498 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:38:21,498 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:38:22,509 INFO spawned: 'gps_bridge' with pid 86799
+2025-07-30 22:38:22,512 INFO spawned: 'motor_bridge' with pid 86800
+2025-07-30 22:38:22,520 INFO spawned: 'setup' with pid 86801
+2025-07-30 22:38:22,523 INFO spawned: 'ultrasonic_bridge' with pid 86802
+2025-07-30 22:38:22,532 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:38:22,533 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:38:22,540 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:38:22,540 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:38:24,556 INFO spawned: 'gps_bridge' with pid 86806
+2025-07-30 22:38:24,560 INFO spawned: 'motor_bridge' with pid 86807
+2025-07-30 22:38:24,563 INFO spawned: 'setup' with pid 86808
+2025-07-30 22:38:24,566 INFO spawned: 'ultrasonic_bridge' with pid 86809
+2025-07-30 22:38:24,579 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:38:24,581 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:38:24,585 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:38:24,586 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:38:27,601 INFO spawned: 'gps_bridge' with pid 86814
+2025-07-30 22:38:27,604 INFO spawned: 'motor_bridge' with pid 86815
+2025-07-30 22:38:27,607 INFO spawned: 'setup' with pid 86816
+2025-07-30 22:38:27,610 INFO spawned: 'ultrasonic_bridge' with pid 86817
+2025-07-30 22:38:27,624 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:38:27,624 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:38:27,625 INFO gave up: gps_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 22:38:27,626 INFO gave up: motor_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 22:38:27,629 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:38:27,631 INFO gave up: ultrasonic_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 22:38:27,631 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:38:28,638 INFO gave up: setup entered FATAL state, too many start retries too quickly
+2025-07-30 22:50:19,540 WARN received SIGTERM indicating exit request
+2025-07-30 22:55:24,196 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-07-30 22:55:24,197 INFO supervisord started with pid 88069
+2025-07-30 22:55:25,205 INFO spawned: 'gps_bridge' with pid 88084
+2025-07-30 22:55:25,209 INFO spawned: 'motor_bridge' with pid 88085
+2025-07-30 22:55:25,215 INFO spawned: 'setup' with pid 88086
+2025-07-30 22:55:25,217 INFO spawned: 'ultrasonic_bridge' with pid 88087
+2025-07-30 22:55:25,229 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:55:25,233 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:55:25,234 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:55:25,237 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:55:26,248 INFO spawned: 'gps_bridge' with pid 88090
+2025-07-30 22:55:26,254 INFO spawned: 'motor_bridge' with pid 88091
+2025-07-30 22:55:26,258 INFO spawned: 'setup' with pid 88092
+2025-07-30 22:55:26,260 INFO spawned: 'ultrasonic_bridge' with pid 88093
+2025-07-30 22:55:26,276 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:55:26,277 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:55:26,279 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:55:26,281 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:55:28,294 INFO spawned: 'gps_bridge' with pid 88097
+2025-07-30 22:55:28,297 INFO spawned: 'motor_bridge' with pid 88098
+2025-07-30 22:55:28,300 INFO spawned: 'setup' with pid 88099
+2025-07-30 22:55:28,303 INFO spawned: 'ultrasonic_bridge' with pid 88100
+2025-07-30 22:55:28,318 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:55:28,322 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:55:28,323 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:55:28,325 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:55:31,343 INFO spawned: 'gps_bridge' with pid 88105
+2025-07-30 22:55:31,348 INFO spawned: 'motor_bridge' with pid 88106
+2025-07-30 22:55:31,352 INFO spawned: 'setup' with pid 88107
+2025-07-30 22:55:31,354 INFO spawned: 'ultrasonic_bridge' with pid 88108
+2025-07-30 22:55:31,366 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 22:55:31,367 INFO gave up: gps_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 22:55:31,370 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 22:55:31,373 INFO gave up: motor_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 22:55:31,373 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 22:55:31,373 INFO gave up: ultrasonic_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 22:55:31,374 WARN exited: setup (exit status 1; not expected)
+2025-07-30 22:55:32,381 INFO gave up: setup entered FATAL state, too many start retries too quickly
+2025-07-30 23:03:47,399 WARN received SIGTERM indicating exit request
+2025-07-30 23:04:08,078 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-07-30 23:04:08,080 INFO supervisord started with pid 88790
+2025-07-30 23:04:09,090 INFO spawned: 'gps_bridge' with pid 88807
+2025-07-30 23:04:09,103 INFO spawned: 'motor_bridge' with pid 88808
+2025-07-30 23:04:09,104 INFO spawned: 'setup' with pid 88809
+2025-07-30 23:04:09,106 INFO spawned: 'ultrasonic_bridge' with pid 88810
+2025-07-30 23:04:09,116 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:04:09,121 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:04:09,123 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:04:09,124 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:04:10,132 INFO spawned: 'gps_bridge' with pid 88813
+2025-07-30 23:04:10,133 INFO spawned: 'motor_bridge' with pid 88814
+2025-07-30 23:04:10,140 INFO spawned: 'setup' with pid 88815
+2025-07-30 23:04:10,143 INFO spawned: 'ultrasonic_bridge' with pid 88816
+2025-07-30 23:04:10,148 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:04:10,149 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:04:10,158 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:04:10,158 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:04:12,166 INFO spawned: 'gps_bridge' with pid 88821
+2025-07-30 23:04:12,168 INFO spawned: 'motor_bridge' with pid 88822
+2025-07-30 23:04:12,170 INFO spawned: 'setup' with pid 88823
+2025-07-30 23:04:12,172 INFO spawned: 'ultrasonic_bridge' with pid 88824
+2025-07-30 23:04:12,186 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:04:12,187 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:04:12,192 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:04:12,194 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:04:15,209 INFO spawned: 'gps_bridge' with pid 88846
+2025-07-30 23:04:15,212 INFO spawned: 'motor_bridge' with pid 88847
+2025-07-30 23:04:15,214 INFO spawned: 'setup' with pid 88848
+2025-07-30 23:04:15,217 INFO spawned: 'ultrasonic_bridge' with pid 88849
+2025-07-30 23:04:15,232 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:04:15,232 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:04:15,233 INFO gave up: gps_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:04:15,234 INFO gave up: motor_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:04:15,237 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:04:15,240 INFO gave up: ultrasonic_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:04:15,241 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:04:16,246 INFO gave up: setup entered FATAL state, too many start retries too quickly
+2025-07-30 23:04:25,294 WARN received SIGTERM indicating exit request
+2025-07-30 23:05:01,796 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-07-30 23:05:01,798 INFO supervisord started with pid 88988
+2025-07-30 23:05:02,802 INFO spawned: 'gps_bridge' with pid 89003
+2025-07-30 23:05:02,803 INFO spawned: 'motor_bridge' with pid 89004
+2025-07-30 23:05:02,804 INFO spawned: 'setup' with pid 89005
+2025-07-30 23:05:02,805 INFO spawned: 'ultrasonic_bridge' with pid 89006
+2025-07-30 23:05:02,813 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:05:02,813 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:05:02,816 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:05:02,818 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:05:03,829 INFO spawned: 'gps_bridge' with pid 89009
+2025-07-30 23:05:03,832 INFO spawned: 'motor_bridge' with pid 89010
+2025-07-30 23:05:03,835 INFO spawned: 'setup' with pid 89011
+2025-07-30 23:05:03,838 INFO spawned: 'ultrasonic_bridge' with pid 89012
+2025-07-30 23:05:03,852 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:05:03,852 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:05:03,856 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:05:03,860 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:05:05,877 INFO spawned: 'gps_bridge' with pid 89016
+2025-07-30 23:05:05,879 INFO spawned: 'motor_bridge' with pid 89017
+2025-07-30 23:05:05,883 INFO spawned: 'setup' with pid 89018
+2025-07-30 23:05:05,886 INFO spawned: 'ultrasonic_bridge' with pid 89019
+2025-07-30 23:05:05,899 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:05:05,900 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:05:05,905 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:05:05,908 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:05:08,925 INFO spawned: 'gps_bridge' with pid 89024
+2025-07-30 23:05:08,927 INFO spawned: 'motor_bridge' with pid 89025
+2025-07-30 23:05:08,929 INFO spawned: 'setup' with pid 89026
+2025-07-30 23:05:08,932 INFO spawned: 'ultrasonic_bridge' with pid 89027
+2025-07-30 23:05:08,947 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:05:08,948 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:05:08,950 INFO gave up: gps_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:05:08,951 INFO gave up: motor_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:05:08,954 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:05:08,954 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:05:08,955 INFO gave up: setup entered FATAL state, too many start retries too quickly
+2025-07-30 23:05:08,955 INFO gave up: ultrasonic_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:12:39,966 WARN received SIGTERM indicating exit request
+2025-07-30 23:12:40,295 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-07-30 23:12:40,296 INFO supervisord started with pid 89682
+2025-07-30 23:12:41,308 INFO spawned: 'gps_bridge' with pid 89696
+2025-07-30 23:12:41,311 INFO spawned: 'motor_bridge' with pid 89697
+2025-07-30 23:12:41,314 INFO spawned: 'setup' with pid 89698
+2025-07-30 23:12:41,317 INFO spawned: 'ultrasonic_bridge' with pid 89699
+2025-07-30 23:12:41,329 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:12:41,334 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:12:41,335 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:12:41,337 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:12:42,346 INFO spawned: 'gps_bridge' with pid 89702
+2025-07-30 23:12:42,348 INFO spawned: 'motor_bridge' with pid 89703
+2025-07-30 23:12:42,351 INFO spawned: 'setup' with pid 89704
+2025-07-30 23:12:42,354 INFO spawned: 'ultrasonic_bridge' with pid 89705
+2025-07-30 23:12:42,369 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:12:42,371 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:12:42,375 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:12:42,375 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:12:44,394 INFO spawned: 'gps_bridge' with pid 89709
+2025-07-30 23:12:44,397 INFO spawned: 'motor_bridge' with pid 89710
+2025-07-30 23:12:44,400 INFO spawned: 'setup' with pid 89711
+2025-07-30 23:12:44,403 INFO spawned: 'ultrasonic_bridge' with pid 89712
+2025-07-30 23:12:44,417 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:12:44,418 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:12:44,421 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:12:44,424 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:12:47,443 INFO spawned: 'gps_bridge' with pid 89736
+2025-07-30 23:12:47,447 INFO spawned: 'motor_bridge' with pid 89737
+2025-07-30 23:12:47,451 INFO spawned: 'setup' with pid 89738
+2025-07-30 23:12:47,454 INFO spawned: 'ultrasonic_bridge' with pid 89739
+2025-07-30 23:12:47,468 WARN exited: gps_bridge (exit status 1; not expected)
+2025-07-30 23:12:47,469 INFO gave up: gps_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:12:47,472 WARN exited: motor_bridge (exit status 1; not expected)
+2025-07-30 23:12:47,472 INFO gave up: motor_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:12:47,474 WARN exited: ultrasonic_bridge (exit status 1; not expected)
+2025-07-30 23:12:47,476 INFO gave up: ultrasonic_bridge entered FATAL state, too many start retries too quickly
+2025-07-30 23:12:47,476 WARN exited: setup (exit status 1; not expected)
+2025-07-30 23:12:47,476 INFO gave up: setup entered FATAL state, too many start retries too quickly

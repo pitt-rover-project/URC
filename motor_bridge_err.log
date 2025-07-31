@@ -14,3 +14,95 @@ Traceback (most recent call last):
   File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
     from ros_bridge.arduino_bridge_base import MotorBridge
 ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'
+Traceback (most recent call last):
+  File "/app/ros_bridge/motor_bridge/motor_serial.py", line 1, in <module>
+    from ros_bridge.arduino_bridge_base import MotorBridge
+ModuleNotFoundError: No module named 'ros_bridge'

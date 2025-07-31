@@ -28,7 +28,7 @@ class MainWindow(QWidget):
         self.speed = 0                                          # Initial speed of the robot
         self.ultrasonic_distances = [0, 0, 0]                   # Distances from ultrasonic sensors
         self.ultrasonic_labels = [QLabel("") for _ in range(3)] # Labels for ultrasonic sensors
-        
+
         # This actually sets up the UI
         self.setup_ui()
 
@@ -38,7 +38,7 @@ class MainWindow(QWidget):
         screen_dimensions = QApplication.primaryScreen().availableGeometry()
         screen_width = screen_dimensions.width()
         screen_height = screen_dimensions.height()
-        
+
         # setGeometry sets the size and position of the main window - setGeometry(x, y, width, height)
         # x and y are the top-left corner coordinates
         self.setGeometry(0, 0, screen_width, screen_height)
@@ -68,7 +68,7 @@ class MainWindow(QWidget):
             "ex_deli_gui": QPushButton("Extreme Delivery", self),
             "json_motorGUI": QPushButton("Motor and Arm", self),
         }
-        
+
         # Labels - Data display
         data_display = {
             "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.imu_velocity}", self),
@@ -85,7 +85,7 @@ class MainWindow(QWidget):
             "ex_deli_gui": lambda: self.launch_gui("ex_deli_gui"),
             "json_motorGUI": lambda: self.launch_gui("json_motorGUI")
         }
-        
+
         for key, button in gui_buttons.items():
             # Each button’s clicked signal triggers its mapped action.
             button.clicked.connect(gui_button_actions[key])
@@ -95,7 +95,7 @@ class MainWindow(QWidget):
         camera_feed_buttons[0].setGeometry(5, 5, screen_width // 3, screen_height // 3)
         camera_feed_buttons[1].setGeometry(screen_width // 3 + 2, 5, screen_width // 3, screen_height // 3)
         camera_feed_buttons[2].setGeometry(2 * screen_width // 3, 5, screen_width // 3, screen_height // 3)
-        
+
         # Data display and control buttons
         self.data_display = {
             "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.velocity}", self),
@@ -115,7 +115,7 @@ class MainWindow(QWidget):
         # data_display["imu_speed"].setGeometry(5, screen_height // 3, 200, 100)
         # data_display["imu_orientation_vertical"].setGeometry(screen_width // 3 + 5, screen_height // 3, 200, 100)
         # data_display["imu_orientation_horizontal"].setGeometry(2*screen_width // 3 + 5, screen_height // 3, 200, 100)
-        
+
         # data_display["imu_speed"].setGeometry(0, screen_height // 3, 200, 100)
         # data_display["imu_orientation_vertical"].setGeometry(screen_width // 3, screen_height // 3, 200, 100)
         # data_display["imu_orientation_horizontal"].setGeometry(2*screen_width // 3, screen_height // 3, 200, 100)
@@ -148,7 +148,7 @@ class MainWindow(QWidget):
         self.data_display["imu_orientation_vertical"].setText(f"IMU Vertical Orientation: {vert_tilt:.2f}")
         self.data_display["imu_orientation_horizontal"].setText(f"IMU Horizontal Orientation: {horiz_tilt:.2f}")
 
-        
+
     @staticmethod
     def launch_gui(name):
         # Launches a GUI script in a new process - static method because it does not need access to instance variables
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     executor.shutdown()
     imu.destroy_node()
     rclpy.shutdown()
-    
+
     # Connecting buttons to publishers
     # Connecting buttons to subscribers
     # Update string headers to give actual values
