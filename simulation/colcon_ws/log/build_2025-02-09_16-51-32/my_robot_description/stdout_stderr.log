@@ -1,4 +1,0 @@
-[0mCMake Error: The current CMakeCache.txt directory /home/parth-p-24/URC-1/simulation/colcon_ws/build/my_robot_description/CMakeCache.txt is different than the directory /home/parth-p-24/colcon_ws/build/my_robot_description where CMakeCache.txt was created. This may result in binaries being created in the wrong place. If you are not sure, reedit the CMakeCache.txt[0m
-[0mCMake Error: The source directory "/home/parth-p-24/colcon_ws/src/my_robot_description" does not exist.
-Specify --help for usage, or press the help button on the CMake GUI.[0m
-gmake: *** [Makefile:226: cmake_check_build_system] Error 1
