@@ -4,7 +4,7 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-    QGridLayout, QFormLayout, QPushButton, QLabel, QGroupBox
+    QGridLayout, QFormLayout, QPushButton, QLabel, QGroupBox, QSpacerItem, QSizePolicy
 )
 from PyQt5.QtCore import Qt, QTimer
 import subprocess
@@ -33,49 +33,35 @@ class MainWindow(QWidget):
         self.setup_ui()
 
     def setup_ui(self):
-
-        # Stores a QRectangle that represents the main window
-        screen_dimensions = QApplication.primaryScreen().availableGeometry()
-        screen_width = screen_dimensions.width()
-        screen_height = screen_dimensions.height()
-
-        # setGeometry sets the size and position of the main window - setGeometry(x, y, width, height)
-        # x and y are the top-left corner coordinates
-        self.setGeometry(0, 0, screen_width, screen_height)
+        # Window setup - responsive without hardcoded dimensions
         self.setWindowTitle("General GUI")
+        self.showMaximized()  # Responsive full-screen
 
-        # --- Attribute initialization ---
-        # Buttons - Camera
+        # --- Widget Creation ---
+        # Camera feed buttons
         camera_feed_buttons = [
-            QPushButton(f"Camera feed {i+1}", self) for i in range(3)
+            QPushButton(f"Camera feed {i+1}") for i in range(3)
         ]
         camera_feed_buttons[2].setText("Camera feed 3 (for other thing)")
 
-        # Buttons - Data display and control
-        kill_button = QPushButton("Kill", self)
-        imu_speed_on = QPushButton("IMU Speed On", self)
-        imu_speed_off = QPushButton("IMU Speed Off", self)
-        imu_orientation_on = QPushButton("IMU Orientation On", self)
-        imu_orientation_off = QPushButton("IMU Orientation Off", self)
-        gps_on = QPushButton("GPS On", self)
-        gps_off = QPushButton("GPS Off", self)
+        # Control buttons
+        kill_button = QPushButton("Kill")
+        imu_speed_on = QPushButton("IMU Speed On")
+        imu_speed_off = QPushButton("IMU Speed Off")
+        imu_orientation_on = QPushButton("IMU Orientation On")
+        imu_orientation_off = QPushButton("IMU Orientation Off")
+        gps_on = QPushButton("GPS On")
+        gps_off = QPushButton("GPS Off")
 
-        # Buttons - GUI controls
+        # GUI navigation buttons
         gui_buttons = {
-            "arduino_gui": QPushButton("Control", self),
-            "auto_gui": QPushButton("Autonomous", self),
-            "equip_serv_gui": QPushButton("Equipment Service", self),
-            "ex_deli_gui": QPushButton("Extreme Delivery", self),
-            "json_motorGUI": QPushButton("Motor and Arm", self),
+            "arduino_gui": QPushButton("Control"),
+            "auto_gui": QPushButton("Autonomous"),
+            "equip_serv_gui": QPushButton("Equipment Service"),
+            "ex_deli_gui": QPushButton("Extreme Delivery"),
+            "json_motorGUI": QPushButton("Motor and Arm"),
         }
 
-        # Labels - Data display
-        data_display = {
-            "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.imu_velocity}", self),
-            "imu_orientation_vertical": QLabel(f"IMU Vertical Orientation: {self.imu_attributes.imu_vertical_tilt_angle}", self),
-            "imu_orientation_horizontal": QLabel(f"IMU Horizontal Orientation: {self.imu_attributes.imu_horizontal_tilt_angle}", self),
-            # "gps_data": QLabel(f"GPS Data: {self.imu_attributes.gps_data}", self)
-        }
 
         # --- Connect GUI buttons to their corresponding actions ---
         gui_button_actions = {
@@ -86,62 +72,75 @@ class MainWindow(QWidget):
             "json_motorGUI": lambda: self.launch_gui("json_motorGUI")
         }
 
+        # IMU Data display - moved to center of screen
+        self.data_display = {
+            "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.velocity}"),
+            "imu_orientation_vertical": QLabel(f"IMU Vertical Orientation: {self.imu_attributes.vertical_tilt_angle}"),
+            "imu_orientation_horizontal": QLabel(f"IMU Horizontal Orientation: {self.imu_attributes.horizontal_tilt_angle}"),
+        }
+        imu_group = QGroupBox("IMU Data")
+        imu_form_layout = QFormLayout()
+        imu_form_layout.addRow("Speed:", self.data_display["imu_speed"])
+        imu_form_layout.addRow("Vert. Tilt:", self.data_display["imu_orientation_vertical"])
+        imu_form_layout.addRow("Horiz. Tilt:", self.data_display["imu_orientation_horizontal"])
+        imu_group.setLayout(imu_form_layout)
+
         for key, button in gui_buttons.items():
-            # Each button’s clicked signal triggers its mapped action.
             button.clicked.connect(gui_button_actions[key])
 
-        # --- Layout setup ---
-        # Camera feed
-        camera_feed_buttons[0].setGeometry(5, 5, screen_width // 3, screen_height // 3)
-        camera_feed_buttons[1].setGeometry(screen_width // 3 + 2, 5, screen_width // 3, screen_height // 3)
-        camera_feed_buttons[2].setGeometry(2 * screen_width // 3, 5, screen_width // 3, screen_height // 3)
+        # --- Responsive Layout Setup ---
+        main_layout = QVBoxLayout()
 
-        # Data display and control buttons
-        self.data_display = {
-            "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.velocity}", self),
-            "imu_orientation_vertical": QLabel(f"IMU Vertical Orientation: {self.imu_attributes.vertical_tilt_angle}", self),
-            "imu_orientation_horizontal": QLabel(f"IMU Horizontal Orientation: {self.imu_attributes.horizontal_tilt_angle}", self),
-        }
-        imu_group = QGroupBox("IMU Data", self)
-        imu_group.setGeometry(15, screen_height // 3 + 10, 600, 120)
+        # Top section: Camera feeds
+        camera_layout = QHBoxLayout()
+        for camera_button in camera_feed_buttons:
+            camera_button.setMinimumHeight(200)
+            camera_layout.addWidget(camera_button)
+        main_layout.addLayout(camera_layout)
 
-        form = QFormLayout()
-        form.addRow("Speed:",      self.data_display["imu_speed"])
-        form.addRow("Vert. Tilt:", self.data_display["imu_orientation_vertical"])
-        form.addRow("Horiz. Tilt:",self.data_display["imu_orientation_horizontal"])
-        imu_group.setLayout(form)
+        # Add spacing
+        main_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
+        # Middle section: IMU data (centered)
+        imu_layout = QHBoxLayout()
+        imu_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        imu_layout.addWidget(imu_group)
+        imu_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        main_layout.addLayout(imu_layout)
 
-        # data_display["imu_speed"].setGeometry(5, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_vertical"].setGeometry(screen_width // 3 + 5, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_horizontal"].setGeometry(2*screen_width // 3 + 5, screen_height // 3, 200, 100)
+        # Add spacing
+        main_layout.addSpacerItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        # data_display["imu_speed"].setGeometry(0, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_vertical"].setGeometry(screen_width // 3, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_horizontal"].setGeometry(2*screen_width // 3, screen_height // 3, 200, 100)
-        # gps_data_label = QLabel(f"GPS Data: {self.imu_attributes.gps_data}", self)
+        # Control buttons section
+        control_layout = QGridLayout()
+        control_layout.addWidget(imu_speed_on, 0, 0)
+        control_layout.addWidget(imu_speed_off, 0, 1)
+        control_layout.addWidget(imu_orientation_on, 0, 2)
+        control_layout.addWidget(imu_orientation_off, 0, 3)
+        control_layout.addWidget(gps_on, 0, 4)
+        control_layout.addWidget(gps_off, 0, 5)
+        main_layout.addLayout(control_layout)
 
-        # IMU control buttons
-        imu_speed_on.setGeometry(0, screen_height // 3 + 60, 200, 50)
-        imu_speed_off.setGeometry(200, screen_height // 3 + 60, 200, 50)
+        # GUI navigation buttons section
+        gui_layout = QGridLayout()
+        gui_layout.addWidget(gui_buttons["arduino_gui"], 0, 0)
+        gui_layout.addWidget(gui_buttons["auto_gui"], 0, 1)
+        gui_layout.addWidget(gui_buttons["ex_deli_gui"], 1, 0)
+        gui_layout.addWidget(gui_buttons["json_motorGUI"], 1, 1)
+        gui_layout.addWidget(gui_buttons["equip_serv_gui"], 2, 0, 1, 2)  # Span 2 columns
+        main_layout.addLayout(gui_layout)
 
-        # IMU orientation buttons
-        imu_orientation_on.setGeometry(screen_width // 3, screen_height // 3 + 60, 200, 50)
-        imu_orientation_off.setGeometry(screen_width // 3 + 200, screen_height // 3 + 60, 200, 50)
+        # Kill button at bottom (centered)
+        kill_layout = QHBoxLayout()
+        kill_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        kill_button.setMinimumHeight(50)
+        kill_button.setMaximumWidth(400)
+        kill_layout.addWidget(kill_button)
+        kill_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        main_layout.addLayout(kill_layout)
 
-        # GPS control buttons
-        gps_on.setGeometry(2*screen_width // 3, screen_height // 3 + 60, 200, 50)
-        gps_off.setGeometry(2*screen_width // 3 + 200, screen_height // 3 + 60, 200, 50)
-
-        # Kill button
-        kill_button.setGeometry(screen_width // 3, screen_height // 8 * 7, 400, 50)
-
-        # Placing the gui buttons
-        gui_buttons["arduino_gui"].setGeometry(0, screen_height // 3 + 200, 200, 50)
-        gui_buttons["auto_gui"].setGeometry(200, screen_height // 3 + 200, 200, 50)
-        gui_buttons["equip_serv_gui"].setGeometry(0, screen_height // 3 + 300, 400, 50)
-        gui_buttons["ex_deli_gui"].setGeometry(0, screen_height // 3 + 250, 200, 50)
-        gui_buttons["json_motorGUI"].setGeometry(200, screen_height // 3 + 250, 200, 50)
+        # Set the main layout
+        self.setLayout(main_layout)
 
     def update_imu_display(self, velocity, vert_tilt, horiz_tilt):
         self.data_display["imu_speed"].setText(f"IMU Speed: {velocity:.2f}")
