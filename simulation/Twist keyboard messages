@@ -1,0 +1,27 @@
+Reading from the keyboard  and Publishing to Twist!
+---------------------------
+Moving around:
+   u    i    o
+   j    k    l
+   m    ,    .
+
+q/z : increase/decrease max speeds by 10%
+w/x : increase/decrease only linear speed by 10%
+e/c : increase/decrease only angular speed by 10%
+anything else : stop
+
+i= move forward (linear.x > 0)
+,= move backward (linear.x < 0)
+j= turn left (angular.z > 0)
+l= turn right (angular.z < 0)
+u= move forward and turn left 
+o= move forward and turn right
+m= move backward and turn left
+.= move backward and turn right
+k= stop (linear.x = 0, angular.z = 0)
+
+positive angular = right
+negative angular = left
+
+positive linear = forward
+negative linear = backwards

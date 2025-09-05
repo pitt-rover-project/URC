@@ -1,0 +1,22 @@
+-- Install configuration: ""
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/urdf
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/urdf/robot.urdf.xacro
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/urdf/gazebo_control.xacro
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/urdf/my_robot.urdf
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/launch
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/launch/display.launch.py
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/ament_index/resource_index/package_run_dependencies/my_robot_description
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/ament_index/resource_index/parent_prefix_path/my_robot_description
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/environment/ament_prefix_path.sh
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/environment/path.sh
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/environment/path.dsv
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/local_setup.bash
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/local_setup.sh
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/local_setup.zsh
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/local_setup.dsv
+-- Installing: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/package.dsv
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/ament_index/resource_index/packages/my_robot_description
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/cmake/my_robot_descriptionConfig.cmake
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/cmake/my_robot_descriptionConfig-version.cmake
+-- Up-to-date: /home/parth-p-24/colcon_ws/install/my_robot_description/share/my_robot_description/package.xml

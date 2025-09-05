@@ -1,0 +1,33 @@
+services:
+  pitt_urc_jetson:
+    image: urc_jetson
+    container_name: pitt_urc_jetson
+    runtime: nvidia
+    privileged: true
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              count: 1
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - ROS_DOMAIN_ID=0
+      - ROS_LOCALHOST_ONLY=0
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    volumes:
+      - ./../../:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix:rws
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+    devices:
+      - /dev:/dev
+    restart: unless-stopped
+    stdin_open: true
+    tty: true

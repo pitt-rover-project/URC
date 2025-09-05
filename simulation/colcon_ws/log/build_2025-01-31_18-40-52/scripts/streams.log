@@ -1,0 +1,21 @@
+[0.460s] Invoking command in '/home/parth-p-24/colcon_ws/src/scripts': PYTHONPATH=/home/parth-p-24/colcon_ws/build/scripts/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/parth-p-24/colcon_ws/install/scripts/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/scripts build --build-base /home/parth-p-24/colcon_ws/build/scripts/build install --record /home/parth-p-24/colcon_ws/build/scripts/install.log --single-version-externally-managed
+[0.601s] /usr/local/lib/python3.10/dist-packages/setuptools_scm/_integration/setuptools.py:31: RuntimeWarning: 
+[0.602s] ERROR: setuptools==59.6.0 is used in combination with setuptools_scm>=8.x
+[0.602s] 
+[0.602s] Your build configuration is incomplete and previously worked by accident!
+[0.602s] setuptools_scm requires setuptools>=61
+[0.602s] 
+[0.602s] Suggested workaround if applicable:
+[0.602s]  - migrating from the deprecated setup_requires mechanism to pep517/518
+[0.602s]    and using a pyproject.toml to declare build dependencies
+[0.602s]    which are reliably pre-installed before running the build tools
+[0.602s] 
+[0.602s]   warnings.warn(
+[0.611s] running egg_info
+[0.611s] writing ../../build/scripts/scripts.egg-info/PKG-INFO
+[0.611s] writing dependency_links to ../../build/scripts/scripts.egg-info/dependency_links.txt
+[0.611s] writing entry points to ../../build/scripts/scripts.egg-info/entry_points.txt
+[0.611s] writing requirements to ../../build/scripts/scripts.egg-info/requires.txt
+[0.611s] writing top-level names to ../../build/scripts/scripts.egg-info/top_level.txt
+[0.612s] error: package directory 'scripts' does not exist
+[0.631s] Invoked command in '/home/parth-p-24/colcon_ws/src/scripts' returned '1': PYTHONPATH=/home/parth-p-24/colcon_ws/build/scripts/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/parth-p-24/colcon_ws/install/scripts/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/scripts build --build-base /home/parth-p-24/colcon_ws/build/scripts/build install --record /home/parth-p-24/colcon_ws/build/scripts/install.log --single-version-externally-managed
