@@ -1,6 +1,6 @@
 # 🚀 University Rover Challenge - Pitt Robotics
 
-> **Advanced Autonomous Rover System for University Rover Challenge**  
+> **Advanced Autonomous Rover System for University Rover Challenge**
 > *ROS 2 • Python • Arduino • Docker • Computer Vision*
 
 ![Competition](https://img.shields.io/badge/Competition-University%20Rover%20Challenge-orange)
@@ -15,7 +15,7 @@ Complete software stack for the **University of Pittsburgh's University Rover Ch
 ### 🏆 Competition Tasks
 - **🚶 Autonomous Navigation** - GPS-guided traversal of challenging terrain
 - **🎯 Equipment Servicing** - Precise manipulation tasks with robotic arm
-- **📦 Extreme Delivery** - Package delivery in harsh environments  
+- **📦 Extreme Delivery** - Package delivery in harsh environments
 - **🔬 Science Operations** - Sample collection and analysis
 - **🕹️ Teleoperation** - Manual control for complex scenarios
 
@@ -32,7 +32,7 @@ chmod +x start_mac.sh
 
 **Jetson/Linux Deployment:**
 ```bash
-cd docker/jetson  
+cd docker/jetson
 chmod +x start.sh
 ./start.sh
 ```
@@ -66,7 +66,7 @@ python3 guis/equip_serv_gui.py   # Equipment servicing
 ├── 🤖 Hardware Abstraction (Motors, Servos)
 └── 📊 Data Processing (Computer Vision, Navigation)
 
-🖥️ GUI Control System  
+🖥️ GUI Control System
 ├── 🎛️ General Control Dashboard
 ├── 🚗 Motor Control Interface
 ├── 🧭 Navigation & Mapping
@@ -89,7 +89,7 @@ graph TD
     D --> E[User Commands]
     E --> F[ROS 2 Actions]
     F --> G[Arduino Actuators]
-    
+
     H[Simulation Environment] --> C
     C --> I[Autonomous System]
     I --> J[Navigation Planning]
@@ -152,7 +152,7 @@ git push origin feature/your-improvement
 
 ### **🧠 Autonomous Navigation**
 - GPS-waypoint following
-- Obstacle detection and avoidance  
+- Obstacle detection and avoidance
 - Terrain analysis and path planning
 - Real-time localization and mapping
 
@@ -183,7 +183,7 @@ git push origin feature/your-improvement
 ./ros2_quick_diagnostic.sh
 
 # Network connectivity
-./udp_connectivity_test.py  
+./udp_connectivity_test.py
 
 # Hardware status
 python3 guis/gen_gui.py  # View sensor dashboard
@@ -192,23 +192,7 @@ python3 guis/gen_gui.py  # View sensor dashboard
 tail -f *.log
 ```
 
-## 🏆 Competition History
-
-- **2024 Season**: Advanced autonomous navigation implementation
-- **Current Focus**: Computer vision improvements and manipulation tasks
-- **Target**: Top 10 finish at University Rover Challenge
-
-## 📚 Learning Resources
-
-- [ROS 2 Documentation](https://docs.ros.org/en/humble/)
-- [University Rover Challenge Rules](http://urc.marssociety.org/)
-- [Computer Vision Tutorials](opencv-tutorials/)
-- [Docker Best Practices](docker-best-practices/)
-
-For detailed development guidance, see [CLAUDE.md](./CLAUDE.md).
-
 ---
 
-**Team**: University of Pittsburgh Robotics Club  
-**Competition**: [University Rover Challenge](http://urc.marssociety.org/)  
-**Status**: Active Development - 2024 Season
+**Team**: University of Pittsburgh Robotics Club
+**Status**: Active Development - 2025 Season
