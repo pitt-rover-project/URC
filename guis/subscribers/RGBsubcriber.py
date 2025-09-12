@@ -1,8 +1,21 @@
+import cv2
 import rclpy
 from rclpy.node import Node
+from PIL import Image as PILImage
+import numpy as np
 
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+
+def array_to_image(array, filename):
+    array = np.array(array)
+
+    array = np.clip(array, 0, 255).astype(np.uint8)
+
+    img = PILImage.fromarray(array, mode='L')
+    img.save(filename)
+    return img
+
 
 class ImageSubscriber(Node):
     def __init__(self):
@@ -34,9 +47,13 @@ class ImageSubscriber(Node):
             print("Received Grayscale Image:")
             print(gray_image)
 
+            # array_to_image(gray_image, 'gray_image.png')
+
             # Optional display
-            # cv2.imshow("Gray Image", gray_image)
-            # cv2.waitKey(1)
+            cv2.imshow("Gray Image", gray_image)
+            cv2.waitKey(1)
+
+            self.gray_image = gray_image
 
         except CvBridgeError as e:
             self.get_logger().error(f"Gray CvBridge Error: {e}")

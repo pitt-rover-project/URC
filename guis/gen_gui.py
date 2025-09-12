@@ -1,5 +1,11 @@
 # General GUI for the robot control system
+import sys
+import os
 
+import numpy as np
+
+from guis.subscribers.RGBsubcriber import ImageSubscriber
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 # Import libraries
 import sys
 from PyQt5.QtWidgets import (
@@ -7,9 +13,13 @@ from PyQt5.QtWidgets import (
     QGridLayout, QPushButton, QLabel
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QImage, QPixmap
 import subprocess
 from pathlib import Path
 import rclpy
+
+if 'QT_QPA_PLATFORM_PLUGIN_PATH' in os.environ:
+    del os.environ['QT_QPA_PLATFORM_PLUGIN_PATH']
 
 # Import subscribers and publishers
 import guis.subscribers.subscriber as sub
@@ -21,12 +31,14 @@ class MainWindow(QWidget):
         super().__init__()
         # Initialize class attributes
         self.imu_attributes = sub.IMUSubscriber()               # IMU data parser instance
+        self.image_attributes = ImageSubscriber()         # Image subscriber instance
         self.speed = 0                                          # Initial speed of the robot
         self.ultrasonic_distances = [0, 0, 0]                   # Distances from ultrasonic sensors
         self.ultrasonic_labels = [QLabel("") for _ in range(3)] # Labels for ultrasonic sensors
         # This actually sets up the UI
         self.setup_ui()
 
+    
     def setup_ui(self):
         # Stores a QRectangle that represents the main window
         screen_dimensions = QApplication.primaryScreen().availableGeometry()
@@ -68,6 +80,7 @@ class MainWindow(QWidget):
             "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.imu_velocity}", self),
             "imu_orientation_vertical": QLabel(f"IMU Vertical Orientation: {self.imu_attributes.imu_vertical_tilt_angle}", self),
             "imu_orientation_horizontal": QLabel(f"IMU Horizontal Orientation: {self.imu_attributes.imu_horizontal_tilt_angle}", self),
+            "gray_image_display": QLabel(self),  # Added this line for image display
             # "gps_data": QLabel(f"GPS Data: {self.imu_attributes.gps_data}", self)
         }
 
@@ -79,7 +92,20 @@ class MainWindow(QWidget):
             "ex_deli_gui": lambda: self.launch_gui("ex_deli_gui"),
             "json_motorGUI": lambda: self.launch_gui("json_motorGUI")
         }
+
+
+        # Convert array to QPixmap and display it - Added this section
+        if hasattr(self, 'image_attributes') and hasattr(self.image_attributes, 'gray_image'):
+            array = np.array(self.image_attributes.gray_image)
+            array = np.clip(array, 0, 255).astype(np.uint8)
+            height, width = array.shape
+            bytes_per_line = width
+            q_image = QImage(array.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+            pixmap = QPixmap.fromImage(q_image)
+            data_display["gray_image_display"].setPixmap(pixmap.scaled(200, 150, Qt.KeepAspectRatio))
         
+        data_display["gray_image_display"].setGeometry(0, screen_height // 3 + 110, 200, 150)
+
         for key, button in gui_buttons.items():
             # Each button’s clicked signal triggers its mapped action.
             button.clicked.connect(gui_button_actions[key])
