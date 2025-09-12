@@ -39,42 +39,38 @@ class MainWindow(QWidget):
     def __init__(self, imu_attributes):
         super().__init__()
         # Initialize class attributes
-        self.imu_attributes = sub.IMUSubscriber()               # IMU data parser instance
+        # Use the imu_attributes passed in (main passes a subscriber instance)
+        self.imu_attributes = imu_attributes
         self.image_attributes = ImageSubscriber()         # Image subscriber instance
         self.speed = 0                                          # Initial speed of the robot
         self.ultrasonic_distances = [0, 0, 0]                   # Distances from ultrasonic sensors
         self.ultrasonic_labels = [QLabel("") for _ in range(3)] # Labels for ultrasonic sensors
         self.camera_label = QLabel(self)
+        # Label to display grayscale image
+        self.gray_image_label = QLabel(self)
 
-        
         # This actually sets up the UI
         self.setup_ui()
 
     
     def setup_ui(self):
-
         # Stores a QRectangle that represents the main window
         screen_dimensions = QApplication.primaryScreen().availableGeometry()
         screen_width = screen_dimensions.width()
         screen_height = screen_dimensions.height()
-        
-        self.camera_label.setGeometry(5, 5, screen_width // 3, screen_height // 3)
-        self.camera_label.setScaledContents(True)  # So it stretches to fit
 
-
-        # setGeometry sets the size and position of the main window - setGeometry(x, y, width, height)
-        # x and y are the top-left corner coordinates
+        # Window settings
         self.setGeometry(0, 0, screen_width, screen_height)
         self.setWindowTitle("General GUI")
 
-        # --- Attribute initialization ---
-        # Buttons - Camera
-        camera_feed_buttons = [
-            QPushButton(f"Camera feed {i+1}", self) for i in range(3)
-        ]
+        # Camera preview label
+        self.camera_label.setGeometry(5, 5, screen_width // 3, screen_height // 3)
+        self.camera_label.setScaledContents(True)
+
+        # Basic control buttons
+        camera_feed_buttons = [QPushButton(f"Camera feed {i+1}", self) for i in range(3)]
         camera_feed_buttons[2].setText("Camera feed 3 (for other thing)")
 
-        # Buttons - Data display and control
         kill_button = QPushButton("Kill", self)
         imu_speed_on = QPushButton("IMU Speed On", self)
         imu_speed_off = QPushButton("IMU Speed Off", self)
@@ -83,7 +79,6 @@ class MainWindow(QWidget):
         gps_on = QPushButton("GPS On", self)
         gps_off = QPushButton("GPS Off", self)
 
-        # Buttons - GUI controls
         gui_buttons = {
             "arduino_gui": QPushButton("Control", self),
             "auto_gui": QPushButton("Autonomous", self),
@@ -91,89 +86,58 @@ class MainWindow(QWidget):
             "ex_deli_gui": QPushButton("Extreme Delivery", self),
             "json_motorGUI": QPushButton("Motor and Arm", self),
         }
-        
-        # Labels - Data display
-        data_display = {
-            "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.imu_velocity}", self),
-            "imu_orientation_vertical": QLabel(f"IMU Vertical Orientation: {self.imu_attributes.imu_vertical_tilt_angle}", self),
-            "imu_orientation_horizontal": QLabel(f"IMU Horizontal Orientation: {self.imu_attributes.imu_horizontal_tilt_angle}", self),
-            "gray_image_display": QLabel(self),  # Added this line for image display
-            # "gps_data": QLabel(f"GPS Data: {self.imu_attributes.gps_data}", self)
+
+        # Data display placeholders
+        self.data_display = {
+            "imu_speed": QLabel("IMU Speed: 0", self),
+            "imu_orientation_vertical": QLabel("IMU Vertical Orientation: 0", self),
+            "imu_orientation_horizontal": QLabel("IMU Horizontal Orientation: 0", self),
+            "gray_image_display": QLabel(self),
         }
 
-        # --- Connect GUI buttons to their corresponding actions ---
+        # Position gray image widgets
+        self.data_display["gray_image_display"].setGeometry(0, screen_height // 3 + 110, 200, 150)
+        self.gray_image_label.setGeometry(210, screen_height // 3 + 110, 200, 150)
+        self.gray_image_label.setScaledContents(True)
+
+        # Connect GUI buttons
         gui_button_actions = {
             "arduino_gui": lambda: self.launch_gui("arduino_gui"),
             "auto_gui": lambda: self.launch_gui("auto_gui"),
             "equip_serv_gui": lambda: self.launch_gui("equip_serv_gui"),
             "ex_deli_gui": lambda: self.launch_gui("ex_deli_gui"),
-            "json_motorGUI": lambda: self.launch_gui("json_motorGUI")
+            "json_motorGUI": lambda: self.launch_gui("json_motorGUI"),
         }
 
-
-        # Convert array to QPixmap and display it - Added this section
-        if hasattr(self, 'image_attributes') and hasattr(self.image_attributes, 'gray_image'):
-            array = np.array(self.image_attributes.gray_image)
-            array = np.clip(array, 0, 255).astype(np.uint8)
-            height, width = array.shape
-            bytes_per_line = width
-            q_image = QImage(array.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
-            pixmap = QPixmap.fromImage(q_image)
-            data_display["gray_image_display"].setPixmap(pixmap.scaled(200, 150, Qt.KeepAspectRatio))
-        
-        data_display["gray_image_display"].setGeometry(0, screen_height // 3 + 110, 200, 150)
-
         for key, button in gui_buttons.items():
-            # Each button’s clicked signal triggers its mapped action.
             button.clicked.connect(gui_button_actions[key])
 
-        # --- Layout setup ---
-        # Camera feed
+        # Camera feed button positions
         camera_feed_buttons[0].setGeometry(5, 5, screen_width // 3, screen_height // 3)
         camera_feed_buttons[1].setGeometry(screen_width // 3 + 2, 5, screen_width // 3, screen_height // 3)
         camera_feed_buttons[2].setGeometry(2 * screen_width // 3, 5, screen_width // 3, screen_height // 3)
-        
-        # Data display and control buttons
-        self.data_display = {
-            "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.velocity}", self),
-            "imu_orientation_vertical": QLabel(f"IMU Vertical Orientation: {self.imu_attributes.vertical_tilt_angle}", self),
-            "imu_orientation_horizontal": QLabel(f"IMU Horizontal Orientation: {self.imu_attributes.horizontal_tilt_angle}", self),
-        }
+
+        # IMU group and layout
         imu_group = QGroupBox("IMU Data", self)
         imu_group.setGeometry(15, screen_height // 3 + 10, 600, 120)
-
         form = QFormLayout()
         form.addRow("Speed:",      self.data_display["imu_speed"])
         form.addRow("Vert. Tilt:", self.data_display["imu_orientation_vertical"])
         form.addRow("Horiz. Tilt:",self.data_display["imu_orientation_horizontal"])
         imu_group.setLayout(form)
 
-
-        # data_display["imu_speed"].setGeometry(5, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_vertical"].setGeometry(screen_width // 3 + 5, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_horizontal"].setGeometry(2*screen_width // 3 + 5, screen_height // 3, 200, 100)
-        
-        # data_display["imu_speed"].setGeometry(0, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_vertical"].setGeometry(screen_width // 3, screen_height // 3, 200, 100)
-        # data_display["imu_orientation_horizontal"].setGeometry(2*screen_width // 3, screen_height // 3, 200, 100)
-        # gps_data_label = QLabel(f"GPS Data: {self.imu_attributes.gps_data}", self)
-
-        # IMU control buttons
+        # IMU control buttons geometry
         imu_speed_on.setGeometry(0, screen_height // 3 + 60, 200, 50)
         imu_speed_off.setGeometry(200, screen_height // 3 + 60, 200, 50)
-
-        # IMU orientation buttons
         imu_orientation_on.setGeometry(screen_width // 3, screen_height // 3 + 60, 200, 50)
         imu_orientation_off.setGeometry(screen_width // 3 + 200, screen_height // 3 + 60, 200, 50)
-
-        # GPS control buttons
         gps_on.setGeometry(2*screen_width // 3, screen_height // 3 + 60, 200, 50)
         gps_off.setGeometry(2*screen_width // 3 + 200, screen_height // 3 + 60, 200, 50)
 
         # Kill button
         kill_button.setGeometry(screen_width // 3, screen_height // 8 * 7, 400, 50)
 
-        # Placing the gui buttons
+        # Place GUI buttons
         gui_buttons["arduino_gui"].setGeometry(0, screen_height // 3 + 200, 200, 50)
         gui_buttons["auto_gui"].setGeometry(200, screen_height // 3 + 200, 200, 50)
         gui_buttons["equip_serv_gui"].setGeometry(0, screen_height // 3 + 300, 400, 50)
@@ -192,6 +156,21 @@ class MainWindow(QWidget):
         pixmap = QPixmap.fromImage(qimg)
         self.camera_label.setPixmap(pixmap)
 
+    def update_gray_display(self, array):
+        # array is expected to be a 2D numpy uint8 array (grayscale)
+        try:
+            arr = np.clip(array, 0, 255).astype(np.uint8)
+            if arr.ndim != 2:
+                # if a single-channel image came as HxWx1, squeeze it
+                arr = arr.squeeze()
+            height, width = arr.shape
+            bytes_per_line = width
+            q_image = QImage(arr.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+            pixmap = QPixmap.fromImage(q_image)
+            self.gray_image_label.setPixmap(pixmap)
+        except Exception as e:
+            print(f"Failed to update gray display: {e}")
+
 
         
     @staticmethod
@@ -203,7 +182,8 @@ class MainWindow(QWidget):
 
 
 class CameraSubscriber(QObject):
-    image_updated = pyqtSignal(np.ndarray)  # Signal to send image to the GUI
+    # Signal emits (frame, is_gray: bool). If is_gray True, frame is 2D uint8 array; else BGR color image
+    image_updated = pyqtSignal(object, bool)
 
     def __init__(self, topic_name, node):
         super().__init__()
@@ -219,9 +199,15 @@ class CameraSubscriber(QObject):
     def image_callback(self, msg):
         try:
             # Convert ROS Image message to OpenCV image
-            frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-            print(frame)
-            self.image_updated.emit(frame)  # Emit frame to GUI
+            # Try to detect encoding and request appropriate conversion
+            encoding = msg.encoding if hasattr(msg, 'encoding') else ''
+            if 'rgb' in encoding.lower() or 'bgr' in encoding.lower():
+                frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+                self.image_updated.emit(frame, False)
+            else:
+                # fallback to mono8
+                frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='mono8')
+                self.image_updated.emit(frame, True)
         except Exception as e:
             self.node.get_logger().error(f"Image conversion failed: {e}")
 
@@ -240,7 +226,8 @@ if __name__ == "__main__":
     main_window = MainWindow(imu)
 
     camera_sub = CameraSubscriber("camera/gray/image_raw", gui_node)
-    camera_sub.image_updated.connect(main_window.update_camera_display)
+    # Dispatch grayscale vs color frames to the appropriate update methods
+    camera_sub.image_updated.connect(lambda frame, is_gray: main_window.update_gray_display(frame) if is_gray else main_window.update_camera_display(frame))
 
     # imu.imu_data_updated.connect(main_window.update_imu_display)
 
