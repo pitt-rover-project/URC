@@ -63,12 +63,13 @@ class MainWindow(QWidget):
         self.setGeometry(0, 0, screen_width, screen_height)
         self.setWindowTitle("General GUI")
 
-        # Camera preview label
+        # Camera preview label (use this as Camera feed 1)
         self.camera_label.setGeometry(5, 5, screen_width // 3, screen_height // 3)
         self.camera_label.setScaledContents(True)
 
-        # Basic control buttons
+        # Basic control buttons (we hide the first button and use camera_label instead)
         camera_feed_buttons = [QPushButton(f"Camera feed {i+1}", self) for i in range(3)]
+        camera_feed_buttons[0].hide()
         camera_feed_buttons[2].setText("Camera feed 3 (for other thing)")
 
         kill_button = QPushButton("Kill", self)
@@ -112,8 +113,7 @@ class MainWindow(QWidget):
         for key, button in gui_buttons.items():
             button.clicked.connect(gui_button_actions[key])
 
-        # Camera feed button positions
-        camera_feed_buttons[0].setGeometry(5, 5, screen_width // 3, screen_height // 3)
+        # Camera feed button positions (first feed replaced by camera_label)
         camera_feed_buttons[1].setGeometry(screen_width // 3 + 2, 5, screen_width // 3, screen_height // 3)
         camera_feed_buttons[2].setGeometry(2 * screen_width // 3, 5, screen_width // 3, screen_height // 3)
 
