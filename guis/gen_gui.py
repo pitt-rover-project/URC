@@ -1,6 +1,7 @@
 # General GUI for the robot control system
 import sys
 import os
+from rclpy.node import Node
 
 import numpy as np
 
