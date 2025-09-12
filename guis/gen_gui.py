@@ -45,8 +45,6 @@ class MainWindow(QWidget):
         self.ultrasonic_distances = [0, 0, 0]                   # Distances from ultrasonic sensors
         self.ultrasonic_labels = [QLabel("") for _ in range(3)] # Labels for ultrasonic sensors
         self.camera_label = QLabel(self)
-        self.camera_label.setGeometry(5, 5, screen_width // 3, screen_height // 3)
-        self.camera_label.setScaledContents(True)  # So it stretches to fit
 
         
         # This actually sets up the UI
@@ -60,6 +58,10 @@ class MainWindow(QWidget):
         screen_width = screen_dimensions.width()
         screen_height = screen_dimensions.height()
         
+        self.camera_label.setGeometry(5, 5, screen_width // 3, screen_height // 3)
+        self.camera_label.setScaledContents(True)  # So it stretches to fit
+
+
         # setGeometry sets the size and position of the main window - setGeometry(x, y, width, height)
         # x and y are the top-left corner coordinates
         self.setGeometry(0, 0, screen_width, screen_height)
