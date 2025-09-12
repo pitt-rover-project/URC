@@ -220,6 +220,7 @@ class CameraSubscriber(QObject):
         try:
             # Convert ROS Image message to OpenCV image
             frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            print(frame)
             self.image_updated.emit(frame)  # Emit frame to GUI
         except Exception as e:
             self.node.get_logger().error(f"Image conversion failed: {e}")
@@ -238,10 +239,10 @@ if __name__ == "__main__":
     imu = sub.IMUSubscriber("imu_data", String, node_name="imu_subscriber")
     main_window = MainWindow(imu)
 
-    camera_sub = CameraSubscriber("/camera/image_raw", gui_node)
+    camera_sub = CameraSubscriber("camera/gray/image_raw", gui_node)
     camera_sub.image_updated.connect(main_window.update_camera_display)
 
-    imu.imu_data_updated.connect(main_window.update_imu_display)
+    # imu.imu_data_updated.connect(main_window.update_imu_display)
 
 
     # Use a ROS executor that doesn't block the Qt event loop
