@@ -12,12 +12,9 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QGridLayout, QFormLayout, QPushButton, QLabel, QGroupBox
 )
-<<<<<<< HEAD
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
-=======
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
->>>>>>> 030799ce27c825070857972bbaf6235e48c71e8f
 import subprocess
 from pathlib import Path
 from std_msgs.msg import String
@@ -41,13 +38,8 @@ class MainWindow(QWidget):
     def __init__(self, imu_attributes):
         super().__init__()
         # Initialize class attributes
-<<<<<<< HEAD
         self.imu_attributes = sub.IMUSubscriber()               # IMU data parser instance
         self.image_attributes = ImageSubscriber()         # Image subscriber instance
-=======
-        self.imu_attributes = imu_attributes             # IMU data parser instance
-        self.imu_attributes.imu_data_updated.connect(self.update_imu_display)
->>>>>>> 030799ce27c825070857972bbaf6235e48c71e8f
         self.speed = 0                                          # Initial speed of the robot
         self.ultrasonic_distances = [0, 0, 0]                   # Distances from ultrasonic sensors
         self.ultrasonic_labels = [QLabel("") for _ in range(3)] # Labels for ultrasonic sensors
