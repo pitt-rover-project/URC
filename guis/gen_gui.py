@@ -98,7 +98,7 @@ class MainWindow(QWidget):
 
         # Position gray image widgets
         self.data_display["gray_image_display"].setGeometry(0, screen_height // 3 + 110, 200, 150)
-        self.gray_image_label.setGeometry(210, screen_height // 3 + 110, 200, 150)
+        self.gray_image_label.setGeometry(5, 5, screen_width // 3, screen_height // 3)
         self.gray_image_label.setScaledContents(True)
 
         # Connect GUI buttons
