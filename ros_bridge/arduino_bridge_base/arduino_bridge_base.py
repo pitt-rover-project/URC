@@ -35,7 +35,7 @@ class ArduinoBridgeBase(Node):
         if self.serial is None:
             self.get_logger().info(f"{self.node_name} Node: Serial connection not available")
             return
-            
+
         try:
             if self.serial.in_waiting > 0:
                 self.get_logger().info(f"{self.node_name} Node: Reading from Arduino...")
@@ -60,10 +60,10 @@ class ArduinoBridgeBase(Node):
             except:
                 pass
             self.serial = None
-        
+
         # Could implement reconnection logic here if needed
         self.get_logger().warning("Serial connection lost. Manual restart required.")
-            
+
     # Overrides the parent class's destroy_node method to close the serial port before shutting down node
     def destroy_node(self):
         if self.serial and self.serial.is_open:
@@ -112,7 +112,7 @@ class MotorBridge(ArduinoBridgeBase):
         if self.serial is None:
             self.get_logger().warning("Cannot send command: serial connection not available")
             return
-            
+
         try:
             command = msg.data
             self.serial.write(command.encode())
@@ -125,7 +125,7 @@ class MotorBridge(ArduinoBridgeBase):
         if self.serial is None:
             self.get_logger().warning("Cannot send teleop command: serial connection not available")
             return
-            
+
         try:
             # Format the Twist message into a comma-separated string and send to Arduino
             command = f"{msg.linear.x},{msg.linear.y},{msg.linear.z},{msg.angular.x},{msg.angular.y},{msg.angular.z}\n"
@@ -158,9 +158,27 @@ class GPSBridge(ArduinoBridgeBase):
 # IMU Bridge
 class IMUBridge(ArduinoBridgeBase):
     def __init__(self):
+        # Try multiple device paths for cross-platform compatibility
+        possible_ports = ["/dev/ttyACM0", "/dev/cu.usbmodem11201", "/dev/ttyUSB0"]
+        working_port = None
+        
+        # Find the first working port
+        for port in possible_ports:
+            try:
+                import serial
+                test_serial = serial.Serial(port, 9600, timeout=1)
+                test_serial.close()
+                working_port = port
+                break
+            except:
+                continue
+        
+        if working_port is None:
+            working_port = "/dev/ttyACM0"  # Default fallback
+            
         super().__init__(
             node_name="imu_bridge",
             topic_name="imu_data",
-            serial_port="/dev/ttyACM0",
-            baud_rate=115200
+            serial_port=working_port,
+            baud_rate=9600
         )

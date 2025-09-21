@@ -30,7 +30,7 @@ source /opt/ros/humble/local_setup.bash
 
 > **Note:** You must run this in every new shell session inside the container.
 
-### Launching the GUI 
+### Launching the GUI
 ```bash
 cd /app                 # Should be here by default!
 python3 -m guis.gen_gui # Starts the General Gui
