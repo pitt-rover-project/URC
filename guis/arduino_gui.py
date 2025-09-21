@@ -1,384 +1,528 @@
-#import serial
 import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import *
-from PyQt5 import *
-from threading import Timer
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+    QPushButton, QLabel, QGroupBox, QSlider, QFrame
+)
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QFont, QPalette, QColor
 import math
-import random
 
-# from guis.subscribers.subscriber import GenericSubscriber
-
-
-# https://stackoverflow.com/a/13151299
-class RepeatedTimer(object):
-    def __init__(self, interval, function, *args, **kwargs):
-        self._timer = None
-        self.interval = interval
-        self.function = function
-        self.args = args
-        self.kwargs = kwargs
-        self.is_running = False
-        self.start()
-
-    def _run(self):
-        self.is_running = False
-        self.start()
-        self.function(*self.args, **self.kwargs)
-
-    def start(self):
-        if not self.is_running:
-            self._timer = Timer(self.interval, self._run)
-            self._timer.start()
-            self.is_running = True
-
-    def stop(self):
-        self._timer.cancel()
-        self.is_running = False
-
-
-# Top-left - motor controls
-# Top-right - arm controls
-# Bottom - sensors/cameras
-# on and off for motors and arm
-# buttons and keyboard control for motor and arms
-
-
-# commPort = "/dev/ttyACM0"
-# serMotor = serial.Serial(commPort, baudrate=115200)
-
+# Throttle control class
+class ThrottleControl(QFrame):
+    def __init__(self):
+        super().__init__()
+        self.throttle_value = 0
+        self.setup_ui()
+        
+    def setup_ui(self):
+        self.setObjectName("throttleFrame")
+        layout = QVBoxLayout(self)
+        
+        # Title
+        title = QLabel("THROTTLE CONTROL")
+        title.setObjectName("throttleTitle")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        # Percentage display
+        self.percentage_label = QLabel("0%")
+        self.percentage_label.setObjectName("throttlePercentage")
+        self.percentage_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.percentage_label)
+        
+        # Horizontal slider
+        slider_frame = QFrame()
+        slider_layout = QHBoxLayout(slider_frame)
+        
+        # Min/Max labels
+        min_label = QLabel("0%")
+        min_label.setObjectName("throttleMinMax")
+        max_label = QLabel("100%")
+        max_label.setObjectName("throttleMinMax")
+        
+        # Throttle slider
+        self.throttle_slider = QSlider(Qt.Horizontal)
+        self.throttle_slider.setObjectName("throttleSlider")
+        self.throttle_slider.setRange(0, 100)
+        self.throttle_slider.setValue(0)
+        self.throttle_slider.valueChanged.connect(self.on_throttle_change)
+        
+        slider_layout.addWidget(min_label)
+        slider_layout.addWidget(self.throttle_slider)
+        slider_layout.addWidget(max_label)
+        
+        layout.addWidget(slider_frame)
+        
+        # Control buttons
+        button_layout = QHBoxLayout()
+        reset_btn = QPushButton("RESET")
+        reset_btn.setObjectName("throttleButton")
+        reset_btn.clicked.connect(self.reset_throttle)
+        
+        full_btn = QPushButton("FULL")
+        full_btn.setObjectName("throttleButton")
+        full_btn.clicked.connect(self.full_throttle)
+        
+        button_layout.addWidget(reset_btn)
+        button_layout.addWidget(full_btn)
+        layout.addLayout(button_layout)
+        
+    def on_throttle_change(self, value):
+        self.throttle_value = value
+        self.percentage_label.setText(f"{value}%")
+        
+    def reset_throttle(self):
+        self.throttle_slider.setValue(0)
+        
+    def full_throttle(self):
+        self.throttle_slider.setValue(100)
+        
+    def get_throttle_value(self):
+        return self.throttle_value / 100.0  # Return as 0-1 value
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.speed = 0
-        self.ultrasonic = [0, 0, 0]
-        self.ultrasonicLabels = [QLabel(""), QLabel(""), QLabel("")]
-        self.UI()
+        # Movement state
+        self.linear_velocity = 0.0  # 0 to 1
+        self.angular_velocity = 0.0  # -1 to 1 (negative = left, positive = right)
         
-    def UI(self):
-        self.setWindowTitle("URC Gui")
-        self.setGeometry(1600, 0, 1200, 900)
-
-        main_layout = QVBoxLayout()
-        top_layout = QHBoxLayout()
-        top_left_layout = QGridLayout()
-        top_right_layout = QGridLayout()
-        bottom_layout = QGridLayout()
-
-        forward_button = QPushButton("Forward\nI")
-        forward_button.clicked.connect(self.forwardButton)
-        left_button = QPushButton("Left\nJ")
-        left_button.clicked.connect(self.leftButton)
-        backwards_button = QPushButton("Backwards\n,")
-        backwards_button.clicked.connect(self.backwardsButton)
-        right_button = QPushButton("Right\nL")
-        right_button.clicked.connect(self.rightButton)
-        speed_up_button = QPushButton("Speed Up\nQ")
-        speed_up_button.clicked.connect(self.speedupButton)
-        slow_down_button = QPushButton("Slow Down\nZ")
-        slow_down_button.clicked.connect(self.slowdownButton)
-        stop_button = QPushButton("Stop\nK")
-        stop_button.clicked.connect(self.stopButton)
-        enable_button = QPushButton("Enable")
-        disable_button = QPushButton("Disable")
-
-        self.le1 = QLabel("Set Speed (UP/DOWN): " + str(self.speed))
-        self.btn2 = QPushButton("Enter an integer")
-        self.btn2.clicked.connect(self.getint)
-
-        top_left_layout.addWidget(forward_button, 0, 1)
-        top_left_layout.addWidget(left_button, 1, 0)
-        top_left_layout.addWidget(backwards_button, 1, 1)
-        top_left_layout.addWidget(right_button, 1, 2)
-        top_left_layout.addWidget(speed_up_button, 2, 0)
-        top_left_layout.addWidget(slow_down_button, 2, 2)
-        top_left_layout.addWidget(stop_button, 3, 0)
-        top_left_layout.addWidget(enable_button, 4, 1)
-        top_left_layout.addWidget(disable_button, 3, 2)
-
-        top_left_layout.addWidget(self.le1, 2, 1)
-        top_left_layout.addWidget(self.btn2, 3, 1)
-
-        top_right_layout.addWidget(QLabel("arm controls here"), 0, 0)
-        # bottom_layout.addWidget(QLabel("cameras/sensors here"), 0, 0)
-
-        # for i in range(len(self.ultrasonic)):
-        #     bottom_layout.addWidget(self.ultrasonicLabels[i], i, 0)
-
-        # rt = RepeatedTimer(0.1, self.getUltraSonicData)
-
-        top_layout.addLayout(top_left_layout)
-        top_layout.addLayout(top_right_layout)
-        main_layout.addLayout(top_layout)
-        main_layout.addLayout(bottom_layout)
-
-        self.setLayout(main_layout)
-
-    # commPort = "/dev/ttyACM2"
-    # serMotor = serial.Serial(commPort, baudrate=115200)
-    # def getUltraSonicData(self):
-    #     while(serMotor.in_waiting > 0):
-    #         read = serMotor.readline().decode("utf-8")
-    #         # 32,43,54
-    #         # in centimeters
-    #         # read = (
-    #         #    str(math.floor(random.random() * 100))
-    #         #    + ","
-    #         #    + str(math.floor(random.random() * 100))
-    #         #    + ","
-    #         #    + str(math.floor(random.random() * 100))
-    #         # )
-
-    #         read = read.split(",")
-
-    #         res = []
-    #         for i in range(3):
-    #             res.append(float(read[i]))
-
-    #         self.ultrasonic = res
-
-    #         for i in range(len(self.ultrasonic)):
-    #             self.ultrasonicLabels[i].setText(
-    #                 "Ultrasonic " + str(i) + ": " + str(self.ultrasonic[i])
-    #             )
-
-    def getint(self):
-        num, ok = QInputDialog.getInt(self, "integer input dialog", "enter a number (10-255)")
-        if ok:
-            self.speed = num
-            self.le1.setText("Set Speed (UP/DOWN): " + str(self.speed))
-
-    def forwardButton(self, event):
-        self.motorEvent("I")
-
-    def leftButton(self, event):
-        self.motorEvent("J")
-
-    def backwardsButton(self, event):
-        self.motorEvent(",")
-
-    def rightButton(self, event):
-        self.motorEvent("L")
-
-    def speedupButton(self, event):
-        self.motorEvent("Q")
-
-    def slowdownButton(self, event):
-        self.motorEvent("Z")
-
-    def stopButton(self, event):
-        self.motorEvent("K")
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_I:
-            self.motorEvent("I")
-        if event.key() == Qt.Key_Comma:
-            self.motorEvent(",")
-        if event.key() == Qt.Key_J:
-            self.motorEvent("J")
-        if event.key() == Qt.Key_L:
-            self.motorEvent("L")
-        if event.key() == Qt.Key_Q:
-            self.motorEvent("Q")
-        if event.key() == Qt.Key_Z:
-            self.motorEvent("Z")
-        if event.key() == Qt.Key_K:
-            self.motorEvent("K")
-
-    def motorEvent(self, keyEvent):
-        if keyEvent == "I":
-            print("forward")
-            self.forward()
-        if keyEvent == ",":
-            print("backwards")
-            self.backward()
-        if keyEvent == "J":
-            print("Left")
-            self.left()
-        if keyEvent == "L":
-            print("Right")
-            self.right()
-        if keyEvent == "Q":
-            print("Speed Up")
-            self.speed_up()
-        if keyEvent == "Z":
-            print("Slow Down")
-            self.slow_down()
-        if keyEvent == "K":
-            print("stop")
-            self.stop()
-
-    def forward(self):
-        serMotor.write("1".encode())
-        return
-
-    def backward(self):
-        serMotor.write("2".encode())
-        return
-
-    def left(self):
-        serMotor.write("3".encode())
-        return
-
-    def right(self):
-        serMotor.write("4".encode())
-        return
-
-    def speed_up(self):
-        # serMotor.write("5".encode())
-        serMotor.write(str(self.speed).encode())
-        # serMotor.write("150".encode())
-        return
-
-    def slow_down(self):
-        # serMotor.write("6".encode())
-        serMotor.write(str(self.speed).encode())
-        return
-
-    def stop(self):
-        serMotor.write("7".encode())
-        # serMotor.write(self.speed.encode())
-        return
-
-
-"""
-# commPort2 = '/dev/ttyACM1'
-# serArm = serial.Serial(commPort2, baudrate = 115200)
-class ArmWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.UI_Arm()
-
-    def UI_Arm(self):
-        self.setWindowTitle("Arm Control")
-        self.setGeometry(1600, 950, 600, 350)
-
-        self.text = QLabel("Claw Opened = X || Claw Closed = C", self)
-        self.text2 = QLabel("Base Shift Right = D || Base Shift Left = A", self)
-        self.text3 = QLabel("forwards:", self)
-        self.text4 = QLabel(
-            "Bottom Joint = U || Middle Joint = I || Top Joint = O", self
+        # Key states
+        self.keys_pressed = set()
+        self.shift_pressed = False
+        
+        # Deceleration rate
+        self.deceleration_rate = 0.05
+        self.angular_deceleration_rate = 0.1
+        
+        self.setup_ui()
+        self.apply_styles()
+        
+        # Update timer for physics simulation
+        self.physics_timer = QTimer()
+        self.physics_timer.timeout.connect(self.update_physics)
+        self.physics_timer.start(50)  # 20 FPS update rate
+        
+        # Display timer for terminal output
+        self.display_timer = QTimer()
+        self.display_timer.timeout.connect(self.display_values)
+        self.display_timer.start(100)  # Update display every 100ms
+        
+    def setup_ui(self):
+        # Get screen dimensions
+        screen = QApplication.primaryScreen().availableGeometry()
+        screen_width = screen.width()
+        screen_height = screen.height()
+        
+        # Window settings
+        window_width = int(screen_width * 0.7)
+        window_height = int(screen_height * 0.6)
+        x_offset = int((screen_width - window_width) / 2)
+        y_offset = int((screen_height - window_height) / 2)
+        
+        self.setGeometry(x_offset, y_offset, window_width, window_height)
+        self.setWindowTitle("Rover Control Interface")
+        
+        # Main layout
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(15)
+        
+        # Title
+        title = QLabel("CAR CONTROL INTERFACE")
+        title.setObjectName("mainTitle")
+        title.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(title)
+        
+        # Main content layout
+        content_layout = QHBoxLayout()
+        
+        # Left side - Motor controls
+        motor_group = QGroupBox("Vehicle Controls")
+        motor_group.setObjectName("controlGroup")
+        motor_layout = QVBoxLayout(motor_group)
+        
+        # Instructions
+        instructions = QLabel(
+            "Controls:\n"
+            "• W - Forward\n"
+            "• S - Backward\n"
+            "• A - Turn Left\n"
+            "• D - Turn Right\n"
+            "• SHIFT - Apply Throttle\n"
+            "• Release SHIFT to decelerate"
         )
-        self.text5 = QLabel("Backwards: ", self)
-        self.text6 = QLabel(
-            "Bottom Joint = J || Middle Joint = K || Top Joint = L", self
-        )
-        self.text7 = QLabel("Wrist Clockwise = Y || Wrist Counterclockwise = H", self)
-        self.text8 = QLabel("Stop All = Escape", self)
-
-        self.text.setFont(QFont("Arial", 15))
-        self.text.move(50, 25)
-        self.text2.setFont(QFont("Arial", 15))
-        self.text2.move(50, 75)
-        self.text3.setFont(QFont("Arial", 15))
-        self.text3.move(50, 120)
-        self.text4.setFont(QFont("Arial", 13))
-        self.text4.move(50, 140)
-        self.text5.setFont(QFont("Arial", 15))
-        self.text5.move(50, 170)
-        self.text6.setFont(QFont("Arial", 13))
-        self.text6.move(50, 190)
-        self.text7.setFont(QFont("Arial", 15))
-        self.text7.move(50, 230)
-        self.text8.setFont(QFont("Arial", 15))
-        self.text8.move(50, 260)
-
-        closeButton = QPushButton("Close", self)
-        closeButton.clicked.connect(self.close_on_click)
-        closeButton.resize(150, 50)
-        closeButton.move(225, 275)
-
-    def close_on_click(self):
-        self.close()
-
+        instructions.setObjectName("instructions")
+        motor_layout.addWidget(instructions)
+        
+        # Movement buttons grid
+        button_grid = QGridLayout()
+        
+        self.forward_button = QPushButton("Forward\n(W)")
+        self.forward_button.setObjectName("motorButton")
+        
+        self.left_button = QPushButton("Turn Left\n(A)")
+        self.left_button.setObjectName("motorButton")
+        
+        self.backward_button = QPushButton("Backward\n(S)")
+        self.backward_button.setObjectName("motorButton")
+        
+        self.right_button = QPushButton("Turn Right\n(D)")
+        self.right_button.setObjectName("motorButton")
+        
+        self.brake_button = QPushButton("BRAKE\n(SPACE)")
+        self.brake_button.setObjectName("stopButton")
+        
+        # Layout movement buttons
+        button_grid.addWidget(self.forward_button, 0, 1)
+        button_grid.addWidget(self.left_button, 1, 0)
+        button_grid.addWidget(self.brake_button, 1, 1)
+        button_grid.addWidget(self.right_button, 1, 2)
+        button_grid.addWidget(self.backward_button, 2, 1)
+        
+        motor_layout.addLayout(button_grid)
+        
+        # Status display
+        status_group = QGroupBox("Vehicle Status")
+        status_group.setObjectName("statusGroup")
+        status_layout = QVBoxLayout(status_group)
+        
+        self.linear_label = QLabel("Linear Velocity: 0.00")
+        self.linear_label.setObjectName("statusLabel")
+        self.angular_label = QLabel("Angular Velocity: 0.00")
+        self.angular_label.setObjectName("statusLabel")
+        self.throttle_status = QLabel("Throttle: OFF")
+        self.throttle_status.setObjectName("throttleStatus")
+        
+        status_layout.addWidget(self.linear_label)
+        status_layout.addWidget(self.angular_label)
+        status_layout.addWidget(self.throttle_status)
+        
+        motor_layout.addWidget(status_group)
+        motor_layout.addStretch()
+        
+        # Right side - Throttle control
+        self.throttle_control = ThrottleControl()
+        
+        # Add to content layout
+        content_layout.addWidget(motor_group, 2)
+        content_layout.addWidget(self.throttle_control, 1)
+        
+        main_layout.addLayout(content_layout)
+        
+    def apply_styles(self):
+        style = """
+        QWidget {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 12px;
+        }
+        
+        #mainTitle {
+            color: #00ff00;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        QGroupBox {
+            font-size: 14px;
+            font-weight: bold;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+        
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            left: 15px;
+            padding: 0 10px 0 10px;
+            background-color: #1a1a1a;
+            color: #00ff00;
+        }
+        
+        #controlGroup {
+            border: 2px solid #0088ff;
+        }
+        
+        #controlGroup::title {
+            color: #0088ff;
+        }
+        
+        #statusGroup {
+            border: 2px solid #ffaa00;
+        }
+        
+        #statusGroup::title {
+            color: #ffaa00;
+        }
+        
+        #instructions {
+            color: #aaaaaa;
+            font-size: 11px;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid #444444;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        #motorButton {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #0066cc, stop: 1 #004499);
+            border: 2px solid #0088ff;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+            margin: 3px;
+            min-height: 60px;
+        }
+        
+        #motorButton:hover {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #0088ff, stop: 1 #0066cc);
+            border: 2px solid #00aaff;
+        }
+        
+        #motorButton:pressed {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #004499, stop: 1 #003366);
+        }
+        
+        #stopButton {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #cc0000, stop: 1 #990000);
+            border: 2px solid #ff0000;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+            margin: 3px;
+            min-height: 60px;
+        }
+        
+        #stopButton:hover {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #ff0000, stop: 1 #cc0000);
+            border: 2px solid #ff3333;
+        }
+        
+        #statusLabel {
+            color: #00ff00;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #002200;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 2px;
+        }
+        
+        #throttleStatus {
+            color: #ffaa00;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #221100;
+            border: 1px solid #ffaa00;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 2px;
+        }
+        
+        /* Throttle Control Styles */
+        #throttleFrame {
+            background-color: #0a0a0a;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 5px;
+        }
+        
+        #throttleTitle {
+            color: #00ff00;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        #throttlePercentage {
+            color: #00ffff;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        #throttleMinMax {
+            color: #00ff00;
+            font-size: 10px;
+        }
+        
+        #throttleSlider {
+            background-color: #0a0a0a;
+            border-radius: 4px;
+            height: 20px;
+        }
+        
+        #throttleSlider::groove:horizontal {
+            background: #0a0a0a;
+            border: 1px solid #00ff00;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        #throttleSlider::handle:horizontal {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #00ff00, stop: 1 #00aa00);
+            border: 2px solid #00ff00;
+            width: 30px;
+            border-radius: 10px;
+            margin: -5px 0;
+        }
+        
+        #throttleSlider::handle:horizontal:hover {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #00ffaa, stop: 1 #00ff00);
+            border: 2px solid #00ffaa;
+        }
+        
+        #throttleButton {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #006600, stop: 1 #004400);
+            border: 2px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            font-weight: bold;
+            padding: 8px;
+            margin: 3px;
+            min-height: 30px;
+        }
+        
+        #throttleButton:hover {
+            background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                        stop: 0 #008800, stop: 1 #006600);
+            border: 2px solid #00ffaa;
+        }
+        """
+        self.setStyleSheet(style)
+    
+    def update_physics(self):
+        """Update physics simulation for car movement"""
+        throttle = self.throttle_control.get_throttle_value()
+        
+        # Check if shift is pressed for throttle application
+        if self.shift_pressed and (Qt.Key_W in self.keys_pressed or 
+                                  Qt.Key_S in self.keys_pressed or
+                                  Qt.Key_A in self.keys_pressed or 
+                                  Qt.Key_D in self.keys_pressed):
+            # Apply throttle
+            if Qt.Key_W in self.keys_pressed:
+                self.linear_velocity = min(1.0, self.linear_velocity + throttle * 0.1)
+            elif Qt.Key_S in self.keys_pressed:
+                self.linear_velocity = max(-1.0, self.linear_velocity - throttle * 0.1)
+            
+            # Angular velocity for turning
+            if Qt.Key_A in self.keys_pressed:
+                target_angular = -throttle  # Negative for left
+                self.angular_velocity += (target_angular - self.angular_velocity) * 0.2
+            elif Qt.Key_D in self.keys_pressed:
+                target_angular = throttle  # Positive for right
+                self.angular_velocity += (target_angular - self.angular_velocity) * 0.2
+            else:
+                # Return angular to center when not turning
+                self.angular_velocity *= 0.8
+                
+        else:
+            # Decelerate when shift is not pressed
+            if abs(self.linear_velocity) > 0.001:
+                if self.linear_velocity > 0:
+                    self.linear_velocity = max(0, self.linear_velocity - self.deceleration_rate)
+                else:
+                    self.linear_velocity = min(0, self.linear_velocity + self.deceleration_rate)
+            else:
+                self.linear_velocity = 0
+            
+            # Decelerate angular velocity
+            if abs(self.angular_velocity) > 0.001:
+                self.angular_velocity *= 0.7
+            else:
+                self.angular_velocity = 0
+        
+        # Update display
+        self.linear_label.setText(f"Linear Velocity: {self.linear_velocity:.2f}")
+        self.angular_label.setText(f"Angular Velocity: {self.angular_velocity:.2f}")
+        self.throttle_status.setText(f"Throttle: {'ON' if self.shift_pressed else 'OFF'}")
+        
+        # Update button visual states
+        self.update_button_states()
+    
+    def display_values(self):
+        """Output current values to terminal"""
+        print(f"Linear: {self.linear_velocity:.3f} | Angular: {self.angular_velocity:.3f} | Throttle: {self.throttle_control.get_throttle_value():.2f}")
+    
+    def update_button_states(self):
+        """Update visual feedback on buttons"""
+        # Reset all buttons to default style
+        buttons = {
+            Qt.Key_W: self.forward_button,
+            Qt.Key_A: self.left_button,
+            Qt.Key_S: self.backward_button,
+            Qt.Key_D: self.right_button,
+        }
+        
+        for key, button in buttons.items():
+            if key in self.keys_pressed and self.shift_pressed:
+                button.setStyleSheet("""
+                    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                              stop: 0 #00ff00, stop: 1 #008800);
+                    border: 2px solid #00ff00;
+                    border-radius: 6px;
+                    color: black;
+                    font-weight: bold;
+                    padding: 15px;
+                    margin: 3px;
+                    min-height: 60px;
+                """)
+            else:
+                button.setStyleSheet("")  # Reset to default from main stylesheet
+    
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_0:
-            print("Claw Opened")
-            # self.claw_open()
-        if event.key() == Qt.Key_9:
-            print("Claw Closed")
-            # self.claw_closed()
-        if event.key() == Qt.Key_M:
-            print("Base Shift Right")
-            # self.base_right()
-        if event.key() == Qt.Key_N:
-            print("Base Shift Left")
-            # self.base_left()
-        if event.key() == Qt.Key_U:
-            print("Bottom Joint forward")
-            # self.bottom_joint_forward()
-        if event.key() == Qt.Key_J:
-            print("Bottom Joint Backwards")
-            # self.bottom_joint_backwards()
-        if event.key() == Qt.Key_I:
-            print("Middle Joint forward")
-            # self.middle_joint_forward()
-        if event.key() == Qt.Key_K:
-            print("Middle Joint Backwards")
-            # self.middle_joint_backwards()
-        if event.key() == Qt.Key_O:
-            print("Middle Joint forward")
-            # self.top_joint_forward()
-        if event.key() == Qt.Key_L:
-            print("Middle Joint Backwards")
-            # self.top_joint_backwards()
-        if event.key() == Qt.Key_Y:
-            print("Wrist Clockwise")
-            # self.wrist_clockwise()
-        if event.key() == Qt.Key_H:
-            print("Wrist Counterclockwise")
-            # self.wrist_counterclockwise()
-        if event.key() == Qt.Key_Escape:
-            print("Stop All")
-            # self.stop_all()
-
-    def claw_open(self):
-        serArm.write("Claw Open".encode())
+        """Handle key press events"""
+        if event.key() == Qt.Key_Shift:
+            self.shift_pressed = True
+        elif event.key() == Qt.Key_Space:
+            # Emergency brake
+            self.linear_velocity = 0
+            self.angular_velocity = 0
+        elif event.key() in [Qt.Key_W, Qt.Key_A, Qt.Key_S, Qt.Key_D]:
+            self.keys_pressed.add(event.key())
+        
+        # Prevent key repeat
+        if not event.isAutoRepeat():
+            self.keys_pressed.add(event.key())
     
-    def claw_closed(self):
-        serArm.write("Claw Closed".encode)
-    
-    def base_right(self):
-        serArm.write("Base Shift Right".encode)
-    
-    def base_left(self):
-        serArm.write("Base Shift Left".encode)
-    
-    def bottom_joint_forward(self):
-        serArm.write("Bottom Joint forward".encode)
-
-    def bottom_joint_backwards(self):
-        serArm.write("Bottom Joint Backwards".encode)
-
-    def middle_joint_forward(self):
-        serArm.write("Middle Joint forward".encode)
-
-    def middle_joint_backwards(self):
-        serArm.write("Middle Joint Backwards".encode)
-
-    def top_joint_forward(self):
-        serArm.write("Top Joint forward".encode)
-
-    def top_joint_backwards(self):
-        serArm.write("Top Joint Backwards".encode)
-    
-    def stop_all(self):
-        serArm.write("Stop All".encode)
-
-    def wrist_clockwise():
-        serArm.write("Wrist Clockwise".encode)
-
-    def wrist_counterclockwise():
-        serArm.write("Wrist Counterclockwise".encode)
-"""
-
+    def keyReleaseEvent(self, event):
+        """Handle key release events"""
+        if event.key() == Qt.Key_Shift:
+            self.shift_pressed = False
+        
+        # Prevent key repeat
+        if not event.isAutoRepeat():
+            self.keys_pressed.discard(event.key())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
+    
+    # Enable keyboard focus for the main window
     main = MainWindow()
+    main.setFocusPolicy(Qt.StrongFocus)
     main.show()
-
-    sys.exit(app.exec())
+    
+    sys.exit(app.exec_())
