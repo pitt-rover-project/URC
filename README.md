@@ -79,23 +79,6 @@ python3 guis/equip_serv_gui.py   # Equipment servicing
 └── 📡 Sensor Data Acquisition
 ```
 
-### **Data Flow Architecture**
-
-```mermaid
-graph TD
-    A[Arduino Sensors] --> B[Serial Bridge]
-    B --> C[ROS 2 Topics]
-    C --> D[GUI Applications]
-    D --> E[User Commands]
-    E --> F[ROS 2 Actions]
-    F --> G[Arduino Actuators]
-
-    H[Simulation Environment] --> C
-    C --> I[Autonomous System]
-    I --> J[Navigation Planning]
-    J --> F
-```
-
 ## 🛠️ Development Workflow
 
 ### **ROS 2 Development**
