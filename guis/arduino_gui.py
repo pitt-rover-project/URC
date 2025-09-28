@@ -92,7 +92,7 @@ class MainWindow(QWidget):
         self.shift_pressed = False
         
         # Deceleration rate
-        self.deceleration_rate = 0.05
+        self.deceleration_rate = 0.015
         self.angular_deceleration_rate = 0.1
         
         self.setup_ui()
@@ -213,57 +213,56 @@ class MainWindow(QWidget):
     def apply_styles(self):
         style = """
         QWidget {
-            background-color: #1a1a1a;
+            background-color: #1e1e1e;
             color: #e0e0e0;
             font-family: 'Segoe UI', Arial, sans-serif;
             font-size: 12px;
         }
         
         #mainTitle {
-            color: #00ff00;
+            color: #ffffff;
             font-size: 24px;
             font-weight: bold;
             padding: 10px;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px #00ff00;
         }
         
         QGroupBox {
             font-size: 14px;
             font-weight: bold;
-            color: #00ff00;
-            border: 2px solid #00ff00;
+            color: #ffffff;
+            border: 2px solid #444444;
             border-radius: 8px;
             margin-top: 10px;
             padding-top: 15px;
+            background-color: #2a2a2a;
         }
         
         QGroupBox::title {
             subcontrol-origin: margin;
             left: 15px;
             padding: 0 10px 0 10px;
-            background-color: #1a1a1a;
-            color: #00ff00;
+            background-color: #2a2a2a;
         }
         
         #controlGroup {
-            border: 2px solid #0088ff;
+            border: 2px solid #42a5f5;
         }
         
         #controlGroup::title {
-            color: #0088ff;
+            color: #42a5f5;
         }
         
         #statusGroup {
-            border: 2px solid #ffaa00;
+            border: 2px solid #ff7043;
         }
         
         #statusGroup::title {
-            color: #ffaa00;
+            color: #ff7043;
         }
         
         #instructions {
-            color: #aaaaaa;
+            color: #e0e0e0;
             font-size: 11px;
             padding: 10px;
             background-color: #2a2a2a;
@@ -274,8 +273,8 @@ class MainWindow(QWidget):
         
         #motorButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #0066cc, stop: 1 #004499);
-            border: 2px solid #0088ff;
+                                        stop: 0 #42a5f5, stop: 1 #1e88e5);
+            border: none;
             border-radius: 6px;
             color: white;
             font-weight: bold;
@@ -286,19 +285,18 @@ class MainWindow(QWidget):
         
         #motorButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #0088ff, stop: 1 #0066cc);
-            border: 2px solid #00aaff;
+                                        stop: 0 #64b5f6, stop: 1 #42a5f5);
         }
         
         #motorButton:pressed {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #004499, stop: 1 #003366);
+                                        stop: 0 #1e88e5, stop: 1 #1565c0);
         }
         
         #stopButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #cc0000, stop: 1 #990000);
-            border: 2px solid #ff0000;
+                                        stop: 0 #f44336, stop: 1 #d32f2f);
+            border: none;
             border-radius: 6px;
             color: white;
             font-weight: bold;
@@ -309,27 +307,26 @@ class MainWindow(QWidget):
         
         #stopButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #ff0000, stop: 1 #cc0000);
-            border: 2px solid #ff3333;
+                                        stop: 0 #e57373, stop: 1 #f44336);
         }
         
         #statusLabel {
-            color: #00ff00;
+            color: #66bb6a;
             font-size: 14px;
             font-weight: bold;
-            background-color: #002200;
-            border: 1px solid #00ff00;
+            background-color: #1a1a1a;
+            border: 1px solid #444444;
             border-radius: 4px;
             padding: 8px;
             margin: 2px;
         }
         
         #throttleStatus {
-            color: #ffaa00;
+            color: #ff7043;
             font-size: 14px;
             font-weight: bold;
-            background-color: #221100;
-            border: 1px solid #ffaa00;
+            background-color: #1a1a1a;
+            border: 1px solid #444444;
             border-radius: 4px;
             padding: 8px;
             margin: 2px;
@@ -337,51 +334,49 @@ class MainWindow(QWidget):
         
         /* Throttle Control Styles */
         #throttleFrame {
-            background-color: #0a0a0a;
-            border: 2px solid #00ff00;
+            background-color: #2a2a2a;
+            border: 2px solid #444444;
             border-radius: 10px;
             padding: 15px;
             margin: 5px;
         }
         
         #throttleTitle {
-            color: #00ff00;
+            color: #ffffff;
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 10px;
-            text-shadow: 0 0 5px #00ff00;
         }
         
         #throttlePercentage {
-            color: #00ffff;
+            color: #42a5f5;
             font-size: 36px;
             font-weight: bold;
             margin: 10px;
-            text-shadow: 0 0 10px #00ffff;
         }
         
         #throttleMinMax {
-            color: #00ff00;
+            color: #e0e0e0;
             font-size: 10px;
         }
         
         #throttleSlider {
-            background-color: #0a0a0a;
+            background-color: #1a1a1a;
             border-radius: 4px;
             height: 20px;
         }
         
         #throttleSlider::groove:horizontal {
-            background: #0a0a0a;
-            border: 1px solid #00ff00;
+            background: #1a1a1a;
+            border: 1px solid #555555;
             height: 20px;
             border-radius: 4px;
         }
         
         #throttleSlider::handle:horizontal {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #00ff00, stop: 1 #00aa00);
-            border: 2px solid #00ff00;
+                                        stop: 0 #42a5f5, stop: 1 #1e88e5);
+            border: 2px solid #42a5f5;
             width: 30px;
             border-radius: 10px;
             margin: -5px 0;
@@ -389,16 +384,16 @@ class MainWindow(QWidget):
         
         #throttleSlider::handle:horizontal:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #00ffaa, stop: 1 #00ff00);
-            border: 2px solid #00ffaa;
+                                        stop: 0 #64b5f6, stop: 1 #42a5f5);
+            border: 2px solid #64b5f6;
         }
         
         #throttleButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #006600, stop: 1 #004400);
-            border: 2px solid #00ff00;
+                                        stop: 0 #42a5f5, stop: 1 #1e88e5);
+            border: none;
             border-radius: 4px;
-            color: #00ff00;
+            color: white;
             font-weight: bold;
             padding: 8px;
             margin: 3px;
@@ -407,8 +402,7 @@ class MainWindow(QWidget):
         
         #throttleButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #008800, stop: 1 #006600);
-            border: 2px solid #00ffaa;
+                                        stop: 0 #64b5f6, stop: 1 #42a5f5);
         }
         """
         self.setStyleSheet(style)
@@ -422,11 +416,13 @@ class MainWindow(QWidget):
                                   Qt.Key_S in self.keys_pressed or
                                   Qt.Key_A in self.keys_pressed or 
                                   Qt.Key_D in self.keys_pressed):
-            # Apply throttle
+            # Apply throttle - cap linear velocity at throttle level
             if Qt.Key_W in self.keys_pressed:
-                self.linear_velocity = min(1.0, self.linear_velocity + throttle * 0.1)
+                target_linear = throttle  # Forward capped by throttle
+                self.linear_velocity = min(target_linear, self.linear_velocity + throttle * 0.1)
             elif Qt.Key_S in self.keys_pressed:
-                self.linear_velocity = max(-1.0, self.linear_velocity - throttle * 0.1)
+                target_linear = -throttle  # Backward capped by throttle
+                self.linear_velocity = max(target_linear, self.linear_velocity - throttle * 0.1)
             
             # Angular velocity for turning
             if Qt.Key_A in self.keys_pressed:

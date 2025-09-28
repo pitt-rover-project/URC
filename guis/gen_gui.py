@@ -260,54 +260,55 @@ class MainWindow(QWidget):
         emergency_layout.addWidget(kill_button)
 
     def apply_styles(self):
-        """Apply professional styling to the GUI"""
+        """Apply dark mode styling to the GUI"""
         style = """
         QWidget {
-            background-color: #f5f5f5;
-            color: #2c3e50;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
             font-family: 'Segoe UI', Arial, sans-serif;
             font-size: 12px;
         }
         
         #titleFrame {
             background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
-                                        stop: 0 #3498db, stop: 1 #2980b9);
+                                        stop: 0 #404040, stop: 1 #2d2d2d);
+            border: 1px solid #555555;
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 10px;
         }
         
         #titleLabel {
-            color: black;
+            color: #ffffff;
             font-size: 24px;
             font-weight: bold;
             letter-spacing: 2px;
         }
         
         #statusOnline {
-            color: #2ecc71;
+            color: #4caf50;
             font-size: 14px;
             font-weight: bold;
         }
         
         #sectionFrame {
-            background-color: white;
-            border: 1px solid #bdc3c7;
+            background-color: #2a2a2a;
+            border: 1px solid #444444;
             border-radius: 8px;
             padding: 15px;
             margin: 5px;
         }
         
         #sectionTitle {
-            color: #34495e;
+            color: #ffffff;
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 10px;
         }
         
         #navTabFrame {
-            background-color: #ecf0f1;
-            border: 1px solid #bdc3c7;
+            background-color: #2a2a2a;
+            border: 1px solid #444444;
             border-radius: 8px;
             padding: 5px;
             margin: 2px;
@@ -315,7 +316,7 @@ class MainWindow(QWidget):
         
         #navTabButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #e67e22, stop: 1 #d35400);
+                                        stop: 0 #ff7043, stop: 1 #e64a19);
             border: none;
             border-radius: 6px;
             color: white;
@@ -327,39 +328,39 @@ class MainWindow(QWidget):
         
         #navTabButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #f39c12, stop: 1 #e67e22);
+                                        stop: 0 #ff8a65, stop: 1 #ff7043);
         }
         
         #navTabButton:pressed {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #d35400, stop: 1 #ba4a00);
+                                        stop: 0 #e64a19, stop: 1 #d84315);
         }
         
         #cameraFrame {
-            background-color: #ecf0f1;
-            border: 2px solid #bdc3c7;
+            background-color: #2a2a2a;
+            border: 2px solid #444444;
             border-radius: 8px;
             padding: 10px;
         }
         
         #cameraTitle {
-            color: #2c3e50;
+            color: #ffffff;
             font-size: 12px;
             font-weight: bold;
             margin-bottom: 5px;
         }
         
         #cameraDisplay, #grayImageDisplay {
-            background-color: #34495e;
-            border: 2px solid #7f8c8d;
+            background-color: #1a1a1a;
+            border: 2px solid #555555;
             border-radius: 4px;
-            color: white;
+            color: #cccccc;
             font-size: 14px;
         }
         
         #cameraButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #95a5a6, stop: 1 #7f8c8d);
+                                        stop: 0 #616161, stop: 1 #424242);
             border: none;
             border-radius: 6px;
             color: white;
@@ -369,61 +370,62 @@ class MainWindow(QWidget):
         
         #cameraButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #a2b2b3, stop: 1 #8c9b9c);
+                                        stop: 0 #757575, stop: 1 #616161);
         }
         
         #cameraButton:pressed {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #7f8c8d, stop: 1 #6c7b7c);
+                                        stop: 0 #424242, stop: 1 #303030);
         }
         
         QGroupBox {
             font-size: 14px;
             font-weight: bold;
-            color: #2c3e50;
-            border: 2px solid #bdc3c7;
+            color: #ffffff;
+            border: 2px solid #444444;
             border-radius: 8px;
             margin-top: 10px;
             padding-top: 15px;
+            background-color: #2a2a2a;
         }
         
         QGroupBox::title {
             subcontrol-origin: margin;
             left: 15px;
             padding: 0 10px 0 10px;
-            background-color: #f5f5f5;
+            background-color: #2a2a2a;
         }
         
         #dataGroup {
-            border: 2px solid #3498db;
+            border: 2px solid #42a5f5;
         }
         
         #dataGroup::title {
-            color: #3498db;
+            color: #42a5f5;
         }
         
         #controlGroup {
-            border: 2px solid #e67e22;
+            border: 2px solid #ff7043;
         }
         
         #controlGroup::title {
-            color: #e67e22;
+            color: #ff7043;
         }
         
         #emergencyGroup {
-            border: 2px solid #e74c3c;
+            border: 2px solid #f44336;
         }
         
         #emergencyGroup::title {
-            color: #e74c3c;
+            color: #f44336;
         }
         
         #dataValue {
-            color: #27ae60;
+            color: #66bb6a;
             font-size: 14px;
             font-weight: bold;
-            background-color: #ecf0f1;
-            border: 1px solid #bdc3c7;
+            background-color: #1a1a1a;
+            border: 1px solid #444444;
             border-radius: 4px;
             padding: 5px;
             margin: 2px;
@@ -431,7 +433,7 @@ class MainWindow(QWidget):
         
         #controlButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #3498db, stop: 1 #2980b9);
+                                        stop: 0 #42a5f5, stop: 1 #1e88e5);
             border: none;
             border-radius: 6px;
             color: white;
@@ -442,17 +444,17 @@ class MainWindow(QWidget):
         
         #controlButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #5dade2, stop: 1 #3498db);
+                                        stop: 0 #64b5f6, stop: 1 #42a5f5);
         }
         
         #controlButton:pressed {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #2980b9, stop: 1 #1f618d);
+                                        stop: 0 #1e88e5, stop: 1 #1565c0);
         }
         
         #guiButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #e67e22, stop: 1 #d35400);
+                                        stop: 0 #ff7043, stop: 1 #e64a19);
             border: none;
             border-radius: 6px;
             color: white;
@@ -463,17 +465,17 @@ class MainWindow(QWidget):
         
         #guiButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #f39c12, stop: 1 #e67e22);
+                                        stop: 0 #ff8a65, stop: 1 #ff7043);
         }
         
         #guiButton:pressed {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #d35400, stop: 1 #ba4a00);
+                                        stop: 0 #e64a19, stop: 1 #d84315);
         }
         
         #killButton {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #e74c3c, stop: 1 #c0392b);
+                                        stop: 0 #f44336, stop: 1 #d32f2f);
             border: none;
             border-radius: 8px;
             color: white;
@@ -485,16 +487,16 @@ class MainWindow(QWidget):
         
         #killButton:hover {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #ec7063, stop: 1 #e74c3c);
+                                        stop: 0 #e57373, stop: 1 #f44336);
         }
         
         #killButton:pressed {
             background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                        stop: 0 #c0392b, stop: 1 #a93226);
+                                        stop: 0 #d32f2f, stop: 1 #b71c1c);
         }
         
         QFormLayout QLabel {
-            color: #2c3e50;
+            color: #e0e0e0;
             font-weight: bold;
         }
         """
