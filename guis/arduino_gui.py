@@ -5,6 +5,9 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPalette, QColor
+from guis.publishers.publisher import MotorPublisher
+import rclpy
+from rclpy.executors import SingleThreadedExecutor
 import math
 
 # Throttle control class
@@ -81,7 +84,7 @@ class ThrottleControl(QFrame):
         return self.throttle_value / 100.0  # Return as 0-1 value
 
 class MainWindow(QWidget):
-    def __init__(self):
+    def __init__(self, motor_publisher):
         super().__init__()
         # Movement state
         self.linear_velocity = 0.0  # 0 to 1
@@ -91,9 +94,13 @@ class MainWindow(QWidget):
         self.keys_pressed = set()
         self.shift_pressed = False
         
-        # Deceleration rate
+        # Acceleration and deceleration rates
+        self.acceleration_rate = 0.02  # How fast it accelerates toward target speed
         self.deceleration_rate = 0.015
         self.angular_deceleration_rate = 0.1
+        
+        # Store motor publisher reference (passed from main)
+        self.motor_publisher = motor_publisher
         
         self.setup_ui()
         self.apply_styles()
@@ -107,6 +114,20 @@ class MainWindow(QWidget):
         self.display_timer = QTimer()
         self.display_timer.timeout.connect(self.display_values)
         self.display_timer.start(100)  # Update display every 100ms
+    
+    def publish_motor_command(self):
+        """Publish motor command with linear velocity at position 0 and angular velocity at position 3"""
+        if self.motor_publisher is not None:
+            # Create motor values array: [linear, 0, 0, angular, 0, 0]
+            motor_values = [
+                self.linear_velocity,  # Position 0 (1st value): Linear velocity
+                0,                      # Position 1 (2nd value): Unused
+                0,                      # Position 2 (3rd value): Unused
+                self.angular_velocity,  # Position 3 (4th value): Angular velocity
+                0,                      # Position 4 (5th value): Unused
+                0                       # Position 5 (6th value): Unused
+            ]
+            self.motor_publisher.publish_motor_command(motor_values)
         
     def setup_ui(self):
         # Get screen dimensions
@@ -193,10 +214,13 @@ class MainWindow(QWidget):
         self.angular_label.setObjectName("statusLabel")
         self.throttle_status = QLabel("Throttle: OFF")
         self.throttle_status.setObjectName("throttleStatus")
+        self.ros_status = QLabel("ROS2: Connected" if self.motor_publisher else "ROS2: Disconnected")
+        self.ros_status.setObjectName("rosStatus")
         
         status_layout.addWidget(self.linear_label)
         status_layout.addWidget(self.angular_label)
         status_layout.addWidget(self.throttle_status)
+        status_layout.addWidget(self.ros_status)
         
         motor_layout.addWidget(status_group)
         motor_layout.addStretch()
@@ -332,6 +356,17 @@ class MainWindow(QWidget):
             margin: 2px;
         }
         
+        #rosStatus {
+            color: #42a5f5;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #1a1a1a;
+            border: 1px solid #444444;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 2px;
+        }
+        
         /* Throttle Control Styles */
         #throttleFrame {
             background-color: #2a2a2a;
@@ -419,18 +454,18 @@ class MainWindow(QWidget):
             # Apply throttle - cap linear velocity at throttle level
             if Qt.Key_W in self.keys_pressed:
                 target_linear = throttle  # Forward capped by throttle
-                self.linear_velocity = min(target_linear, self.linear_velocity + throttle * 0.1)
+                self.linear_velocity = min(target_linear, self.linear_velocity + self.acceleration_rate)
             elif Qt.Key_S in self.keys_pressed:
                 target_linear = -throttle  # Backward capped by throttle
-                self.linear_velocity = max(target_linear, self.linear_velocity - throttle * 0.1)
+                self.linear_velocity = max(target_linear, self.linear_velocity - self.acceleration_rate)
             
             # Angular velocity for turning
             if Qt.Key_A in self.keys_pressed:
                 target_angular = -throttle  # Negative for left
-                self.angular_velocity += (target_angular - self.angular_velocity) * 0.2
+                self.angular_velocity += (target_angular - self.angular_velocity) * 0.1
             elif Qt.Key_D in self.keys_pressed:
                 target_angular = throttle  # Positive for right
-                self.angular_velocity += (target_angular - self.angular_velocity) * 0.2
+                self.angular_velocity += (target_angular - self.angular_velocity) * 0.1
             else:
                 # Return angular to center when not turning
                 self.angular_velocity *= 0.8
@@ -450,6 +485,9 @@ class MainWindow(QWidget):
                 self.angular_velocity *= 0.7
             else:
                 self.angular_velocity = 0
+        
+        # Publish motor command to ROS2
+        self.publish_motor_command()
         
         # Update display
         self.linear_label.setText(f"Linear Velocity: {self.linear_velocity:.2f}")
@@ -497,6 +535,7 @@ class MainWindow(QWidget):
             # Emergency brake
             self.linear_velocity = 0
             self.angular_velocity = 0
+            self.publish_motor_command()
         elif event.key() in [Qt.Key_W, Qt.Key_A, Qt.Key_S, Qt.Key_D]:
             self.keys_pressed.add(event.key())
         
@@ -514,11 +553,39 @@ class MainWindow(QWidget):
             self.keys_pressed.discard(event.key())
 
 if __name__ == "__main__":
+    # Initialize ROS2
+    rclpy.init()
+    
+    # Create QApplication
     app = QApplication(sys.argv)
     
-    # Enable keyboard focus for the main window
-    main = MainWindow()
+    # Create motor publisher (similar to how IMU subscriber is created in main GUI)
+    motor_pub = MotorPublisher(
+        topic_name='motor_control_input',
+        node_name='rover_control_gui'
+    )
+    
+    # Create main window and pass the publisher
+    main = MainWindow(motor_pub)
     main.setFocusPolicy(Qt.StrongFocus)
     main.show()
     
-    sys.exit(app.exec_())
+    # Use a ROS executor that doesn't block the Qt event loop
+    executor = SingleThreadedExecutor()
+    executor.add_node(motor_pub)
+    
+    # Use a QTimer to periodically spin ROS events (same pattern as main GUI)
+    timer = QTimer()
+    timer.timeout.connect(lambda: executor.spin_once(timeout_sec=0))
+    timer.start(10)  # 10ms interval
+    
+    # Run Qt application
+    exit_code = app.exec_()
+    
+    # Cleanup
+    motor_pub.stop_all_motors()
+    executor.shutdown()
+    motor_pub.destroy_node()
+    rclpy.shutdown()
+    
+    sys.exit(exit_code)
