@@ -5,7 +5,6 @@ from std_msgs.msg import String
 import serial
 import time
 from geometry_msgs.msg import Twist
-from std_msgs.msg import String
 
 
 """ Parent class """
@@ -13,10 +12,16 @@ from std_msgs.msg import String
 class ArduinoBridgeBase(Node):
     def __init__(self, node_name, topic_name, serial_port, baud_rate=115200, timer_period=0.1):
         super().__init__(node_name)
-
-        # Initialize the serial connection
-        self.serial = serial.Serial(serial_port, baud_rate)
-        time.sleep(2)  # Allow the Arduino to reset
+        self.node_name = node_name
+        # Initialize the serial connection with error handling
+        try:
+            self.serial = serial.Serial(serial_port, baud_rate, timeout=1)
+            time.sleep(2)  # Allow the Arduino to reset
+            self.get_logger().info(f"Serial connection established on {serial_port} at {baud_rate} baud")
+        except serial.SerialException as e:
+            self.get_logger().error(f"Failed to connect to serial port {serial_port}: {e}")
+            self.serial = None
+            return
 
         # Publisher for the specific topic
         self.publisher = self.create_publisher(String, topic_name, 10)
@@ -27,18 +32,46 @@ class ArduinoBridgeBase(Node):
         self.get_logger().info(f"{node_name} Node Started")
 
     def read_from_arduino(self):
-        if self.serial.in_waiting > 0:
-            response = self.serial.readline().decode("utf-8").strip()
-            self.get_logger().info(f"Received from Arduino: {response}")
-            msg = String()
-            msg.data = response
-            self.publisher.publish(msg)
-            
+        if self.serial is None:
+            self.get_logger().info(f"{self.node_name} Node: Serial connection not available")
+            return
+
+        try:
+            if self.serial.in_waiting > 0:
+                self.get_logger().info(f"{self.node_name} Node: Reading from Arduino...")
+                response = self.serial.readline().decode("utf-8").strip()
+                self.get_logger().debug(f"Raw response: {response}")
+                if response:  # Only process non-empty responses
+                    self.get_logger().info(f"Received from Arduino: {response}")
+                    msg = String()
+                    msg.data = response
+                    self.publisher.publish(msg)
+        except serial.SerialException as e:
+            self.get_logger().error(f"Serial communication error: {e}")
+            self._attempt_reconnection()
+        except UnicodeDecodeError as e:
+            self.get_logger().warning(f"Failed to decode serial data: {e}")
+
+    def _attempt_reconnection(self):
+        """Attempt to reconnect to the serial port"""
+        if self.serial:
+            try:
+                self.serial.close()
+            except:
+                pass
+            self.serial = None
+
+        # Could implement reconnection logic here if needed
+        self.get_logger().warning("Serial connection lost. Manual restart required.")
+
     # Overrides the parent class's destroy_node method to close the serial port before shutting down node
     def destroy_node(self):
         if self.serial and self.serial.is_open:
             self.get_logger().info("Closing serial port...")
-            self.serial.close()
+            try:
+                self.serial.close()
+            except serial.SerialException as e:
+                self.get_logger().error(f"Error closing serial port: {e}")
         super().destroy_node()
 
 """ Child Classes """
@@ -76,41 +109,76 @@ class MotorBridge(ArduinoBridgeBase):
             self.publisher.publish(msg)
 
     def write_to_arduino(self, msg):
-        command = msg.data
-        self.serial.write(command.encode())
-        self.get_logger().info(f"Sent to Arduino: {command}")
+        if self.serial is None:
+            self.get_logger().warning("Cannot send command: serial connection not available")
+            return
+
+        try:
+            command = msg.data
+            self.serial.write(command.encode())
+            self.get_logger().info(f"Sent to Arduino: {command}")
+        except serial.SerialException as e:
+            self.get_logger().error(f"Failed to send command to Arduino: {e}")
+            self._attempt_reconnection()
 
     def teleop_callback(self, msg):
-        # Format the Twist message into a comma-separated string and send to Arduino
-        command = f"{msg.linear.x},{msg.linear.y},{msg.linear.z},{msg.angular.x},{msg.angular.y},{msg.angular.z}\n"
-        self.serial.write(command.encode())
+        if self.serial is None:
+            self.get_logger().warning("Cannot send teleop command: serial connection not available")
+            return
+
+        try:
+            # Format the Twist message into a comma-separated string and send to Arduino
+            command = f"{msg.linear.x},{msg.linear.y},{msg.linear.z},{msg.angular.x},{msg.angular.y},{msg.angular.z}\n"
+            self.serial.write(command.encode())
+            self.get_logger().debug(f"Sent teleop command: {command.strip()}")
+        except serial.SerialException as e:
+            self.get_logger().error(f"Failed to send teleop command to Arduino: {e}")
+            self._attempt_reconnection()
 
 # Ultrasonic Bridge Class
 class UltrasonicBridge(ArduinoBridgeBase):
-    def __init__(self):
+    def __init__(self, serial_port="/dev/ttyACM0", baud_rate=115200):
         super().__init__(
             node_name="ultrasonic_bridge",
             topic_name="ultrasonic_data",
-            serial_port="/dev/ttyACM0",
-            baud_rate=115200
+            serial_port=serial_port,
+            baud_rate=baud_rate
         )
 
 # GPS Bridge
 class GPSBridge(ArduinoBridgeBase):
-    def __init__(self):
+    def __init__(self, serial_port="/dev/ttyACM0", baud_rate=115200):
         super().__init__(
             node_name="gps_bridge",
             topic_name="gps_data",
-            serial_port="/dev/ttyACM0",
-            baud_rate=115200
+            serial_port=serial_port,
+            baud_rate=baud_rate
         )
 
 # IMU Bridge
 class IMUBridge(ArduinoBridgeBase):
     def __init__(self):
+        # Try multiple device paths for cross-platform compatibility
+        possible_ports = ["/dev/ttyACM0", "/dev/cu.usbmodem11201", "/dev/ttyUSB0"]
+        working_port = None
+        
+        # Find the first working port
+        for port in possible_ports:
+            try:
+                import serial
+                test_serial = serial.Serial(port, 9600, timeout=1)
+                test_serial.close()
+                working_port = port
+                break
+            except:
+                continue
+        
+        if working_port is None:
+            working_port = "/dev/ttyACM0"  # Default fallback
+            
         super().__init__(
             node_name="imu_bridge",
             topic_name="imu_data",
-            serial_port="/dev/ttyACM0",
-            baud_rate=115200
+            serial_port=working_port,
+            baud_rate=9600
         )

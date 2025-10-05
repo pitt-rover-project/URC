@@ -1,19 +1,13 @@
+# Note, removed nvidia related code
+
 services:
   pitt_urc_jetson:
     image: urc_jetson
     container_name: pitt_urc_jetson
-    runtime: nvidia
     privileged: true
     network_mode: host
     pid: host
     ipc: host
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
-              count: 1
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
@@ -24,11 +18,10 @@ services:
     volumes:
       - ./../../:/app
       - /tmp/.X11-unix:/tmp/.X11-unix:rws
-      - /dev/bus/usb:/dev/bus/usb
-      - /dev/video0:/dev/video0
-      - /dev/video1:/dev/video1
-    devices:
-      - /dev:/dev
+      - /dev/cu.usbmodem11201:/dev/cu.usbmodem11201
+      # - /dev/bus/usb:/dev/bus/usb
+      # - /dev/video0:/dev/video0
+      # - /dev/video1:/dev/video1
     restart: unless-stopped
     stdin_open: true
     tty: true

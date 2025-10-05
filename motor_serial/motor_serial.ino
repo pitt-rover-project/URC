@@ -1,17 +1,22 @@
 #include <stdlib.h>
+#include <stdlib.h>
 #define PWM1Front 3 //all 1's are on right side of robot
 #define PWM1Middle 5
-#define PWM1Back 6
+#define PWM1Back 7
 #define DIR1Front 52
 #define DIR1Middle 50
 #define DIR1Back 48
-#define PWM2Front 9 //all 2's are on the left side or robot
-#define PWM2Middle 10
-#define PWM2Back 11
+#define PWM2Front 2 //all 2's are on the left side or robot
+#define PWM2Middle 4
+#define PWM2Back 6
 #define DIR2Front 53
 #define DIR2Middle 51
 #define DIR2Back 49
 
+// REPLACE
+#define WHEEL_BASE 0.7384    // distance between the left and right wheels in meters
+#define MAX_LINEAR_SPEED 1.0    // maximum linear speed in m/s
+#define MAX_PWM 255
 // REPLACE
 #define WHEEL_BASE 0.7384    // distance between the left and right wheels in meters
 #define MAX_LINEAR_SPEED 1.0    // maximum linear speed in m/s
@@ -36,6 +41,8 @@ void setup()
   pinMode(PWM2Back,   OUTPUT);
 }
 
+/*
+void forward() {
 /*
 void forward() {
   digitalWrite(DIR1Front, HIGH);
@@ -163,7 +170,14 @@ void stopAll() {
 /*
 float min(float x, float y) {
   return (x > y) ? y : x;
+}*/
+/*
+float min(float x, float y) {
+  return (x > y) ? y : x;
 }
+*/
+
+
 */
 
 
@@ -217,6 +231,8 @@ void loop() {
         angular_z = newData.toFloat();
         Serial.println(angular_z);
         parsed++;
+        Serial.print("parsed: ");
+        Serial.println(parsed);
       }
     }
 
@@ -283,11 +299,13 @@ void loop() {
   if (!(input.equals("")))
   {
     Serial.print("Input change detected, input is: ");
+    Serial.print("Input change detected, input is: ");
     Serial.println(input);
     Serial.println(input.equals("1"));
     if (input.equals("1"))
     {
       Serial.println("Moving forward");
+      forward();
       forward();
     }
     else if(input.equals("2")){
@@ -307,13 +325,18 @@ void loop() {
       stopAll();
     }
     else if(input.equals("7")) {
+    else if(input.equals("7")) {
       int changeSpeed = input.toInt();
       Serial.println("Boost!");
       pwmSpeed = boost(pwmSpeed, changeSpeed);
     }
   }*/
   
+  }*/
+  
   Serial.flush();
+  //input = "0";
+
   //input = "0";
 
 }

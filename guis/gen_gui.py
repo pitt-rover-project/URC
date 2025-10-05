@@ -109,7 +109,20 @@ class MainWindow(QWidget):
             "ex_deli_gui": lambda: self.launch_gui("ex_deli_gui"),
             "json_motorGUI": lambda: self.launch_gui("json_motorGUI"),
         }
-        
+
+        # IMU Data display - moved to center of screen
+        self.data_display = {
+            "imu_speed": QLabel(f"IMU Speed: {self.imu_attributes.velocity}"),
+            "imu_orientation_vertical": QLabel(f"IMU Vertical Orientation: {self.imu_attributes.vertical_tilt_angle}"),
+            "imu_orientation_horizontal": QLabel(f"IMU Horizontal Orientation: {self.imu_attributes.horizontal_tilt_angle}"),
+        }
+        imu_group = QGroupBox("IMU Data")
+        imu_form_layout = QFormLayout()
+        imu_form_layout.addRow("Speed:", self.data_display["imu_speed"])
+        imu_form_layout.addRow("Vert. Tilt:", self.data_display["imu_orientation_vertical"])
+        imu_form_layout.addRow("Horiz. Tilt:", self.data_display["imu_orientation_horizontal"])
+        imu_group.setLayout(imu_form_layout)
+
         for key, button in gui_buttons.items():
             button.setObjectName("navTabButton")
             button.setMinimumHeight(int(screen_height * 0.04))

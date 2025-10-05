@@ -22,6 +22,7 @@ from rclpy.executors import MultiThreadedExecutor
 from std_msgs.msg import String
 from guis.subscribers.IMUDataParser import IMUDataParser
 from guis.subscribers.GPSDataParser import GPSDataParser
+from PyQt5.QtCore import pyqtSignal, QObject
 
 class GenericSubscriber(Node):
     """
@@ -52,10 +53,17 @@ class GenericSubscriber(Node):
         super().__init__(node_name)
         self.topic_name = topic_name
         self.msg_type = msg_type
-        
-        # Use the provided callback function or fall back to the default callback
-        self.callback = callback if callback is not None else self.default_callback
 
+        # Use the provided callback function or fall back to the default callback
+        if callback is not None:
+            print("Using provided callback function.")
+            callback
+        else:
+            print("No callback function provided, using default callback.")
+            callback = self.default_callback
+
+        self.callback = callback if callback is not None else self.default_callback
+        print(self.callback)
         # Create a subscription to the topic with a queue size of 10
         self.subscription = self.create_subscription(
             self.msg_type,     # Message type
@@ -63,22 +71,26 @@ class GenericSubscriber(Node):
             self.callback,     # Callback function
             10                 # Queue size
         )
+        print("------------ subscription created ------------")
+        print(self.subscription)
         self.get_logger().info(f"Subscribed to topic: {self.topic_name}")
-        
+
 
     def default_callback(self, msg):
         """
         Default callback function for processing incoming messages.
 
         This function logs the received message to the console.
-        
+
         Args:
             msg: The message received from the subscribed topic.
         """
+        print("TEST")
         self.get_logger().info(f"Received message on {self.topic_name}: {msg}")
 
 
-class IMUSubscriber(GenericSubscriber):
+class IMUSubscriber(GenericSubscriber, QObject):
+    imu_data_updated = pyqtSignal(float, float, float)  # velocity, vert_tilt, horiz_tilt
     """
     A ROS2 subscriber that parses IMU messages using the IMUDataParser.
 
@@ -86,7 +98,10 @@ class IMUSubscriber(GenericSubscriber):
     the incoming IMU message and compute the distance traveled and velocity.
     """
     def __init__(self, topic_name: str = 'imu_data', msg_type=String, node_name: str = 'imu_subscriber', callback=None):
-        super().__init__(topic_name, msg_type, node_name, callback)
+        default_callback = lambda msg: self.default_callback(msg)
+
+        super().__init__(topic_name, msg_type, node_name, default_callback)
+        QObject.__init__(self)
         self.parser = IMUDataParser()
         self.distance = 0.0
         self.velocity = 0.0
@@ -100,12 +115,14 @@ class IMUSubscriber(GenericSubscriber):
         The message is expected to be of type String, with the actual IMU data in msg.data.
         It computes the distance and velocity, then logs the results.
         """
+        print("IMU Subscriber default callback called")
         try:
             parsed_data = self.parser.parse_imu_data(msg.data)
             # TODO: In the event that part of the IMU msg is missing, logger generated warning - is this even an issue?
             if len(parsed_data) == 4:
                 self.distance, self.velocity, self.vertical_tilt_angle, self.horizontal_tilt_angle = parsed_data
                 self.get_logger().info(f"IMU data parsed: distance = {self.distance:.2f}, velocity = {self.velocity:.2f}, vertical tilt = {self.vertical_tilt_angle:.2f}, horizontal tilt = {self.horizontal_tilt_angle:.2f}")
+                self.imu_data_updated.emit(self.velocity, self.vertical_tilt_angle, self.horizontal_tilt_angle)
             else:
                 self.get_logger().warning("Incomplete IMU data received.")
         except Exception as e:
@@ -184,6 +201,8 @@ def main(args=None):
         - IMUBridge: 'imu_data'
     """
     rclpy.init(args=args)
+    rclpy.logging.get_logger('subscriber').info(">> subscriber.py main() starting")
+
 
     # Create subscribers for each Arduino bridge topic with unique node names
     motor_subscriber = GenericSubscriber("motor_data", String, node_name="motor_subscriber")
