@@ -1,0 +1,1 @@
+# Publishers package for GUI ROS2 communication

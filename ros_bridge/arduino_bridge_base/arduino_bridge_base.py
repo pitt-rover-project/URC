@@ -87,7 +87,7 @@ class MotorBridge(ArduinoBridgeBase):
         # Subscriber to receive teleoperation commands (Twist messages) from teleop node
         self.teleop_subscriber = self.create_subscription(
             Twist,
-            "/teleop_cmd_vel",
+            "cmd_vel",
             self.teleop_callback,
             10
         )
@@ -96,6 +96,13 @@ class MotorBridge(ArduinoBridgeBase):
             String,
             "drive_arduino_commands",
             self.write_to_arduino,
+            10
+        )
+        # Subscriber to receive motor commands from GUI publishers
+        self.motor_command_subscriber = self.create_subscription(
+            String,
+            "motor_control_input",
+            self.motor_command_callback,
             10
         )
         self.get_logger().info("Motor Bridge Node Started")
@@ -133,6 +140,34 @@ class MotorBridge(ArduinoBridgeBase):
             self.get_logger().debug(f"Sent teleop command: {command.strip()}")
         except serial.SerialException as e:
             self.get_logger().error(f"Failed to send teleop command to Arduino: {e}")
+            self._attempt_reconnection()
+
+    def motor_command_callback(self, msg):
+        """Handle motor commands from GUI publishers in 6-value comma-separated format"""
+        if self.serial is None:
+            self.get_logger().warning("Cannot send motor command: serial connection not available")
+            return
+
+        try:
+            # Validate the command format (should be 6 comma-separated values)
+            command_data = msg.data.strip()
+            values = command_data.split(',')
+
+            if len(values) == 6:
+                # Validate that all values are numeric
+                try:
+                    [float(val) for val in values]
+                    # Send command directly to Arduino
+                    formatted_command = f"{command_data}\n"
+                    self.serial.write(formatted_command.encode())
+                    self.get_logger().info(f"Sent motor command to Arduino: {command_data}")
+                except ValueError:
+                    self.get_logger().warning(f"Invalid numeric values in motor command: {command_data}")
+            else:
+                self.get_logger().warning(f"Invalid motor command format. Expected 6 values, got {len(values)}: {command_data}")
+
+        except serial.SerialException as e:
+            self.get_logger().error(f"Failed to send motor command to Arduino: {e}")
             self._attempt_reconnection()
 
 # Ultrasonic Bridge Class
