@@ -3,11 +3,22 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
+import serial
+import time
 
 
 class MotorSubscriber(Node):
     def __init__(self):
         super().__init__('motor_subscriber')
+
+        # Initialize serial connection to Arduino at /dev/ttyACM1
+        try:
+            self.serial = serial.Serial('/dev/ttyACM1', 115200, timeout=1)
+            time.sleep(2)  # Allow the Arduino to reset
+            self.get_logger().info('Serial connection established on /dev/ttyACM1 at 115200 baud')
+        except serial.SerialException as e:
+            self.get_logger().error(f'Failed to connect to serial port /dev/ttyACM1: {e}')
+            self.serial = None
 
         # Publisher for motor commands in the specified format
         self.publisher = self.create_publisher(String, 'motor_commands', 10)
@@ -34,6 +45,10 @@ class MotorSubscriber(Node):
 
     def motor_command_callback(self, msg):
         """Handle incoming motor command strings"""
+        if self.serial is None:
+            self.get_logger().warning('Cannot send command: serial connection not available')
+            return
+
         try:
             # Parse the incoming command and ensure it's in the correct format
             command_data = msg.data.strip()
@@ -53,31 +68,55 @@ class MotorSubscriber(Node):
                 formatted_command = "0,0,0,0,0,0"
                 self.get_logger().warning(f"Invalid command format, using default: {formatted_command}")
 
-            # Publish the formatted command
+            # Send to Arduino via serial
+            serial_command = f"{formatted_command}\n"
+            self.serial.write(serial_command.encode())
+            self.get_logger().info(f"Sent to Arduino: {formatted_command}")
+
+            # Also publish the formatted command to ROS topic
             output_msg = String()
             output_msg.data = formatted_command
             self.publisher.publish(output_msg)
 
-            self.get_logger().info(f"Published motor command: {formatted_command}")
-
+        except serial.SerialException as e:
+            self.get_logger().error(f"Serial communication error: {e}")
         except Exception as e:
             self.get_logger().error(f"Error processing motor command: {e}")
 
     def twist_callback(self, msg):
         """Convert Twist messages to motor command format"""
+        if self.serial is None:
+            self.get_logger().warning('Cannot send Twist command: serial connection not available')
+            return
+
         try:
             # Convert Twist to the 6-value format: linear_x,linear_y,linear_z,angular_x,angular_y,angular_z
             formatted_command = f"{msg.linear.x},{msg.linear.y},{msg.linear.z},{msg.angular.x},{msg.angular.y},{msg.angular.z}"
 
-            # Publish the formatted command
+            # Send to Arduino via serial
+            serial_command = f"{formatted_command}\n"
+            self.serial.write(serial_command.encode())
+            self.get_logger().info(f"Sent Twist to Arduino: {formatted_command}")
+
+            # Also publish the formatted command to ROS topic
             output_msg = String()
             output_msg.data = formatted_command
             self.publisher.publish(output_msg)
 
-            self.get_logger().info(f"Converted Twist to motor command: {formatted_command}")
-
+        except serial.SerialException as e:
+            self.get_logger().error(f"Serial communication error: {e}")
         except Exception as e:
             self.get_logger().error(f"Error converting Twist message: {e}")
+
+    def destroy_node(self):
+        """Clean up serial connection before shutting down"""
+        if self.serial and self.serial.is_open:
+            self.get_logger().info('Closing serial port...')
+            try:
+                self.serial.close()
+            except serial.SerialException as e:
+                self.get_logger().error(f"Error closing serial port: {e}")
+        super().destroy_node()
 
 
 def main(args=None):
