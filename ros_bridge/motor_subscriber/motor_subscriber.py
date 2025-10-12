@@ -13,9 +13,11 @@ class MotorSubscriber(Node):
 
         # Initialize serial connection to Arduino at /dev/ttyACM1
         try:
-            self.serial = serial.Serial('/dev/ttyACM1', 115200, timeout=1)
-            time.sleep(2)  # Allow the Arduino to reset
+            # Use a very short timeout to avoid blocking
+            self.serial = serial.Serial('/dev/ttyACM1', 115200, timeout=0.01)
             self.get_logger().info('Serial connection established on /dev/ttyACM1 at 115200 baud')
+            # Note: Arduino reset happens automatically on serial open, but we don't wait for it
+            # The first few commands might be missed, but subsequent ones will work immediately
         except serial.SerialException as e:
             self.get_logger().error(f'Failed to connect to serial port /dev/ttyACM1: {e}')
             self.serial = None
