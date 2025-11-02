@@ -63,8 +63,8 @@ void loop() {
       Serial.print(angular_y); Serial.print(", ");
       Serial.print(angular_z); Serial.println(")");
 
-      float left_speed = linear_x - (angular_z * (WHEEL_BASE / 2.0));
-      float right_speed = linear_x + (angular_z * (WHEEL_BASE / 2.0));
+      float left_speed = linear_x - (angular_z * (WHEEL_BASE));
+      float right_speed = linear_x + (angular_z * (WHEEL_BASE));
 
       int pwm_left  = (int)(min(abs(left_speed) / MAX_LINEAR_SPEED, 1.0) * MAX_PWM);
       int pwm_right = (int)(min(abs(right_speed) / MAX_LINEAR_SPEED, 1.0) * MAX_PWM);

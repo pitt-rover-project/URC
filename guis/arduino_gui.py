@@ -133,9 +133,9 @@ class MainWindow(QWidget):
                 self.linear_velocity,  # Position 0 (1st value): Linear velocity
                 0,  # Position 1 (2nd value): Unused
                 0,  # Position 2 (3rd value): Unused
-                self.angular_velocity,  # Position 3 (4th value): Angular velocity
+                0,  # Position 3 (4th value): Angular velocity
                 0,  # Position 4 (5th value): Unused
-                0,  # Position 5 (6th value): Unused
+                self.angular_velocity,  # Position 5 (6th value): Unused
             ]
             self.motor_publisher.publish_motor_command(motor_values)
 
@@ -160,7 +160,7 @@ class MainWindow(QWidget):
         main_layout.setSpacing(15)
 
         # Title
-        title = QLabel("CAR CONTROL INTERFACE")
+        title = QLabel("ROVER CONTROL INTERFACE")
         title.setObjectName("mainTitle")
         title.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title)
