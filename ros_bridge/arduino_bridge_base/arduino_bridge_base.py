@@ -223,7 +223,7 @@ class IMUBridge(ArduinoBridgeBase):
             try:
                 import serial
 
-                test_serial = serial.Serial(port, 9600, timeout=1)
+                test_serial = serial.Serial(port, 115200, timeout=1)
                 test_serial.close()
                 working_port = port
                 break
@@ -237,5 +237,5 @@ class IMUBridge(ArduinoBridgeBase):
             node_name="imu_bridge",
             topic_name="imu_data",
             serial_port=working_port,
-            baud_rate=9600,
+            baud_rate=115200,
         )

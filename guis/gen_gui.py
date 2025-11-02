@@ -598,7 +598,7 @@ if __name__ == "__main__":
     # Dispatch grayscale vs color frames to the appropriate update methods
     camera_sub.image_updated.connect(lambda frame, is_gray: main_window.update_gray_display(frame) if is_gray else main_window.update_camera_display(frame))
 
-    # imu.imu_data_updated.connect(main_window.update_imu_display)
+    imu.imu_data_updated.connect(main_window.update_imu_display)
 
     # Use a ROS executor that doesn't block the Qt event loop
     executor = SingleThreadedExecutor()
