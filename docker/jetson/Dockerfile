@@ -29,21 +29,23 @@ RUN apt-get update -y && apt-get install -y python3-pip &&\
     pip install supervisor &&\
     pip3 install --no-cache-dir pyserial
 
-# https://github.com/IntelRealSense/librealsense/blob/master/doc/installation_jetson.md
+RUN apt-get install -y python3-opencv
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE &&\
     add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u &&\
     apt-get install -y librealsense2-utils &&\
-    apt-get install -y librealsense2-dev
+    apt-get install -y librealsense2-dev &&\
+    apt-get install -y python3-pyrealsense2
 
 RUN apt-get install ros-humble-librealsense2* -y
 
 RUN apt-get install ros-humble-realsense2-* -y
 
-# teleop
+RUN pip3 install --no-cache-dir "numpy<2.0"
+
 RUN apt update
-RUN apt install ros-humble-teleop-twist-keyboard
-RUN apt install ros-humble-joy ros-humble-teleop-twist-joy
+RUN apt install ros-humble-teleop-twist-keyboard -y
+RUN apt install ros-humble-joy ros-humble-teleop-twist-joy -y
 
 RUN git clone https://github.com/pitt-rover-project/URC.git /app
 
