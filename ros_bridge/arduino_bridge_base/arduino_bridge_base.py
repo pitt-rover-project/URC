@@ -111,6 +111,13 @@ class MotorBridge(ArduinoBridgeBase):
         self.motor_command_subscriber = self.create_subscription(
             String, "motor_control_input", self.motor_command_callback, 10
         )
+        # Subscriber to receive motor commands from GUI publishers
+        self.motor_command_subscriber = self.create_subscription(
+            String,
+            "motor_control_input",
+            self.motor_command_callback,
+            10
+        )
         self.get_logger().info("Motor Bridge Node Started")
 
     def read_from_arduino(self):
