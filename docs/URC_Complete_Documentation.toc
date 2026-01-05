@@ -1,102 +1,102 @@
-\contentsline {chapter}{\numberline {1}Project Overview}{4}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Introduction}{4}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Competition Tasks}{4}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Key Specifications}{5}{section.1.3}%
-\contentsline {chapter}{\numberline {2}System Architecture}{6}{chapter.2}%
-\contentsline {section}{\numberline {2.1}High-Level Architecture}{6}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Dual-Container Architecture}{6}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Communication Flow}{7}{section.2.3}%
-\contentsline {chapter}{\numberline {3}Directory Structure}{8}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Project Layout}{8}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Key Directories}{9}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Docker Configuration}{9}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}ROS Bridge}{9}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}GUI System}{9}{subsection.3.2.3}%
-\contentsline {chapter}{\numberline {4}Hardware Requirements}{10}{chapter.4}%
-\contentsline {section}{\numberline {4.1}On-Board Computer}{10}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Motor System}{10}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Pin Configuration}{10}{subsection.4.2.1}%
-\contentsline {section}{\numberline {4.3}Sensors}{11}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Ultrasonic Sensor Pins}{11}{subsection.4.3.1}%
-\contentsline {section}{\numberline {4.4}Serial Port Configuration}{11}{section.4.4}%
-\contentsline {chapter}{\numberline {5}Software Dependencies}{12}{chapter.5}%
-\contentsline {section}{\numberline {5.1}System Requirements}{12}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Python Dependencies}{12}{section.5.2}%
-\contentsline {section}{\numberline {5.3}System Packages (APT)}{12}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Arduino Libraries}{13}{section.5.4}%
-\contentsline {chapter}{\numberline {6}Docker Configuration}{14}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Jetson Container}{14}{section.6.1}%
-\contentsline {subsection}{\numberline {6.1.1}Overview}{14}{subsection.6.1.1}%
-\contentsline {subsection}{\numberline {6.1.2}Key Features}{14}{subsection.6.1.2}%
-\contentsline {subsection}{\numberline {6.1.3}Device Mappings}{14}{subsection.6.1.3}%
-\contentsline {subsection}{\numberline {6.1.4}Environment Variables}{14}{subsection.6.1.4}%
-\contentsline {subsection}{\numberline {6.1.5}Supervised Processes}{15}{subsection.6.1.5}%
-\contentsline {section}{\numberline {6.2}Local Container (Base Station)}{15}{section.6.2}%
-\contentsline {subsection}{\numberline {6.2.1}macOS Setup}{15}{subsection.6.2.1}%
-\contentsline {subsection}{\numberline {6.2.2}Linux Setup}{15}{subsection.6.2.2}%
-\contentsline {subsection}{\numberline {6.2.3}Local Environment Variables}{15}{subsection.6.2.3}%
-\contentsline {section}{\numberline {6.3}Simulation Container}{15}{section.6.3}%
-\contentsline {chapter}{\numberline {7}Quick Start Guide}{16}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Prerequisites}{16}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}Install Docker}{16}{subsection.7.1.1}%
-\contentsline {subsection}{\numberline {7.1.2}Clone Repository}{16}{subsection.7.1.2}%
-\contentsline {subsection}{\numberline {7.1.3}Connect Hardware}{16}{subsection.7.1.3}%
-\contentsline {section}{\numberline {7.2}Option A: Full System Startup}{16}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}Step 1: Start Jetson Container (on rover)}{17}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Step 2: Start Local Container (on base station)}{17}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}Step 3: Launch GUI}{17}{subsection.7.2.3}%
-\contentsline {section}{\numberline {7.3}Option B: Simulation Only}{17}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Option C: Development Mode}{17}{section.7.4}%
-\contentsline {chapter}{\numberline {8}Detailed Startup Procedures}{18}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Jetson On-Board Startup}{18}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Base Station Startup}{18}{section.8.2}%
-\contentsline {subsection}{\numberline {8.2.1}macOS Procedure}{18}{subsection.8.2.1}%
-\contentsline {subsection}{\numberline {8.2.2}Linux Procedure}{19}{subsection.8.2.2}%
-\contentsline {section}{\numberline {8.3}Verification Steps}{19}{section.8.3}%
-\contentsline {subsection}{\numberline {8.3.1}Check ROS 2 Connectivity}{19}{subsection.8.3.1}%
-\contentsline {subsection}{\numberline {8.3.2}Test Motor Commands}{20}{subsection.8.3.2}%
-\contentsline {subsection}{\numberline {8.3.3}Monitor Sensor Data}{20}{subsection.8.3.3}%
-\contentsline {chapter}{\numberline {9}ROS 2 Architecture}{21}{chapter.9}%
-\contentsline {section}{\numberline {9.1}Node Overview}{21}{section.9.1}%
-\contentsline {section}{\numberline {9.2}Topic Architecture}{21}{section.9.2}%
-\contentsline {section}{\numberline {9.3}Message Formats}{21}{section.9.3}%
-\contentsline {subsection}{\numberline {9.3.1}Motor Control Input (String)}{22}{subsection.9.3.1}%
-\contentsline {subsection}{\numberline {9.3.2}IMU Data (String)}{22}{subsection.9.3.2}%
-\contentsline {subsection}{\numberline {9.3.3}GPS Data (String)}{22}{subsection.9.3.3}%
-\contentsline {subsection}{\numberline {9.3.4}Ultrasonic Data (String)}{22}{subsection.9.3.4}%
-\contentsline {section}{\numberline {9.4}Bridge Class Hierarchy}{22}{section.9.4}%
-\contentsline {chapter}{\numberline {10}Hardware Interfaces}{23}{chapter.10}%
-\contentsline {section}{\numberline {10.1}Motor Control}{23}{section.10.1}%
-\contentsline {subsection}{\numberline {10.1.1}Arduino Firmware}{23}{subsection.10.1.1}%
-\contentsline {section}{\numberline {10.2}IMU (BNO055)}{23}{section.10.2}%
-\contentsline {subsection}{\numberline {10.2.1}Data Processing}{23}{subsection.10.2.1}%
-\contentsline {section}{\numberline {10.3}GPS}{24}{section.10.3}%
-\contentsline {section}{\numberline {10.4}Ultrasonic Sensors}{24}{section.10.4}%
-\contentsline {section}{\numberline {10.5}RealSense Cameras}{24}{section.10.5}%
-\contentsline {chapter}{\numberline {11}GUI System}{25}{chapter.11}%
-\contentsline {section}{\numberline {11.1}Main Control GUI}{25}{section.11.1}%
-\contentsline {section}{\numberline {11.2}Motor/Arm GUI Hotkeys}{25}{section.11.2}%
-\contentsline {section}{\numberline {11.3}Publisher Classes}{26}{section.11.3}%
-\contentsline {chapter}{\numberline {12}Development Workflow}{27}{chapter.12}%
-\contentsline {section}{\numberline {12.1}Git Workflow}{27}{section.12.1}%
-\contentsline {subsection}{\numberline {12.1.1}Branch Strategy}{27}{subsection.12.1.1}%
-\contentsline {subsection}{\numberline {12.1.2}Standard Workflow}{27}{subsection.12.1.2}%
-\contentsline {subsection}{\numberline {12.1.3}Commit Message Format}{27}{subsection.12.1.3}%
-\contentsline {section}{\numberline {12.2}Adding a New Sensor Bridge}{28}{section.12.2}%
-\contentsline {subsection}{\numberline {12.2.1}Step 1: Create Arduino Firmware}{28}{subsection.12.2.1}%
-\contentsline {subsection}{\numberline {12.2.2}Step 2: Create Python Bridge}{28}{subsection.12.2.2}%
-\contentsline {subsection}{\numberline {12.2.3}Step 3: Add to Supervisor}{28}{subsection.12.2.3}%
-\contentsline {chapter}{\numberline {13}Troubleshooting}{29}{chapter.13}%
-\contentsline {section}{\numberline {13.1}Common Issues}{29}{section.13.1}%
-\contentsline {section}{\numberline {13.2}Serial Port Debugging}{29}{section.13.2}%
-\contentsline {section}{\numberline {13.3}ROS 2 Debugging}{29}{section.13.3}%
-\contentsline {section}{\numberline {13.4}Docker Debugging}{30}{section.13.4}%
-\contentsline {section}{\numberline {13.5}Log File Locations}{30}{section.13.5}%
-\contentsline {chapter}{\numberline {14}API Reference}{31}{chapter.14}%
-\contentsline {section}{\numberline {14.1}ArduinoBridgeBase}{31}{section.14.1}%
-\contentsline {section}{\numberline {14.2}MotorPublisher}{31}{section.14.2}%
-\contentsline {section}{\numberline {14.3}TwistPublisher}{32}{section.14.3}%
-\contentsline {chapter}{\numberline {A}Environment Variables}{33}{appendix.A}%
-\contentsline {chapter}{\numberline {B}Quick Command Reference}{34}{appendix.B}%
-\contentsline {chapter}{\numberline {C}Network Ports}{35}{appendix.C}%
-\contentsline {chapter}{Document Information}{36}{appendix*.22}%
+\contentsline {chapter}{\numberline {1}Project Overview}{6}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Introduction}{6}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Competition Tasks}{6}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Key Specifications}{7}{section.1.3}%
+\contentsline {chapter}{\numberline {2}System Architecture}{8}{chapter.2}%
+\contentsline {section}{\numberline {2.1}High-Level Architecture}{8}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Dual-Container Architecture}{8}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Communication Flow}{9}{section.2.3}%
+\contentsline {chapter}{\numberline {3}Directory Structure}{10}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Project Layout}{10}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Key Directories}{11}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Docker Configuration}{11}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}ROS Bridge}{11}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}GUI System}{11}{subsection.3.2.3}%
+\contentsline {chapter}{\numberline {4}Hardware Requirements}{12}{chapter.4}%
+\contentsline {section}{\numberline {4.1}On-Board Computer}{12}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Motor System}{12}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Pin Configuration}{12}{subsection.4.2.1}%
+\contentsline {section}{\numberline {4.3}Sensors}{13}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Ultrasonic Sensor Pins}{13}{subsection.4.3.1}%
+\contentsline {section}{\numberline {4.4}Serial Port Configuration}{13}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Software Dependencies}{14}{chapter.5}%
+\contentsline {section}{\numberline {5.1}System Requirements}{14}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Python Dependencies}{14}{section.5.2}%
+\contentsline {section}{\numberline {5.3}System Packages (APT)}{14}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Arduino Libraries}{15}{section.5.4}%
+\contentsline {chapter}{\numberline {6}Docker Configuration}{16}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Jetson Container}{16}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Overview}{16}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Key Features}{16}{subsection.6.1.2}%
+\contentsline {subsection}{\numberline {6.1.3}Device Mappings}{16}{subsection.6.1.3}%
+\contentsline {subsection}{\numberline {6.1.4}Environment Variables}{16}{subsection.6.1.4}%
+\contentsline {subsection}{\numberline {6.1.5}Supervised Processes}{17}{subsection.6.1.5}%
+\contentsline {section}{\numberline {6.2}Local Container (Base Station)}{17}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}macOS Setup}{17}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Linux Setup}{17}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}Local Environment Variables}{17}{subsection.6.2.3}%
+\contentsline {section}{\numberline {6.3}Simulation Container}{17}{section.6.3}%
+\contentsline {chapter}{\numberline {7}Quick Start Guide}{18}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Prerequisites}{18}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Install Docker}{18}{subsection.7.1.1}%
+\contentsline {subsection}{\numberline {7.1.2}Clone Repository}{18}{subsection.7.1.2}%
+\contentsline {subsection}{\numberline {7.1.3}Connect Hardware}{18}{subsection.7.1.3}%
+\contentsline {section}{\numberline {7.2}Option A: Full System Startup}{18}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Step 1: Start Jetson Container (on rover)}{19}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Step 2: Start Local Container (on base station)}{19}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Step 3: Launch GUI}{19}{subsection.7.2.3}%
+\contentsline {section}{\numberline {7.3}Option B: Simulation Only}{19}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Option C: Development Mode}{19}{section.7.4}%
+\contentsline {chapter}{\numberline {8}Detailed Startup Procedures}{20}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Jetson On-Board Startup}{20}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Base Station Startup}{20}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}macOS Procedure}{20}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Linux Procedure}{21}{subsection.8.2.2}%
+\contentsline {section}{\numberline {8.3}Verification Steps}{21}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Check ROS 2 Connectivity}{21}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Test Motor Commands}{22}{subsection.8.3.2}%
+\contentsline {subsection}{\numberline {8.3.3}Monitor Sensor Data}{22}{subsection.8.3.3}%
+\contentsline {chapter}{\numberline {9}ROS 2 Architecture}{23}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Node Overview}{23}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Topic Architecture}{23}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Message Formats}{23}{section.9.3}%
+\contentsline {subsection}{\numberline {9.3.1}Motor Control Input (String)}{24}{subsection.9.3.1}%
+\contentsline {subsection}{\numberline {9.3.2}IMU Data (String)}{24}{subsection.9.3.2}%
+\contentsline {subsection}{\numberline {9.3.3}GPS Data (String)}{24}{subsection.9.3.3}%
+\contentsline {subsection}{\numberline {9.3.4}Ultrasonic Data (String)}{24}{subsection.9.3.4}%
+\contentsline {section}{\numberline {9.4}Bridge Class Hierarchy}{24}{section.9.4}%
+\contentsline {chapter}{\numberline {10}Hardware Interfaces}{25}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Motor Control}{25}{section.10.1}%
+\contentsline {subsection}{\numberline {10.1.1}Arduino Firmware}{25}{subsection.10.1.1}%
+\contentsline {section}{\numberline {10.2}IMU (BNO055)}{25}{section.10.2}%
+\contentsline {subsection}{\numberline {10.2.1}Data Processing}{25}{subsection.10.2.1}%
+\contentsline {section}{\numberline {10.3}GPS}{26}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Ultrasonic Sensors}{26}{section.10.4}%
+\contentsline {section}{\numberline {10.5}RealSense Cameras}{26}{section.10.5}%
+\contentsline {chapter}{\numberline {11}GUI System}{27}{chapter.11}%
+\contentsline {section}{\numberline {11.1}Main Control GUI}{27}{section.11.1}%
+\contentsline {section}{\numberline {11.2}Motor/Arm GUI Hotkeys}{27}{section.11.2}%
+\contentsline {section}{\numberline {11.3}Publisher Classes}{28}{section.11.3}%
+\contentsline {chapter}{\numberline {12}Development Workflow}{29}{chapter.12}%
+\contentsline {section}{\numberline {12.1}Git Workflow}{29}{section.12.1}%
+\contentsline {subsection}{\numberline {12.1.1}Branch Strategy}{29}{subsection.12.1.1}%
+\contentsline {subsection}{\numberline {12.1.2}Standard Workflow}{29}{subsection.12.1.2}%
+\contentsline {subsection}{\numberline {12.1.3}Commit Message Format}{29}{subsection.12.1.3}%
+\contentsline {section}{\numberline {12.2}Adding a New Sensor Bridge}{30}{section.12.2}%
+\contentsline {subsection}{\numberline {12.2.1}Step 1: Create Arduino Firmware}{30}{subsection.12.2.1}%
+\contentsline {subsection}{\numberline {12.2.2}Step 2: Create Python Bridge}{30}{subsection.12.2.2}%
+\contentsline {subsection}{\numberline {12.2.3}Step 3: Add to Supervisor}{30}{subsection.12.2.3}%
+\contentsline {chapter}{\numberline {13}Troubleshooting}{31}{chapter.13}%
+\contentsline {section}{\numberline {13.1}Common Issues}{31}{section.13.1}%
+\contentsline {section}{\numberline {13.2}Serial Port Debugging}{31}{section.13.2}%
+\contentsline {section}{\numberline {13.3}ROS 2 Debugging}{31}{section.13.3}%
+\contentsline {section}{\numberline {13.4}Docker Debugging}{32}{section.13.4}%
+\contentsline {section}{\numberline {13.5}Log File Locations}{32}{section.13.5}%
+\contentsline {chapter}{\numberline {14}API Reference}{33}{chapter.14}%
+\contentsline {section}{\numberline {14.1}ArduinoBridgeBase}{33}{section.14.1}%
+\contentsline {section}{\numberline {14.2}MotorPublisher}{33}{section.14.2}%
+\contentsline {section}{\numberline {14.3}TwistPublisher}{34}{section.14.3}%
+\contentsline {chapter}{\numberline {A}Environment Variables}{35}{appendix.A}%
+\contentsline {chapter}{\numberline {B}Quick Command Reference}{36}{appendix.B}%
+\contentsline {chapter}{\numberline {C}Network Ports}{37}{appendix.C}%
+\contentsline {chapter}{Document Information}{38}{appendix*.22}%

@@ -1,36 +1,36 @@
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {1.1}{\ignorespaces URC Competition Tasks\relax }}{4}{table.caption.1}%
-\contentsline {table}{\numberline {1.2}{\ignorespaces Rover System Specifications\relax }}{5}{table.caption.2}%
+\contentsline {table}{\numberline {1.1}{\ignorespaces URC Competition Tasks\relax }}{6}{table.caption.1}%
+\contentsline {table}{\numberline {1.2}{\ignorespaces Rover System Specifications\relax }}{7}{table.caption.2}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.1}{\ignorespaces Container Responsibilities\relax }}{6}{table.caption.4}%
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Jetson Nano Specifications\relax }}{10}{table.caption.6}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Motor System Specifications\relax }}{10}{table.caption.7}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Arduino Motor Pin Configuration\relax }}{10}{table.caption.8}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Sensor Configuration\relax }}{11}{table.caption.9}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Ultrasonic Sensor Pin Configuration\relax }}{11}{table.caption.10}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Serial Port Assignments\relax }}{11}{table.caption.11}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces Container Responsibilities\relax }}{8}{table.caption.4}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {6.1}{\ignorespaces Supervisor Managed Processes\relax }}{15}{table.caption.12}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Jetson Nano Specifications\relax }}{12}{table.caption.6}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Motor System Specifications\relax }}{12}{table.caption.7}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Arduino Motor Pin Configuration\relax }}{12}{table.caption.8}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Sensor Configuration\relax }}{13}{table.caption.9}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Ultrasonic Sensor Pin Configuration\relax }}{13}{table.caption.10}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Serial Port Assignments\relax }}{13}{table.caption.11}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {6.1}{\ignorespaces Supervisor Managed Processes\relax }}{17}{table.caption.12}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {9.1}{\ignorespaces ROS 2 Nodes\relax }}{21}{table.caption.13}%
+\contentsline {table}{\numberline {9.1}{\ignorespaces ROS 2 Nodes\relax }}{23}{table.caption.13}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {10.1}{\ignorespaces NMEA Sentence Types\relax }}{24}{table.caption.15}%
+\contentsline {table}{\numberline {10.1}{\ignorespaces NMEA Sentence Types\relax }}{26}{table.caption.15}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {11.1}{\ignorespaces Main GUI Components\relax }}{25}{table.caption.16}%
-\contentsline {table}{\numberline {11.2}{\ignorespaces Motor Control Hotkeys\relax }}{25}{table.caption.17}%
-\contentsline {table}{\numberline {11.3}{\ignorespaces Arm Control Hotkeys\relax }}{26}{table.caption.18}%
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {13.1}{\ignorespaces Common Issues and Solutions\relax }}{29}{table.13.1}%
-\contentsline {table}{\numberline {13.2}{\ignorespaces Log File Locations\relax }}{30}{table.caption.19}%
+\contentsline {table}{\numberline {11.1}{\ignorespaces Main GUI Components\relax }}{27}{table.caption.16}%
+\contentsline {table}{\numberline {11.2}{\ignorespaces Motor Control Hotkeys\relax }}{27}{table.caption.17}%
+\contentsline {table}{\numberline {11.3}{\ignorespaces Arm Control Hotkeys\relax }}{28}{table.caption.18}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {A.1}{\ignorespaces Environment Variable Reference\relax }}{33}{table.caption.20}%
+\contentsline {table}{\numberline {13.1}{\ignorespaces Common Issues and Solutions\relax }}{31}{table.13.1}%
+\contentsline {table}{\numberline {13.2}{\ignorespaces Log File Locations\relax }}{32}{table.caption.19}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {C.1}{\ignorespaces Network Port Reference\relax }}{35}{table.caption.21}%
+\contentsline {table}{\numberline {A.1}{\ignorespaces Environment Variable Reference\relax }}{35}{table.caption.20}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {C.1}{\ignorespaces Network Port Reference\relax }}{37}{table.caption.21}%
