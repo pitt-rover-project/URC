@@ -105,8 +105,8 @@ class MainWindow(QWidget):
         self.shift_pressed = False
 
         # Acceleration and deceleration rates
-        self.acceleration_rate = 0.02  # How fast it accelerates toward target speed
-        self.deceleration_rate = 0.015
+        self.acceleration_rate = 0.1  # How fast it accelerates toward target speed
+        self.deceleration_rate = 0.08
         self.angular_deceleration_rate = 0.1
 
         # Store motor publisher reference (passed from main)
@@ -479,10 +479,10 @@ class MainWindow(QWidget):
 
             # Angular velocity for turning
             if Qt.Key_A in self.keys_pressed:
-                target_angular = -throttle  # Negative for left
+                target_angular = throttle  # Positive for left
                 self.angular_velocity += (target_angular - self.angular_velocity) * 0.1
             elif Qt.Key_D in self.keys_pressed:
-                target_angular = throttle  # Positive for right
+                target_angular = -throttle  # Negative for right
                 self.angular_velocity += (target_angular - self.angular_velocity) * 0.1
             else:
                 # Return angular to center when not turning

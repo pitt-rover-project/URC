@@ -34,8 +34,9 @@ RUN pip3 install --no-cache-dir "numpy<2.0" opencv-python
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE &&\
     add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u &&\
     apt-get install -y librealsense2-utils &&\
-    apt-get install -y librealsense2-dev &&\
-    apt-get install -y python3-pyrealsense2
+    apt-get install -y librealsense2-dev
+
+RUN pip3 install --no-cache-dir pyrealsense2
 
 RUN apt-get install ros-humble-librealsense2* -y
 

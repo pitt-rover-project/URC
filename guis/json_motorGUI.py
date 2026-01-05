@@ -104,10 +104,10 @@ class MotorWindow(QWidget):
             self.backward()     
         if(event.key() == Qt.Key_J):
             print('Left')
-            self.right()
+            self.left()
         if(event.key() == Qt.Key_L):
             print('Right')
-            self.left()
+            self.right()
         if(event.key() == Qt.Key_Q):
             print('Speed Up')
             self.speed_up()

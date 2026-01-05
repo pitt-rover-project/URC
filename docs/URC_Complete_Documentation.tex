@@ -151,8 +151,6 @@
 % Document info
 \title{
     \vspace{-2cm}
-    \includegraphics[width=0.3\textwidth]{example-image}\\ % Replace with actual logo
-    \vspace{1cm}
     {\color{pittblue}\Huge\bfseries University Rover Challenge}\\
     \vspace{0.5cm}
     {\color{pittblue!70}\LARGE Complete Technical Documentation}\\
@@ -250,6 +248,107 @@ Serial Baud Rate & 115200 bps \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\section{How Systems Work Together}
+
+The URC rover system follows a distributed architecture where components work together through a multi-layered communication stack. Understanding this flow is essential for developers extending or debugging the system.
+
+\subsection{End-to-End Data Flow}
+
+When an operator interacts with the system, data flows through the following path:
+
+\begin{enumerate}
+    \item \textbf{User Input} --- Operator presses a key or moves a joystick on the base station
+    \item \textbf{GUI Publisher} --- PyQt5 GUI captures input and calls \texttt{MotorPublisher.publish\_motor\_command()} or \texttt{TwistPublisher.publish\_twist()}
+    \item \textbf{ROS 2 Topic} --- Publisher sends message to topic (e.g., \texttt{/motor\_control\_input} or \texttt{/cmd\_vel}) over WiFi via ROS 2 DDS
+    \item \textbf{Bridge Subscriber} --- \texttt{MotorBridge} on Jetson receives message via subscription callback
+    \item \textbf{Serial Transmission} --- Bridge formats command as comma-separated string and writes to Arduino via \texttt{serial.write()} at 115200 baud
+    \item \textbf{Arduino Processing} --- Arduino firmware parses command, calculates differential drive values
+    \item \textbf{Motor Control} --- Arduino sets PWM and direction pins to drive GoBilda motors
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm,
+    box/.style={rectangle, draw=pittblue, thick, minimum width=5cm, minimum height=0.7cm, align=center, fill=pittblue!10, font=\small},
+    arrow/.style={->, thick, >=stealth, pittblue}
+]
+    \node[box] (input) {Operator Input (Keyboard/Joystick/GUI)};
+    \node[box, below of=input] (gui) {PyQt5 GUI (MotorPublisher / TwistPublisher)};
+    \node[box, below of=gui] (topic) {ROS 2 Topic via WiFi (DDS Discovery)};
+    \node[box, below of=topic] (bridge) {MotorBridge (ArduinoBridgeBase child)};
+    \node[box, below of=bridge] (serial) {Serial UART (115200 baud, /dev/ttyACM1)};
+    \node[box, below of=serial] (arduino) {Arduino Mega 2560 Firmware};
+    \node[box, below of=arduino, fill=pittgold!20] (motors) {6x GoBilda Motors (H-Bridge Controllers)};
+
+    \draw[arrow] (input) -- (gui);
+    \draw[arrow] (gui) -- node[right, font=\tiny] {String: "0,0,0,0,0,0"} (topic);
+    \draw[arrow] (topic) -- node[right, font=\tiny] {WiFi} (bridge);
+    \draw[arrow] (bridge) -- node[right, font=\tiny] {serial.write()} (serial);
+    \draw[arrow] (serial) -- (arduino);
+    \draw[arrow] (arduino) -- node[right, font=\tiny] {PWM + Direction} (motors);
+\end{tikzpicture}
+\caption{Complete Motor Control Data Flow --- Note: \texttt{/dev/ttyACM1} assignment requires Motor Arduino to be plugged in \textbf{second}. See Section~\ref{sec:usb-enumeration} for required plug-in order.}
+\end{figure}
+
+\begin{importantbox}
+\textbf{Hardware Requirement: Two Arduino Boards}
+
+This system requires \textbf{two separate Arduino boards}:
+\begin{enumerate}
+    \item \textbf{Sensor Arduino} (plugged in first $\rightarrow$ \texttt{/dev/ttyACM0}) --- Runs IMU, GPS, and ultrasonic sensor firmware
+    \item \textbf{Motor Arduino} (plugged in second $\rightarrow$ \texttt{/dev/ttyACM1}) --- Runs motor control firmware for 6-wheel drive
+\end{enumerate}
+
+The port numbers are assigned based on USB plug-in order, not physical port location. See Section~\ref{sec:usb-enumeration} for detailed plug-in procedures.
+\end{importantbox}
+
+\subsection{Sensor Data Return Path}
+
+Sensor data flows in the reverse direction:
+
+\begin{enumerate}
+    \item \textbf{Hardware Sensor} --- BNO055 IMU reads orientation, GPS receives NMEA sentences
+    \item \textbf{Arduino} --- Formats sensor data and sends via \texttt{Serial.println()}
+    \item \textbf{Bridge Timer} --- \texttt{ArduinoBridgeBase.read\_from\_arduino()} executes every 100ms via ROS 2 timer
+    \item \textbf{ROS 2 Publisher} --- Bridge publishes data to topic (e.g., \texttt{/imu\_data}, \texttt{/gps\_data})
+    \item \textbf{GUI Subscriber} --- \texttt{IMUSubscriber} or \texttt{GPSSubscriber} receives message, parses with data parser
+    \item \textbf{PyQt5 Signal} --- Subscriber emits \texttt{imu\_data\_updated} signal with parsed values
+    \item \textbf{GUI Update} --- Signal triggers slot function that updates UI labels/displays
+\end{enumerate}
+
+\subsection{Base Station vs. Rover Responsibilities}
+
+\begin{table}[H]
+\centering
+\caption{Component Location and Purpose}
+\begin{tabular}{@{}llp{7cm}@{}}
+\toprule
+\textbf{Component} & \textbf{Location} & \textbf{Responsibility} \\
+\midrule
+GUI Applications & Base Station & User interface, input capture, data visualization \\
+Publisher Classes & Base Station & Convert user actions to ROS 2 messages \\
+Subscriber Classes & Base Station & Receive sensor data, parse, update GUI \\
+Data Parsers & Base Station & Parse raw sensor strings into usable values \\
+\midrule
+Bridge Classes & Rover (Jetson) & ROS 2 $\leftrightarrow$ Serial translation \\
+Supervisor & Rover (Jetson) & Process management, auto-restart \\
+Arduino Firmware & Rover (Arduino) & Hardware control, sensor reading \\
+Motors/Sensors & Rover (Physical) & Physical actuation and sensing \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{tipbox}
+\textbf{When to modify each component:}
+\begin{itemize}
+    \item \textbf{Add new GUI control} $\rightarrow$ Modify/create Publisher class in \texttt{guis/publishers/}
+    \item \textbf{Add new sensor display} $\rightarrow$ Create Subscriber class in \texttt{guis/subscribers/} with data parser
+    \item \textbf{Change serial protocol} $\rightarrow$ Modify Bridge class in \texttt{ros\_bridge/} and corresponding Arduino sketch
+    \item \textbf{Add new hardware} $\rightarrow$ Create new Bridge class inheriting from \texttt{ArduinoBridgeBase}
+\end{itemize}
+\end{tipbox}
 
 %=============================================================================
 \chapter{System Architecture}
@@ -359,6 +458,214 @@ The dual-container architecture saves Jetson processing power for real-time cont
 \caption{Motor Control Communication Flow}
 \end{figure}
 
+\section{Sensor Data Flow}
+
+Each sensor follows a parallel data pipeline from hardware to GUI display. Understanding these pipelines helps developers debug sensor issues and add new sensor types.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    scale=0.85,
+    node distance=0.6cm,
+    sensor/.style={rectangle, draw=pittgold, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=pittgold!20, font=\scriptsize},
+    bridge/.style={rectangle, draw=pittblue, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=pittblue!10, font=\scriptsize},
+    topic/.style={rectangle, draw=pittblue!50, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=pittblue!5, font=\scriptsize},
+    sub/.style={rectangle, draw=green!50!black, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=green!10, font=\scriptsize},
+    arrow/.style={->, thick, >=stealth}
+]
+    % IMU Pipeline
+    \node at (-4.5, 4) {\textbf{IMU}};
+    \node[sensor] (imu_hw) at (-4.5, 3) {BNO055\\(I2C)};
+    \node[sensor] (imu_ard) at (-4.5, 2) {Arduino\\imu\_serial.ino};
+    \node[bridge] (imu_bridge) at (-4.5, 1) {IMUBridge};
+    \node[topic] (imu_topic) at (-4.5, 0) {/imu\_data};
+    \node[sub] (imu_sub) at (-4.5, -1) {IMUSubscriber};
+    \node[sub] (imu_parse) at (-4.5, -2) {IMUDataParser};
+
+    % GPS Pipeline
+    \node at (-1.5, 4) {\textbf{GPS}};
+    \node[sensor] (gps_hw) at (-1.5, 3) {RTK GPS\\(Serial)};
+    \node[sensor] (gps_ard) at (-1.5, 2) {Arduino\\gps.ino};
+    \node[bridge] (gps_bridge) at (-1.5, 1) {GPSBridge};
+    \node[topic] (gps_topic) at (-1.5, 0) {/gps\_data};
+    \node[sub] (gps_sub) at (-1.5, -1) {GPSSubscriber};
+    \node[sub] (gps_parse) at (-1.5, -2) {GPSDataParser};
+
+    % Ultrasonic Pipeline
+    \node at (1.5, 4) {\textbf{Ultrasonic}};
+    \node[sensor] (ultra_hw) at (1.5, 3) {3x HC-SR04\\(GPIO)};
+    \node[sensor] (ultra_ard) at (1.5, 2) {Arduino\\ultrasonic.ino};
+    \node[bridge] (ultra_bridge) at (1.5, 1) {UltrasonicBridge};
+    \node[topic] (ultra_topic) at (1.5, 0) {/ultrasonic\_data};
+    \node[sub] (ultra_sub) at (1.5, -1) {GenericSubscriber};
+
+    % Camera Pipeline
+    \node at (4.5, 4) {\textbf{Camera}};
+    \node[sensor] (cam_hw) at (4.5, 3) {RealSense D435\\(USB 3.0)};
+    \node[bridge] (cam_setup) at (4.5, 1.5) {setup.py\\(pyrealsense2)};
+    \node[topic] (cam_topic) at (4.5, 0) {/camera/*};
+    \node[sub] (cam_sub) at (4.5, -1) {ImageSubscriber};
+
+    % Arrows
+    \draw[arrow] (imu_hw) -- (imu_ard);
+    \draw[arrow] (imu_ard) -- (imu_bridge);
+    \draw[arrow] (imu_bridge) -- (imu_topic);
+    \draw[arrow] (imu_topic) -- (imu_sub);
+    \draw[arrow] (imu_sub) -- (imu_parse);
+
+    \draw[arrow] (gps_hw) -- (gps_ard);
+    \draw[arrow] (gps_ard) -- (gps_bridge);
+    \draw[arrow] (gps_bridge) -- (gps_topic);
+    \draw[arrow] (gps_topic) -- (gps_sub);
+    \draw[arrow] (gps_sub) -- (gps_parse);
+
+    \draw[arrow] (ultra_hw) -- (ultra_ard);
+    \draw[arrow] (ultra_ard) -- (ultra_bridge);
+    \draw[arrow] (ultra_bridge) -- (ultra_topic);
+    \draw[arrow] (ultra_topic) -- (ultra_sub);
+
+    \draw[arrow] (cam_hw) -- (cam_setup);
+    \draw[arrow] (cam_setup) -- (cam_topic);
+    \draw[arrow] (cam_topic) -- (cam_sub);
+
+\end{tikzpicture}
+\caption{Parallel Sensor Data Pipelines}
+\end{figure}
+
+\section{Error Handling Architecture}
+
+The system implements error handling at multiple layers to ensure graceful degradation when components fail.
+
+\subsection{Serial Connection Errors}
+
+The \texttt{ArduinoBridgeBase} class handles serial connection failures:
+
+\begin{lstlisting}[language=python, caption={Reconnection Logic in ArduinoBridgeBase}]
+def _attempt_reconnection(self):
+    """Attempt to reconnect to the serial port"""
+    if self.serial:
+        try:
+            self.serial.close()
+        except:
+            pass
+        self.serial = None
+
+    # Manual restart required - logs warning
+    self.get_logger().warning(
+        "Serial connection lost. Manual restart required."
+    )
+\end{lstlisting}
+
+\subsection{Data Parsing Errors}
+
+Subscribers use sentinel values to indicate parse failures:
+
+\begin{table}[H]
+\centering
+\caption{Error Values by Subscriber}
+\begin{tabular}{@{}llp{6cm}@{}}
+\toprule
+\textbf{Subscriber} & \textbf{Error Value} & \textbf{Condition} \\
+\midrule
+IMUSubscriber & -0.1 & Parse exception in \texttt{IMUDataParser} \\
+GPSSubscriber & "NO CONNECTION!!!" & Empty NMEA sentence received \\
+GPSSubscriber & None & Invalid sentence type (not GAGSV/GNGLL) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{warningbox}
+When displaying sensor data in GUIs, always check for error values before showing data to the user. A value of -0.1 for IMU data indicates a parsing failure, not an actual sensor reading.
+\end{warningbox}
+
+\subsection{IMUBridge Port Auto-Detection}
+
+The \texttt{IMUBridge} class implements automatic port detection for cross-platform compatibility:
+
+\begin{lstlisting}[language=python, caption={IMU Port Auto-Detection}]
+possible_ports = [
+    "/dev/ttyACM0",      # Linux primary
+    "/dev/cu.usbmodem11201",  # macOS
+    "/dev/ttyUSB0"       # Linux USB-serial
+]
+
+for port in possible_ports:
+    try:
+        test_serial = serial.Serial(port, 115200, timeout=1)
+        test_serial.close()
+        working_port = port
+        break
+    except:
+        continue
+\end{lstlisting}
+
+\section{Message Format Specifications}
+
+Detailed field-by-field breakdown of all message formats used in the system.
+
+\subsection{Motor Control Input}
+
+\begin{table}[H]
+\centering
+\caption{Motor Command String Format}
+\begin{tabular}{@{}clp{6cm}@{}}
+\toprule
+\textbf{Field} & \textbf{Name} & \textbf{Description} \\
+\midrule
+0 & linear\_x & Forward/backward velocity (-100 to 100) \\
+1 & linear\_y & Left/right strafe (typically 0) \\
+2 & linear\_z & Up/down (typically 0) \\
+3 & angular\_x & Roll (typically 0) \\
+4 & angular\_y & Pitch (typically 0) \\
+5 & angular\_z & Yaw/turning (-100 to 100) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Example:} \texttt{"100,0,0,0,0,50"} = Forward at full speed with moderate right turn
+
+\subsection{IMU Data Format}
+
+\begin{lstlisting}[caption={IMU String Format}]
+Format: "X: <float>\tY: <float>\tZ: <float>"
+Fields: X = heading (0-360), Y = roll, Z = pitch
+Example: "X: 45.23\tY: -2.15\tZ: 0.89"
+\end{lstlisting}
+
+The \texttt{IMUDataParser} processes this into:
+\begin{itemize}
+    \item \textbf{distance} --- Euclidean distance from previous reading
+    \item \textbf{velocity} --- distance / time\_delta (meters/second)
+    \item \textbf{yz\_tilt\_angle} --- Vertical tilt in degrees
+    \item \textbf{yx\_tilt\_angle} --- Horizontal tilt in degrees
+\end{itemize}
+
+\subsection{GPS NMEA Formats}
+
+\textbf{GNGLL (Position):}
+\begin{lstlisting}[caption={GNGLL Sentence Structure}]
+$GNGLL,<lat>,<N/S>,<lon>,<E/W>,<time>,<status>,<mode>*<checksum>
+Example: $GNGLL,4024.12345,N,07952.12345,W,123456.00,A,A*6B
+
+Parsed output: "Latitude: 4024.12345 N Longitude: 07952.12345 W"
+\end{lstlisting}
+
+\textbf{GAGSV/GBGSV (Satellites):}
+\begin{lstlisting}[caption={GAGSV Sentence Structure}]
+$GAGSV,<total>,<msg#>,<sats>,<sat1_prn>,<elev>,<azim>,<snr>,...*<checksum>
+SNR values extracted from positions 7, 11, 15, 19... (every 4th field)
+
+Parsed output: List of SNR integers, average SNR float
+\end{lstlisting}
+
+\subsection{Ultrasonic Data Format}
+
+\begin{lstlisting}[caption={Ultrasonic String Format}]
+Format: "distance1_cm, distance2_cm, distance3_cm, "
+Example: "45, 120, 88, "
+Note: Trailing comma and space are part of the format
+\end{lstlisting}
+
 %=============================================================================
 \chapter{Directory Structure}
 %=============================================================================
@@ -438,6 +745,107 @@ URC/
     \item \texttt{publishers/} --- MotorPublisher, TwistPublisher classes
     \item \texttt{subscribers/} --- IMUSubscriber, GPSSubscriber, data parsers
 \end{itemize}
+
+\section{Module Interdependencies}
+
+Understanding how modules depend on each other helps developers know which files to modify when extending the system.
+
+\subsection{Class Inheritance Hierarchy}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    scale=0.9,
+    node distance=1cm,
+    base/.style={rectangle, draw=pittblue, thick, minimum width=3.5cm, minimum height=0.7cm, align=center, fill=pittblue!20, font=\small},
+    child/.style={rectangle, draw=pittblue, thick, minimum width=3cm, minimum height=0.6cm, align=center, fill=pittblue!10, font=\small},
+    arrow/.style={->, thick, >=stealth}
+]
+    % Bridge Hierarchy
+    \node at (-4, 4) {\textbf{Bridge Classes}};
+    \node[base] (bridgebase) at (-4, 3) {ArduinoBridgeBase\\(Node)};
+    \node[child] (motor) at (-6, 1.5) {MotorBridge};
+    \node[child] (gps) at (-4, 1.5) {GPSBridge};
+    \node[child] (imu) at (-2, 1.5) {IMUBridge};
+    \node[child] (ultra) at (-4, 0.5) {UltrasonicBridge};
+
+    \draw[arrow] (bridgebase) -- (motor);
+    \draw[arrow] (bridgebase) -- (gps);
+    \draw[arrow] (bridgebase) -- (imu);
+    \draw[arrow] (bridgebase) -- (ultra);
+
+    % Publisher Hierarchy
+    \node at (4, 4) {\textbf{Publisher Classes}};
+    \node[base] (pubbase) at (4, 3) {GenericPublisher\\(Node)};
+    \node[child] (motorpub) at (2.5, 1.5) {MotorPublisher\\(+ QObject)};
+    \node[child] (twistpub) at (5.5, 1.5) {TwistPublisher\\(+ QObject)};
+
+    \draw[arrow] (pubbase) -- (motorpub);
+    \draw[arrow] (pubbase) -- (twistpub);
+
+    % Subscriber Hierarchy
+    \node at (-4, -1.5) {\textbf{Subscriber Classes}};
+    \node[base] (subbase) at (-4, -2.5) {GenericSubscriber\\(Node)};
+    \node[child] (imusub) at (-6, -4) {IMUSubscriber\\(+ QObject)};
+    \node[child] (gpssub) at (-2, -4) {GPSSubscriber};
+
+    \draw[arrow] (subbase) -- (imusub);
+    \draw[arrow] (subbase) -- (gpssub);
+
+    % Data Parser (standalone)
+    \node at (4, -1.5) {\textbf{Data Parsers}};
+    \node[child] (imuparse) at (3, -2.5) {IMUDataParser};
+    \node[child] (gpsparse) at (5, -2.5) {GPSDataParser};
+
+\end{tikzpicture}
+\caption{Module Inheritance and Composition}
+\end{figure}
+
+\subsection{Import Dependencies}
+
+\begin{table}[H]
+\centering
+\caption{Module Import Requirements}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Module} & \textbf{Key Imports} \\
+\midrule
+ArduinoBridgeBase & \texttt{rclpy}, \texttt{serial}, \texttt{std\_msgs.msg.String} \\
+MotorBridge & ArduinoBridgeBase, \texttt{geometry\_msgs.msg.Twist} \\
+GenericPublisher & \texttt{rclpy.node.Node} \\
+MotorPublisher & GenericPublisher, \texttt{PyQt5.QtCore.QObject}, \texttt{pyqtSignal} \\
+GenericSubscriber & \texttt{rclpy.node.Node} \\
+IMUSubscriber & GenericSubscriber, IMUDataParser, \texttt{PyQt5.QtCore} \\
+GPSSubscriber & GenericSubscriber, GPSDataParser \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{sys.path Configuration}
+
+GUI modules require path configuration to import sibling packages:
+
+\begin{lstlisting}[language=python, caption={Import Path Setup (from gen\_gui.py)}]
+import sys
+import os
+
+# Add parent directory to path for sibling imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Now can import from publishers/ and subscribers/
+from guis.publishers.publisher import MotorPublisher
+from guis.subscribers.subscriber import IMUSubscriber
+\end{lstlisting}
+
+\begin{tipbox}
+\textbf{When adding new modules:}
+\begin{itemize}
+    \item Place publishers in \texttt{guis/publishers/} and inherit from \texttt{GenericPublisher}
+    \item Place subscribers in \texttt{guis/subscribers/} and inherit from \texttt{GenericSubscriber}
+    \item Place bridges in \texttt{ros\_bridge/<bridge\_name>/} and inherit from \texttt{ArduinoBridgeBase}
+    \item Data parsers are standalone classes in \texttt{guis/subscribers/}
+\end{itemize}
+\end{tipbox}
 
 %=============================================================================
 \chapter{Hardware Requirements}
@@ -535,18 +943,22 @@ Sensor 3 & 48 & 49 \\
 
 \begin{table}[H]
 \centering
-\caption{Serial Port Assignments}
-\begin{tabular}{@{}llll@{}}
+\caption{Serial Port Assignments --- Port numbers depend on USB plug-in order (see Section~\ref{sec:usb-enumeration})}
+\begin{tabular}{@{}lllll@{}}
 \toprule
-\textbf{Device} & \textbf{Port} & \textbf{Baud Rate} & \textbf{Notes} \\
+\textbf{Device} & \textbf{Port} & \textbf{Baud Rate} & \textbf{Arduino} & \textbf{Notes} \\
 \midrule
-Motors & /dev/ttyACM1 & 115200 & Hardcoded in MotorBridge \\
-GPS & /dev/ttyACM0 & 115200 & Configurable \\
-IMU & Auto-detect & 115200 & Tries multiple ports \\
-Ultrasonic & Arduino internal & 115200 & No separate port \\
+Motors & /dev/ttyACM1 & 115200 & Motor (2nd) & Hardcoded in MotorBridge \\
+GPS & /dev/ttyACM0 & 115200 & Sensor (1st) & Configurable, default ACM0 \\
+IMU & /dev/ttyACM0 & 115200 & Sensor (1st) & Auto-detect tries ACM0 first \\
+Ultrasonic & /dev/ttyACM0 & 115200 & Sensor (1st) & Same Arduino as IMU/GPS \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{tipbox}
+\textbf{Which Arduino?} The ``Sensor (1st)'' Arduino handles all sensor data (IMU, GPS, ultrasonic) while the ``Motor (2nd)'' Arduino handles motor commands. The 1st/2nd refers to the required USB plug-in order on the Jetson.
+\end{tipbox}
 
 %=============================================================================
 \chapter{Software Dependencies}
@@ -613,6 +1025,68 @@ ros-humble-librealsense2-* ros-humble-realsense2-*
     \item \texttt{Adafruit\_BNO055} --- 9-axis IMU driver library
 \end{itemize}
 
+\section{Dependency Rationale}
+
+Understanding why each dependency is required helps developers troubleshoot installation issues and evaluate alternatives.
+
+\begin{table}[H]
+\centering
+\caption{Python Package Rationale}
+\begin{tabular}{@{}lllp{5cm}@{}}
+\toprule
+\textbf{Package} & \textbf{Version} & \textbf{Used By} & \textbf{Why Required} \\
+\midrule
+pyserial & $\geq$3.5 & ArduinoBridgeBase & Serial communication with Arduino; 3.5+ includes stability fixes for Linux \\
+pyrealsense2 & $\geq$2.50.0 & setup.py, ImageSubscriber & Intel RealSense SDK bindings; 2.50+ required for D435 depth camera \\
+PyQt5 & $\geq$5.15.0 & All GUIs & Qt bindings for GUI framework; 5.15+ has stable signal/slot mechanism \\
+opencv-python & $\geq$4.5.0 & Camera utilities & Image processing and cv\_bridge integration \\
+numpy & $<$2.0 & IMUDataParser, cameras & Matrix operations; 2.0 has breaking API changes affecting cv\_bridge \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Version Constraint Explanations}
+
+\begin{importantbox}
+\textbf{numpy$<$2.0 Constraint}
+
+NumPy 2.0 introduced breaking changes to array handling that affect \texttt{cv\_bridge} and OpenCV integration. The constraint is enforced in both Dockerfiles:
+
+\begin{lstlisting}[language=bash]
+# From docker/jetson/Dockerfile and docker/local/Dockerfile
+RUN pip3 install 'numpy<2.0' opencv-python
+\end{lstlisting}
+
+If you upgrade to numpy 2.0+, expect \texttt{TypeError} exceptions when converting ROS Image messages to OpenCV arrays.
+\end{importantbox}
+
+\subsection{ROS 2 Humble Compatibility}
+
+ROS 2 Humble (May 2022 -- May 2027) is the current LTS release. Key compatibility notes:
+
+\begin{itemize}
+    \item \textbf{Python 3.10+} --- Required by Humble; earlier Python versions will fail
+    \item \textbf{Ubuntu 22.04} --- Official supported platform for Humble
+    \item \textbf{DDS Implementation} --- Uses Fast-RTPS by default (\texttt{RMW\_IMPLEMENTATION=rmw\_fastrtps\_cpp})
+\end{itemize}
+
+\subsection{Development vs. Production Dependencies}
+
+\begin{table}[H]
+\centering
+\caption{Dependency Categories}
+\begin{tabular}{@{}llp{6cm}@{}}
+\toprule
+\textbf{Category} & \textbf{Packages} & \textbf{Notes} \\
+\midrule
+Core (Required) & rclpy, pyserial, PyQt5 & Essential for all operations \\
+Sensors & pyrealsense2, Adafruit libraries & Only needed with corresponding hardware \\
+Development & ros-dev-tools, x11-apps & Debugging and testing tools \\
+Simulation & Gazebo packages & Only for simulation mode \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 %=============================================================================
 \chapter{Docker Configuration}
 %=============================================================================
@@ -623,9 +1097,24 @@ ros-humble-librealsense2-* ros-humble-realsense2-*
 
 The Jetson container runs on-board the rover and manages all hardware interfaces.
 
+\begin{warningbox}
+\textbf{CRITICAL: Re-Plug Arduinos Before EVERY Docker Start}
+
+The Docker container captures serial port mappings at startup. You \textbf{MUST} unplug and re-plug the Arduinos in the correct order \textbf{every time} before starting the container:
+\begin{enumerate}
+    \item Unplug all Arduinos from Jetson
+    \item Plug in \textbf{Sensor Arduino FIRST} $\rightarrow$ gets \texttt{/dev/ttyACM0}
+    \item Plug in \textbf{Motor Arduino SECOND} $\rightarrow$ gets \texttt{/dev/ttyACM1}
+    \item Verify with \texttt{ls /dev/ttyACM*}
+    \item \textbf{Then} start the Docker container
+\end{enumerate}
+See Section~\ref{sec:usb-enumeration} for details.
+\end{warningbox}
+
 \begin{lstlisting}[language=bash, caption={Build and Start Jetson Container}]
 cd docker/jetson
 sudo docker build -t urc_jetson .
+# FIRST: Re-plug Arduinos in correct order (Sensor, then Motor)
 sudo docker-compose up -d
 \end{lstlisting}
 
@@ -742,12 +1231,37 @@ cd URC
 
 \subsection{Connect Hardware}
 
+\begin{warningbox}
+\textbf{CRITICAL: Arduino Plug-In Order Determines Port Numbers}
+
+The order you plug in the Arduinos determines their \texttt{/dev/ttyACM*} port numbers. You must follow this exact order \textbf{every time before starting Docker}:
+\end{warningbox}
+
 \begin{enumerate}
-    \item Connect Arduino to USB port
+    \item \textbf{Ensure Arduinos are UNPLUGGED} from Jetson
+    \item Power on Jetson and wait for full boot (~60-90 seconds)
+    \item \textbf{Plug in SENSOR Arduino FIRST} $\rightarrow$ becomes \texttt{/dev/ttyACM0}
+    \begin{itemize}
+        \item This Arduino runs IMU, GPS, and ultrasonic firmware
+        \item Wait 2 seconds after plugging in
+    \end{itemize}
+    \item \textbf{Plug in MOTOR Arduino SECOND} $\rightarrow$ becomes \texttt{/dev/ttyACM1}
+    \begin{itemize}
+        \item This Arduino runs motor control firmware
+        \item Wait 2 seconds after plugging in
+    \end{itemize}
     \item Connect RealSense cameras to USB 3.0 ports
     \item Power on motor controllers
     \item Verify serial ports: \texttt{ls /dev/ttyACM*}
+    \begin{itemize}
+        \item Must show both \texttt{ttyACM0} and \texttt{ttyACM1}
+    \end{itemize}
+    \item \textbf{NOW} start the Docker container
 \end{enumerate}
+
+\begin{tipbox}
+\textbf{Why This Matters:} Docker captures the \texttt{/dev/ttyACM*} mappings when the container starts. The MotorBridge is hardcoded to use \texttt{/dev/ttyACM1}, so the Motor Arduino \textbf{must} be the second device plugged in.
+\end{tipbox}
 
 \section{Option A: Full System Startup}
 
@@ -757,7 +1271,12 @@ This option requires both the rover (Jetson) and base station (local machine) to
 
 \subsection{Step 1: Start Jetson Container (on rover)}
 
+\begin{warningbox}
+\textbf{Before running start.sh:} Unplug and re-plug Arduinos in correct order (Sensor first $\rightarrow$ ACM0, Motor second $\rightarrow$ ACM1). The container captures port assignments at startup!
+\end{warningbox}
+
 \begin{lstlisting}[language=bash]
+# FIRST: Re-plug Arduinos (Sensor, then Motor)
 cd docker/jetson
 sudo ./start.sh
 \end{lstlisting}
@@ -808,6 +1327,46 @@ cd /app
 python3 ros_bridge/motor_bridge/launch_motor_bridge.py
 python3 -m guis.arduino_gui
 \end{lstlisting}
+
+\section{Quick Start Troubleshooting}
+
+If something isn't working, check these common issues first:
+
+\begin{table}[H]
+\centering
+\caption{Quick Start Troubleshooting Reference}
+\begin{tabular}{@{}p{4cm}p{9cm}@{}}
+\toprule
+\textbf{Problem} & \textbf{Solution} \\
+\midrule
+Motors don't respond & \textbf{Re-plug Arduinos:} \texttt{docker-compose down} $\rightarrow$ unplug all $\rightarrow$ plug Sensor first $\rightarrow$ plug Motor second $\rightarrow$ \texttt{docker-compose up -d} \\
+\midrule
+No sensor data (IMU/GPS) & Same as above --- Sensor Arduino must be \texttt{/dev/ttyACM0} (plugged in first) \\
+\midrule
+\texttt{/dev/ttyACM*} missing & Arduinos not plugged in, or USB cable issue. Try different USB port/cable \\
+\midrule
+Container won't start & Check \texttt{docker ps -a} for error. Run \texttt{docker logs pitt\_urc\_jetson} \\
+\midrule
+ROS topics not visible & Ensure \texttt{ROS\_DOMAIN\_ID=0} on both Jetson and base station \\
+\midrule
+GUI won't display & Set \texttt{export DISPLAY=:0} or check X11 forwarding (XQuartz on macOS) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{importantbox}
+\textbf{90\% of startup failures} are caused by incorrect Arduino plug-in order. When in doubt:
+\begin{enumerate}
+    \item Stop Docker: \texttt{sudo docker-compose down}
+    \item Unplug ALL Arduinos
+    \item Plug in Sensor Arduino (wait 2 sec)
+    \item Plug in Motor Arduino (wait 2 sec)
+    \item Verify: \texttt{ls /dev/ttyACM*} shows ACM0 and ACM1
+    \item Start Docker: \texttt{sudo docker-compose up -d}
+\end{enumerate}
+\end{importantbox}
+
+For detailed troubleshooting, see Chapter~\ref{chap:troubleshooting}.
 
 %=============================================================================
 \chapter{Detailed Startup Procedures}
@@ -1226,6 +1785,134 @@ Escape & Emergency stop all \\
 \end{tabular}
 \end{table}
 
+\begin{warningbox}
+\textbf{Keybinding Conflict Warning}
+
+The \texttt{json\_motorGUI.py} Motor and Arm windows share overlapping key bindings that cause conflicts when both windows are open:
+
+\begin{center}
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\textbf{Key} & \textbf{Motor Action} & \textbf{Arm Action} \\
+\midrule
+I & Forward & Middle joint forward \\
+J & Turn left & Bottom joint backward \\
+K & Stop & Middle joint backward \\
+L & Turn right & Top joint backward \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Recommendation:} Only open one control window at a time, or modify keybindings in the source code to eliminate conflicts.
+\end{warningbox}
+
+\section{Alternative GUI: HTTP-Based Control (json\_motorGUI.py)}
+
+\textbf{Location:} \texttt{guis/json\_motorGUI.py}
+
+\begin{importantbox}
+\textbf{Different Communication Architecture}
+
+Unlike the main GUIs that use ROS 2, the \texttt{json\_motorGUI.py} uses HTTP POST requests to communicate with a local server. This requires a separate HTTP server running on \texttt{localhost:8000}.
+\end{importantbox}
+
+\textbf{Architecture:}
+\begin{enumerate}
+    \item GUI sends HTTP POST to \texttt{http://localhost:8000/}
+    \item JSON payload contains command code: \texttt{\{"rover": 1\}} or \texttt{\{"arm": 0\}}
+    \item HTTP server (not included) must translate commands to motor/arm control
+\end{enumerate}
+
+\textbf{Command Codes:}
+
+\begin{table}[H]
+\centering
+\caption{Rover HTTP Command Codes}
+\begin{tabular}{@{}clc@{}}
+\toprule
+\textbf{Code} & \textbf{Action} & \textbf{JSON Payload} \\
+\midrule
+1 & Forward & \texttt{\{"rover": 1\}} \\
+2 & Reverse & \texttt{\{"rover": 2\}} \\
+3 & Turn Left & \texttt{\{"rover": 3\}} \\
+4 & Turn Right & \texttt{\{"rover": 4\}} \\
+5 & Speed Up (Boost) & \texttt{\{"rover": 5\}} \\
+6 & Slow Down & \texttt{\{"rover": 6\}} \\
+7 & Stop & \texttt{\{"rover": 7\}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Arm HTTP Command Codes}
+\begin{tabular}{@{}clc@{}}
+\toprule
+\textbf{Code} & \textbf{Action} & \textbf{JSON Payload} \\
+\midrule
+0 & Claw Open & \texttt{\{"arm": 0\}} \\
+1 & Claw Close & \texttt{\{"arm": 1\}} \\
+2 & Base Shift Right & \texttt{\{"arm": 2\}} \\
+3 & Base Shift Left & \texttt{\{"arm": 3\}} \\
+4 & Bottom Joint Forward & \texttt{\{"arm": 4\}} \\
+5 & Bottom Joint Reverse & \texttt{\{"arm": 5\}} \\
+6 & Middle Joint Forward & \texttt{\{"arm": 6\}} \\
+7 & Middle Joint Reverse & \texttt{\{"arm": 7\}} \\
+8 & Top Joint Forward & \texttt{\{"arm": 8\}} \\
+9 & Top Joint Reverse & \texttt{\{"arm": 9\}} \\
+10 & Wrist Clockwise & \texttt{\{"arm": 10\}} \\
+11 & Wrist Counterclockwise & \texttt{\{"arm": 11\}} \\
+12 & Stop All & \texttt{\{"arm": 12\}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{warningbox}
+\textbf{HTTP Server Requirement}
+
+The \texttt{json\_motorGUI.py} will fail with connection errors if no HTTP server is running on port 8000. This GUI is designed for use with a custom HTTP-to-serial bridge that is separate from the ROS 2 infrastructure.
+\end{warningbox}
+
+\section{ROS 2 Motor Control GUI (arduino\_gui.py)}
+
+\textbf{Location:} \texttt{guis/arduino\_gui.py}
+
+This GUI uses ROS 2 for motor control (unlike \texttt{json\_motorGUI.py}).
+
+\textbf{Key Features:}
+\begin{itemize}
+    \item \textbf{ThrottleControl Widget} --- Custom QFrame with slider (0-100\%), reset/full buttons
+    \item \textbf{Physics Simulation} --- Acceleration/deceleration at 20 FPS (50ms timer)
+    \item \textbf{WASD Controls} --- Hold SHIFT + direction keys to apply throttle
+    \item \textbf{ROS 2 Integration} --- Publishes to \texttt{motor\_control\_input} topic via MotorPublisher
+\end{itemize}
+
+\textbf{Keybindings (arduino\_gui.py):}
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}cl@{}}
+\toprule
+\textbf{Key} & \textbf{Action} \\
+\midrule
+W & Forward (with SHIFT held) \\
+S & Backward (with SHIFT held) \\
+A & Turn Left (with SHIFT held) \\
+D & Turn Right (with SHIFT held) \\
+SHIFT & Apply throttle (hold to accelerate) \\
+SPACE & Emergency brake (immediate stop) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Physics Parameters:}
+\begin{lstlisting}[language=python, caption={Physics Constants in arduino\_gui.py}]
+self.acceleration_rate = 0.1      # Rate toward target speed
+self.deceleration_rate = 0.08     # Rate when releasing throttle
+self.angular_deceleration_rate = 0.1
+# Angular velocity decay multiplier: 0.7 (applied per frame)
+# Physics update rate: 50ms (20 FPS)
+\end{lstlisting}
+
 \section{Publisher Classes}
 
 \textbf{Location:} \texttt{guis/publishers/publisher.py}
@@ -1259,6 +1946,148 @@ class TwistPublisher(GenericPublisher):
         msg = Twist()
         msg.angular.z = float(angular_speed)
         self.publisher.publish(msg)
+\end{lstlisting}
+
+\section{Event Handling Architecture}
+
+The GUI system uses PyQt5's signal/slot mechanism to safely communicate between ROS 2 threads and the GUI thread.
+
+\subsection{Signal/Slot Pattern}
+
+ROS 2 callbacks execute in separate threads, but Qt GUI updates must happen in the main thread. Signals bridge this gap:
+
+\begin{lstlisting}[language=python, caption={Signal Definition and Emission}]
+# In IMUSubscriber (guis/subscribers/subscriber.py)
+class IMUSubscriber(GenericSubscriber, QObject):
+    # Define signal with parameter types
+    imu_data_updated = pyqtSignal(float, float, float)
+
+    def default_callback(self, msg):
+        # Parse data in ROS thread
+        parsed_data = self.parser.parse_imu_data(msg.data)
+        self.velocity, self.vertical_tilt, self.horizontal_tilt = parsed_data[1:4]
+
+        # Emit signal (thread-safe crossing to GUI thread)
+        self.imu_data_updated.emit(
+            self.velocity,
+            self.vertical_tilt,
+            self.horizontal_tilt
+        )
+\end{lstlisting}
+
+\begin{lstlisting}[language=python, caption={Signal Connection in GUI}]
+# In MainWindow (guis/gen_gui.py)
+def setup_subscribers(self):
+    self.imu_subscriber = IMUSubscriber()
+
+    # Connect signal to slot (GUI update method)
+    self.imu_subscriber.imu_data_updated.connect(self.update_imu_display)
+
+def update_imu_display(self, velocity, vert_tilt, horiz_tilt):
+    # This runs in GUI thread - safe to update widgets
+    self.speed_label.setText(f"{velocity:.2f} m/s")
+    self.vert_tilt_label.setText(f"{vert_tilt:.1f} deg")
+    self.horiz_tilt_label.setText(f"{horiz_tilt:.1f} deg")
+\end{lstlisting}
+
+\subsection{Available Signals}
+
+\begin{table}[H]
+\centering
+\caption{PyQt5 Signals in the System}
+\begin{tabular}{@{}llp{5cm}@{}}
+\toprule
+\textbf{Class} & \textbf{Signal} & \textbf{Parameters} \\
+\midrule
+IMUSubscriber & imu\_data\_updated & (float, float, float) --- velocity, vert\_tilt, horiz\_tilt \\
+MotorPublisher & message\_published & (str) --- the published command string \\
+TwistPublisher & twist\_published & (float $\times$ 6) --- linear xyz, angular xyz \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Keyboard Event Handling}
+
+The \texttt{json\_motorGUI.py} implements keyboard control using Qt's \texttt{keyPressEvent}:
+
+\begin{lstlisting}[language=python, caption={Keyboard Control Pattern}]
+# Command codes (from json_motorGUI.py lines 9-30)
+FORWARD = 1
+REVERSE = 2
+LEFT = 3
+RIGHT = 4
+SPEED_UP = 5
+SLOW_DOWN = 6
+STOP = 7
+
+class MotorWindow(QWidget):
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        if key == Qt.Key_I:
+            self.send_command(FORWARD)
+        elif key == Qt.Key_Comma:
+            self.send_command(REVERSE)
+        elif key == Qt.Key_J:
+            self.send_command(LEFT)
+        elif key == Qt.Key_L:
+            self.send_command(RIGHT)
+        elif key == Qt.Key_K:
+            self.send_command(STOP)
+        elif key == Qt.Key_Escape:
+            self.emergency_stop()
+\end{lstlisting}
+
+\section{Extending the GUI System}
+
+\subsection{Adding a New Sensor Display}
+
+To add a new sensor type to the GUI:
+
+\begin{enumerate}
+    \item \textbf{Create Data Parser} (if needed) in \texttt{guis/subscribers/}
+    \item \textbf{Create Subscriber Class} inheriting from \texttt{GenericSubscriber}
+    \item \textbf{Define PyQt Signal} with appropriate parameter types
+    \item \textbf{Connect Signal to Slot} in your GUI class
+    \item \textbf{Create UI Widgets} to display the data
+\end{enumerate}
+
+\begin{lstlisting}[language=python, caption={Example: Adding Temperature Sensor Display}]
+# 1. Create TempSubscriber in guis/subscribers/subscriber.py
+class TempSubscriber(GenericSubscriber, QObject):
+    temp_updated = pyqtSignal(float)  # temperature in Celsius
+
+    def __init__(self):
+        super().__init__('temp_data', String, 'temp_subscriber')
+        QObject.__init__(self)
+
+    def default_callback(self, msg):
+        temp = float(msg.data)
+        self.temp_updated.emit(temp)
+
+# 2. In your GUI class
+self.temp_subscriber = TempSubscriber()
+self.temp_subscriber.temp_updated.connect(self.update_temp_display)
+
+def update_temp_display(self, temp):
+    self.temp_label.setText(f"Temp: {temp:.1f} C")
+\end{lstlisting}
+
+\subsection{Adding a New Control Button}
+
+To add a new control that sends commands to the rover:
+
+\begin{lstlisting}[language=python, caption={Adding Custom Control Button}]
+# In your GUI setup
+self.custom_button = QPushButton("Custom Action")
+self.custom_button.clicked.connect(self.on_custom_click)
+
+# Create publisher instance
+self.motor_pub = MotorPublisher()
+
+def on_custom_click(self):
+    # Send custom motor command
+    self.motor_pub.publish_motor_command([50, 0, 0, 0, 0, 25])
 \end{lstlisting}
 
 %=============================================================================
@@ -1363,7 +2192,25 @@ autorestart=true
 
 %=============================================================================
 \chapter{Troubleshooting}
+\label{chap:troubleshooting}
 %=============================================================================
+
+\begin{importantbox}
+\textbf{\#1 Cause of System Failures: Arduino Plug-In Order}
+
+Before troubleshooting anything else, verify:
+\begin{enumerate}
+    \item Did you \textbf{re-plug Arduinos before starting Docker}?
+    \item Was \textbf{Sensor Arduino plugged in FIRST} (becomes \texttt{/dev/ttyACM0})?
+    \item Was \textbf{Motor Arduino plugged in SECOND} (becomes \texttt{/dev/ttyACM1})?
+\end{enumerate}
+
+\textbf{Docker captures port mappings at startup.} If you started the container with Arduinos in the wrong order (or unplugged), the bridges will fail silently or connect to the wrong device.
+
+\textbf{Quick Fix:} \texttt{docker-compose down} $\rightarrow$ unplug all $\rightarrow$ plug Sensor $\rightarrow$ plug Motor $\rightarrow$ \texttt{docker-compose up -d}
+
+See Section~\ref{sec:usb-enumeration} for the complete USB Port Enumeration Order guide.
+\end{importantbox}
 
 \section{Common Issues}
 
@@ -1372,9 +2219,11 @@ autorestart=true
 \textbf{Issue} & \textbf{Cause} & \textbf{Solution} \\
 \midrule
 \endhead
-Serial port not found & Device not connected & Check USB connections, verify \texttt{/dev/ttyACM*} exists \\
+Serial port not found & Device not connected or wrong plug-in order & Check USB connections, verify \texttt{/dev/ttyACM*} exists. \textbf{Ensure correct plug-in order} (see Section~\ref{sec:usb-enumeration}) \\
 \midrule
-Motors not responding & Wrong port or baud rate & Verify \texttt{/dev/ttyACM1}, check 115200 baud \\
+Motors not responding & Wrong port, baud rate, or plug-in order & Motor Arduino must be \texttt{/dev/ttyACM1} (plugged in \textbf{second}). See Section~\ref{sec:usb-enumeration} for required order \\
+\midrule
+Sensor data missing & Wrong plug-in order & Sensor Arduino must be \texttt{/dev/ttyACM0} (plugged in \textbf{first}). See Section~\ref{sec:usb-enumeration} \\
 \midrule
 ROS topics not visible & Domain ID mismatch & Ensure \texttt{ROS\_DOMAIN\_ID=0} on both systems \\
 \midrule
@@ -1383,9 +2232,416 @@ GUI won't display & X11 forwarding issue & Check \texttt{DISPLAY} variable, rest
 Camera black screen & USB bandwidth & Use USB 3.0 ports, reduce resolution \\
 \midrule
 High latency & Network congestion & Check WiFi signal, reduce message frequency \\
+\midrule
+IMU returns -0.1 values & Parse error in IMUDataParser & Check serial format matches "X: val\textbackslash tY: val\textbackslash tZ: val", verify BNO055 calibration \\
+\midrule
+GPS shows "NO CONNECTION!!!" & Empty NMEA sentence & Check GPS serial connection, verify module has satellite fix \\
+\midrule
+Motor command ignored & Invalid 6-value format & Verify comma-separated format with no spaces, check for exactly 6 values \\
+\midrule
+Ultrasonic shows 0.0 & Sensor timeout or wiring & Check trigger/echo pin wiring, verify object is within sensor range (2-400cm) \\
+\midrule
+Qt platform plugin error & Missing X11 libraries & Install \texttt{libxcb-xinerama0}, restart container \\
+\midrule
+Camera black after restart & RealSense USB reset needed & Unplug/replug USB cable, run \texttt{rs-enumerate-devices} \\
+\midrule
+ROS nodes visible but no data & QoS mismatch & Ensure \texttt{queue\_size=10} on both publisher and subscriber \\
+\midrule
+Container exits immediately & Supervisor config error & Check \texttt{/app/*.log} files inside container for startup errors \\
+\midrule
+PyQt5 signal not received & Thread safety violation & Use \texttt{pyqtSignal} for cross-thread communication, never update GUI directly from ROS callback \\
+\midrule
+Serial permission denied & User not in dialout group & Run \texttt{sudo usermod -a -G dialout \$USER}, then logout/login \\
 \bottomrule
 \caption{Common Issues and Solutions}
 \end{longtable}
+
+\section{Docker Container Restart Guide}
+
+When serial ports change (e.g., Arduino reconnected to different USB port), you must restart the Docker container to pick up the new device mapping.
+
+\begin{importantbox}
+\textbf{Key Concept: Docker Captures Ports at Startup}
+
+The Docker container maps \texttt{/dev/ttyACM*} devices \textbf{only when it starts}. If you:
+\begin{itemize}
+    \item Unplug/replug an Arduino while the container is running $\rightarrow$ container won't see the change
+    \item Start the container with Arduinos unplugged $\rightarrow$ container has no serial access
+    \item Start the container with wrong plug-in order $\rightarrow$ ports are swapped, motors/sensors fail
+\end{itemize}
+
+\textbf{Solution:} Always re-plug Arduinos in correct order \textbf{before} every \texttt{docker-compose up}.
+\end{importantbox}
+
+\subsection{When to Restart}
+
+\begin{itemize}
+    \item Arduino disconnected and reconnected (port may change from \texttt{/dev/ttyACM0} to \texttt{/dev/ttyACM1})
+    \item New USB device added that wasn't present at container start
+    \item Serial permission changes made to host system
+    \item After modifying \texttt{docker-compose.yml} device mappings
+    \item \textbf{Every time you want fresh, correct serial port assignments}
+\end{itemize}
+
+\subsection{Complete Restart Procedure}
+
+\begin{lstlisting}[language=bash, caption={Docker Container Restart for Port Changes}]
+# 1. Stop the running container
+cd docker/jetson  # or docker/local
+sudo docker-compose down
+
+# 2. RE-PLUG ARDUINOS IN CORRECT ORDER (CRITICAL!)
+#    a. Unplug ALL Arduinos from Jetson
+#    b. Wait 2 seconds
+#    c. Plug in SENSOR Arduino FIRST -> becomes /dev/ttyACM0
+#    d. Wait 2 seconds
+#    e. Plug in MOTOR Arduino SECOND -> becomes /dev/ttyACM1
+
+# 3. Verify correct port assignments
+ls -la /dev/ttyACM*
+# MUST show: ttyACM0 (Sensor) and ttyACM1 (Motor)
+
+# 4. (Optional) Update docker-compose.yml if needed
+# Edit the devices section if needed:
+#   devices:
+#     - /dev/ttyACM0:/dev/ttyACM0
+#     - /dev/ttyACM1:/dev/ttyACM1
+
+# 5. Start the container (AFTER re-plugging Arduinos!)
+sudo docker-compose up -d
+
+# 6. Verify container is running and processes started
+sudo docker ps
+sudo docker exec -it pitt_urc_jetson supervisorctl status
+
+# 7. Check bridge logs for serial connection success
+sudo docker exec -it pitt_urc_jetson tail -f /app/motor_bridge.log
+# Look for: "Serial connection established on /dev/ttyACM1"
+\end{lstlisting}
+
+\begin{warningbox}
+\textbf{Port Hardcoding Warning}
+
+The \texttt{MotorBridge} class has the serial port hardcoded to \texttt{/dev/ttyACM1}. If your Arduino appears on a different port, you have two options:
+
+\begin{enumerate}
+    \item \textbf{Create symlink on host} (recommended):
+    \begin{lstlisting}[language=bash]
+sudo ln -sf /dev/ttyACM0 /dev/ttyACM1
+    \end{lstlisting}
+
+    \item \textbf{Modify source code}:
+    Edit \texttt{ros\_bridge/arduino\_bridge\_base/arduino\_bridge\_base.py} line 98:
+    \begin{lstlisting}[language=python]
+serial_port="/dev/ttyACM0",  # Change to your port
+    \end{lstlisting}
+\end{enumerate}
+\end{warningbox}
+
+\subsection{USB Port Enumeration Order}
+\label{sec:usb-enumeration}
+
+\begin{importantbox}
+\textbf{Critical: Arduino Plug-In Order Matters}
+
+The Jetson (and Linux in general) assigns serial port numbers based on the \textbf{order devices are plugged in}, not by physical USB port location. The first USB serial device plugged in becomes \texttt{/dev/ttyACM0}, the second becomes \texttt{/dev/ttyACM1}, and so on.
+\end{importantbox}
+
+\textbf{How Port Assignment Works:}
+
+\begin{enumerate}
+    \item When the Jetson boots with no USB devices connected, no \texttt{/dev/ttyACM*} ports exist
+    \item The \textbf{first Arduino plugged in} is assigned \texttt{/dev/ttyACM0}
+    \item The \textbf{second Arduino plugged in} is assigned \texttt{/dev/ttyACM1}
+    \item If a device is unplugged and replugged, it may get a different port number
+\end{enumerate}
+
+\textbf{Required Plug-In Order for URC System:}
+
+Based on the hardcoded port assignments in \texttt{arduino\_bridge\_base.py}:
+
+\begin{center}
+\begin{tabular}{@{}clll@{}}
+\toprule
+\textbf{Order} & \textbf{Arduino} & \textbf{Expected Port} & \textbf{Bridge Class} \\
+\midrule
+1st (plug in first) & Sensor Arduino (IMU/GPS/Ultrasonic) & \texttt{/dev/ttyACM0} & IMUBridge, GPSBridge, UltrasonicBridge \\
+2nd (plug in second) & Motor Arduino & \texttt{/dev/ttyACM1} & MotorBridge \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}[language=python, caption={Port Assignments in arduino\_bridge\_base.py}]
+# MotorBridge - HARDCODED to ACM1 (line 98)
+class MotorBridge(ArduinoBridgeBase):
+    def __init__(self):
+        super().__init__(
+            serial_port="/dev/ttyACM1",  # Must be second device
+            ...
+        )
+
+# Sensor bridges default to ACM0
+class UltrasonicBridge(ArduinoBridgeBase):
+    def __init__(self, serial_port="/dev/ttyACM0", ...):  # First device
+
+class GPSBridge(ArduinoBridgeBase):
+    def __init__(self, serial_port="/dev/ttyACM0", ...):  # First device
+
+class IMUBridge(ArduinoBridgeBase):
+    def __init__(self):
+        possible_ports = ["/dev/ttyACM0", ...]  # Tries ACM0 first
+\end{lstlisting}
+
+\textbf{Startup Procedure:}
+
+\begin{enumerate}
+    \item Power on Jetson with \textbf{no Arduinos connected}
+    \item Wait for Jetson to fully boot (login screen or SSH available)
+    \item Plug in \textbf{Sensor Arduino first} (IMU/GPS/Ultrasonic) $\rightarrow$ becomes \texttt{/dev/ttyACM0}
+    \item Plug in \textbf{Motor Arduino second} $\rightarrow$ becomes \texttt{/dev/ttyACM1}
+    \item Verify ports with: \texttt{ls -la /dev/ttyACM*}
+    \item Start Docker container: \texttt{sudo docker-compose up -d}
+\end{enumerate}
+
+\begin{warningbox}
+\textbf{Common Mistake: Wrong Plug-In Order}
+
+If you plug in the Motor Arduino first, it gets \texttt{/dev/ttyACM0} but the MotorBridge expects \texttt{/dev/ttyACM1}. Symptoms:
+\begin{itemize}
+    \item Motor commands have no effect
+    \item Bridge logs show ``Serial connection established'' but motors don't respond
+    \item IMU/GPS bridge fails to connect (expected port is taken by wrong Arduino)
+\end{itemize}
+
+\textbf{Fix:} Unplug both Arduinos, wait 2 seconds, then plug them in the correct order.
+\end{warningbox}
+
+\textbf{Verifying Correct Port Assignment:}
+
+\begin{lstlisting}[language=bash, caption={Verify Arduino Port Assignment}]
+# List connected serial devices
+ls -la /dev/ttyACM*
+
+# Expected output when correctly plugged in:
+# /dev/ttyACM0 -> Sensor Arduino (first plugged in)
+# /dev/ttyACM1 -> Motor Arduino (second plugged in)
+
+# Check which Arduino is on which port by monitoring serial output:
+# Terminal 1 - Monitor ACM0 (should show IMU/GPS data)
+screen /dev/ttyACM0 115200
+
+# Terminal 2 - Monitor ACM1 (should respond to motor commands)
+screen /dev/ttyACM1 115200
+
+# Exit screen: Ctrl+A, then K, then Y
+\end{lstlisting}
+
+\begin{tipbox}
+\textbf{Pro Tip: udev Rules for Persistent Naming}
+
+For production deployments, create udev rules to assign consistent device names based on hardware serial numbers instead of plug-in order:
+
+\begin{lstlisting}[language=bash]
+# Find Arduino serial number
+udevadm info -a -n /dev/ttyACM0 | grep serial
+
+# Create udev rule (as root)
+echo 'SUBSYSTEM=="tty", ATTRS{serial}=="YOUR_SERIAL", SYMLINK+="arduino_motor"' \
+    >> /etc/udev/rules.d/99-arduino.rules
+
+# Reload rules
+sudo udevadm control --reload-rules
+\end{lstlisting}
+
+Then update bridge code to use \texttt{/dev/arduino\_motor} instead of \texttt{/dev/ttyACM1}.
+\end{tipbox}
+
+\subsection{Quick Restart Commands}
+
+\begin{warningbox}
+\textbf{Remember:} Before ANY \texttt{docker-compose up} command, re-plug Arduinos in correct order!
+\end{warningbox}
+
+\begin{lstlisting}[language=bash, caption={Quick Restart Reference}]
+# === BEFORE ANY RESTART: Re-plug Arduinos ===
+# 1. Unplug all Arduinos
+# 2. Plug Sensor Arduino (ACM0)
+# 3. Plug Motor Arduino (ACM1)
+# 4. Verify: ls /dev/ttyACM*
+
+# Full restart (recommended for port changes)
+sudo docker-compose down && sudo docker-compose up -d
+
+# Restart single bridge process (port must be same - NO re-plug needed)
+sudo docker exec -it pitt_urc_jetson supervisorctl restart motor_bridge
+
+# Rebuild and restart (after code changes)
+sudo docker-compose down
+# Re-plug Arduinos here!
+sudo docker build -t urc_jetson .
+sudo docker-compose up -d
+
+# Force recreate container (clears all state)
+# Re-plug Arduinos first!
+sudo docker-compose up -d --force-recreate
+\end{lstlisting}
+
+\section{Complete Cold-Start Procedure}
+
+This section provides a comprehensive, step-by-step guide for starting the entire URC system from a powered-off state.
+
+\begin{importantbox}
+\textbf{Critical: Follow This Order Exactly}
+
+The USB port enumeration is determined by plug-in order. Deviating from this procedure will result in incorrect port assignments and system failures.
+\end{importantbox}
+
+\subsection{Phase 1: Hardware Power-Up}
+
+\begin{enumerate}
+    \item \textbf{Ensure all Arduinos are UNPLUGGED} from the Jetson
+    \item Power on the Jetson Nano
+    \item Wait for complete boot (login prompt or SSH available) --- approximately 60-90 seconds
+    \item Power on the base station computer
+\end{enumerate}
+
+\subsection{Phase 2: Arduino Connection (Critical Order)}
+
+\begin{enumerate}
+    \item \textbf{Plug in Sensor Arduino FIRST}
+    \begin{itemize}
+        \item This Arduino runs IMU, GPS, and ultrasonic firmware
+        \item It will be assigned \texttt{/dev/ttyACM0}
+        \item Wait 2 seconds for device enumeration
+    \end{itemize}
+
+    \item \textbf{Plug in Motor Arduino SECOND}
+    \begin{itemize}
+        \item This Arduino runs motor control firmware
+        \item It will be assigned \texttt{/dev/ttyACM1}
+        \item Wait 2 seconds for device enumeration
+    \end{itemize}
+
+    \item \textbf{Verify port assignments on Jetson:}
+    \begin{lstlisting}[language=bash]
+ls -la /dev/ttyACM*
+# Expected output:
+# /dev/ttyACM0 -> Sensor Arduino
+# /dev/ttyACM1 -> Motor Arduino
+    \end{lstlisting}
+\end{enumerate}
+
+\subsection{Phase 3: Start Jetson Container}
+
+\begin{lstlisting}[language=bash, caption={Jetson Container Startup}]
+# SSH into Jetson (or use direct terminal)
+ssh user@jetson-ip
+
+# Navigate to docker directory
+cd ~/URC/docker/jetson
+
+# Start container in detached mode
+sudo docker-compose up -d
+
+# Verify container is running
+sudo docker ps
+# Should show: pitt_urc_jetson
+
+# Check Supervisor processes started
+sudo docker exec -it pitt_urc_jetson supervisorctl status
+# Expected: motor_bridge RUNNING, imu_bridge RUNNING, etc.
+
+# Monitor bridge logs for serial connection success
+sudo docker exec -it pitt_urc_jetson tail -f /app/motor_bridge.log
+# Look for: "Serial connection established on /dev/ttyACM1"
+\end{lstlisting}
+
+\subsection{Phase 4: Start Base Station Container}
+
+\begin{lstlisting}[language=bash, caption={Base Station Container Startup}]
+# On base station computer
+cd ~/URC/docker/local
+
+# Start container
+sudo docker-compose up -d
+
+# Verify container
+sudo docker ps
+# Should show: pitt_urc_local
+\end{lstlisting}
+
+\subsection{Phase 5: Verify ROS 2 Communication}
+
+\begin{lstlisting}[language=bash, caption={ROS 2 Verification}]
+# On base station, enter container
+sudo docker exec -it pitt_urc_local bash
+
+# Source ROS 2
+source /opt/ros/humble/local_setup.bash
+
+# Check for topics from Jetson
+ros2 topic list
+# Expected: /imu_data, /gps_data, /motor_control_input, /cmd_vel, etc.
+
+# Test IMU data reception
+ros2 topic echo /imu_data
+# Should show: data: "X: <val>\tY: <val>\tZ: <val>"
+
+# Test motor command transmission
+ros2 topic pub --once /motor_control_input std_msgs/String "data: '0,0,0,0,0,0'"
+# Motors should remain stopped (all zeros)
+\end{lstlisting}
+
+\subsection{Phase 6: Launch GUI}
+
+\begin{lstlisting}[language=bash, caption={GUI Launch}]
+# Inside base station container
+cd /app/guis
+
+# Launch main GUI
+python3 gen_gui.py
+
+# OR launch motor control GUI (ROS 2 based)
+python3 arduino_gui.py
+
+# OR launch HTTP-based GUI (requires HTTP server)
+# python3 json_motorGUI.py
+\end{lstlisting}
+
+\subsection{Verification Checklist}
+
+\begin{table}[H]
+\centering
+\caption{Cold-Start Verification Checklist}
+\begin{tabular}{@{}lcp{6cm}@{}}
+\toprule
+\textbf{Component} & \textbf{Status} & \textbf{Verification Command} \\
+\midrule
+Jetson booted & $\square$ & SSH connection successful \\
+Sensor Arduino (ACM0) & $\square$ & \texttt{ls /dev/ttyACM0} exists \\
+Motor Arduino (ACM1) & $\square$ & \texttt{ls /dev/ttyACM1} exists \\
+Jetson container & $\square$ & \texttt{docker ps} shows running \\
+Bridges running & $\square$ & \texttt{supervisorctl status} all RUNNING \\
+Serial connected & $\square$ & Bridge logs show "established" \\
+Base container & $\square$ & \texttt{docker ps} shows running \\
+ROS topics visible & $\square$ & \texttt{ros2 topic list} shows topics \\
+IMU data flowing & $\square$ & \texttt{ros2 topic echo /imu\_data} shows data \\
+GUI launches & $\square$ & Window appears, no errors \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{warningbox}
+\textbf{Troubleshooting Cold-Start Failures}
+
+\begin{itemize}
+    \item \textbf{No /dev/ttyACM* devices:} Unplug both Arduinos, wait 5 seconds, replug in correct order
+    \item \textbf{Bridge shows "Serial connection failed":} Wrong plug-in order. Restart from Phase 2
+    \item \textbf{ROS topics not visible:} Check \texttt{ROS\_DOMAIN\_ID=0} on both systems
+    \item \textbf{GUI crashes on launch:} Verify X11 forwarding (\texttt{echo \$DISPLAY} should be set)
+    \item \textbf{Motors don't respond:} Verify Motor Arduino is on ACM1 (plug-in order issue)
+\end{itemize}
+\end{warningbox}
 
 \section{Serial Port Debugging}
 
@@ -1535,6 +2791,400 @@ class TwistPublisher(GenericPublisher):
     def stop(self):
         """Stop all motion."""
 \end{lstlisting}
+
+\section{GenericPublisher}
+
+\textbf{Location:} \texttt{guis/publishers/publisher.py}
+
+Base class for all ROS 2 publishers in the GUI system.
+
+\begin{lstlisting}[language=python, caption={GenericPublisher API}]
+class GenericPublisher(Node):
+    """
+    Base class for ROS 2 publishers.
+
+    Extends rclpy.node.Node to provide a simple interface
+    for publishing messages to ROS 2 topics.
+    """
+
+    def __init__(self, topic_name: str, msg_type,
+                 node_name: str = 'generic_publisher',
+                 queue_size: int = 10):
+        """
+        Initialize the publisher.
+
+        Args:
+            topic_name: Name of the ROS 2 topic to publish to
+            msg_type: Message type (e.g., String, Twist)
+            node_name: Unique name for this ROS 2 node
+            queue_size: Publisher queue depth (default: 10)
+        """
+
+    def publish_message(self, message):
+        """
+        Publish a message to the topic.
+
+        Args:
+            message: Message instance of the correct type
+        """
+\end{lstlisting}
+
+\section{GenericSubscriber}
+
+\textbf{Location:} \texttt{guis/subscribers/subscriber.py}
+
+Base class for all ROS 2 subscribers in the GUI system.
+
+\begin{lstlisting}[language=python, caption={GenericSubscriber API}]
+class GenericSubscriber(Node):
+    """
+    Base class for ROS 2 subscribers.
+
+    Provides subscription to ROS 2 topics with customizable
+    callback functions for message processing.
+    """
+
+    def __init__(self, topic_name: str, msg_type,
+                 node_name: str = 'generic_subscriber',
+                 callback=None):
+        """
+        Initialize the subscriber.
+
+        Args:
+            topic_name: Name of the ROS 2 topic to subscribe to
+            msg_type: Expected message type
+            node_name: Unique name for this ROS 2 node
+            callback: Custom callback function (uses default if None)
+        """
+
+    def default_callback(self, msg):
+        """
+        Default message handler - logs received messages.
+
+        Override in subclasses for custom processing.
+
+        Args:
+            msg: The received ROS 2 message
+        """
+\end{lstlisting}
+
+\section{IMUSubscriber}
+
+\textbf{Location:} \texttt{guis/subscribers/subscriber.py}
+
+Specialized subscriber for IMU data with PyQt5 signal integration.
+
+\begin{lstlisting}[language=python, caption={IMUSubscriber API}]
+class IMUSubscriber(GenericSubscriber, QObject):
+    """
+    Subscriber for IMU data with Qt signal support.
+
+    Parses incoming IMU messages and emits signals for
+    thread-safe GUI updates.
+    """
+
+    # PyQt5 Signal: emitted when new IMU data is parsed
+    imu_data_updated = pyqtSignal(float, float, float)
+    # Parameters: velocity, vertical_tilt, horizontal_tilt
+
+    def __init__(self, topic_name: str = 'imu_data',
+                 msg_type=String,
+                 node_name: str = 'imu_subscriber'):
+        """Initialize with default IMU topic."""
+
+    @property
+    def imu_distance(self) -> float:
+        """Cumulative distance traveled (meters)."""
+
+    @property
+    def imu_velocity(self) -> float:
+        """Current velocity (meters/second)."""
+
+    @property
+    def imu_vertical_tilt_angle(self) -> float:
+        """Vertical tilt angle (degrees)."""
+
+    @property
+    def imu_horizontal_tilt_angle(self) -> float:
+        """Horizontal tilt angle (degrees)."""
+
+    # Error Behavior:
+    # On parse failure, all properties return -0.1
+\end{lstlisting}
+
+\section{GPSSubscriber}
+
+\textbf{Location:} \texttt{guis/subscribers/subscriber.py}
+
+Specialized subscriber for GPS NMEA data.
+
+\begin{lstlisting}[language=python, caption={GPSSubscriber API}]
+class GPSSubscriber(GenericSubscriber):
+    """
+    Subscriber for GPS NMEA sentence data.
+
+    Parses GAGSV/GBGSV (satellite) and GNGLL (position)
+    sentences using GPSDataParser.
+    """
+
+    def __init__(self, topic_name: str = 'gps_data',
+                 msg_type=String,
+                 node_name: str = 'gps_subscriber'):
+        """Initialize with default GPS topic."""
+
+    def default_callback(self, msg):
+        """
+        Parse GPS message and log results.
+
+        Logs: SNR values, average SNR, coordinates
+        Returns "NO CONNECTION!!!" on empty input
+        """
+\end{lstlisting}
+
+\section{IMUDataParser}
+
+\textbf{Location:} \texttt{guis/subscribers/IMUDataParser.py}
+
+Stateful parser that computes derived values from IMU orientation data.
+
+\begin{lstlisting}[language=python, caption={IMUDataParser API}]
+class IMUDataParser:
+    """
+    Parses IMU orientation strings and computes motion metrics.
+
+    Maintains state between readings to calculate distance
+    and velocity. Uses Euclidean distance in 3D space.
+    """
+
+    def __init__(self):
+        """Initialize with no previous data."""
+
+    def parse_imu_data(self, imu_message: str) -> tuple:
+        """
+        Parse IMU message and compute derived values.
+
+        Args:
+            imu_message: String in format "X: <f>\tY: <f>\tZ: <f>"
+
+        Returns:
+            tuple: (distance, velocity, vert_tilt, horiz_tilt)
+                   Returns (0.0, 0.0, 0.0, 0.0) on first call
+        """
+
+    @staticmethod
+    def parse_coordinates(imu_coordinates_data: str) -> list[float]:
+        """
+        Extract [X, Y, Z] floats from IMU string.
+
+        Args:
+            imu_coordinates_data: "X: val\tY: val\tZ: val"
+
+        Returns:
+            list: [x, y, z] as floats
+        """
+
+    @staticmethod
+    def calculate_distance(past: list, current: list) -> float:
+        """
+        Compute Euclidean distance between 3D points.
+
+        Args:
+            past: [x, y, z] previous coordinates
+            current: [x, y, z] current coordinates
+
+        Returns:
+            float: Distance in coordinate units
+        """
+\end{lstlisting}
+
+\section{GPSDataParser}
+
+\textbf{Location:} \texttt{guis/subscribers/GPSDataParser.py}
+
+Parser for NMEA GPS sentences (GAGSV, GBGSV, GNGLL).
+
+\begin{lstlisting}[language=python, caption={GPSDataParser API}]
+class GPSDataParser:
+    """
+    Parses NMEA sentences for GPS position and signal quality.
+
+    Supports:
+    - GAGSV/GBGSV: Satellite SNR (signal-to-noise ratio)
+    - GNGLL: Geographic position (lat/lon)
+    """
+
+    def parse_gagsv(self, nmea_sentence: str) -> list[int] | str | None:
+        """
+        Extract SNR values from satellite sentence.
+
+        Args:
+            nmea_sentence: NMEA GAGSV or GBGSV sentence
+
+        Returns:
+            list[int]: SNR values for visible satellites
+            str: "NO CONNECTION!!!" if empty input
+            None: If not a valid GAGSV/GBGSV sentence
+        """
+
+    def compute_average_snr(self, snr_values: list[int]) -> float:
+        """
+        Calculate average signal-to-noise ratio.
+
+        Args:
+            snr_values: List of SNR integers
+
+        Returns:
+            float: Average SNR, or 0 if empty list
+        """
+
+    def parse_gngll(self, nmea_sentence: str) -> str | None:
+        """
+        Extract coordinates from position sentence.
+
+        Args:
+            nmea_sentence: NMEA GNGLL sentence
+
+        Returns:
+            str: "Latitude: <lat> <dir> Longitude: <lon> <dir>"
+            str: "NO CONNECTION!!!" if empty input
+            None: If not a valid GNGLL sentence
+        """
+
+    def parse_message(self, nmea_sentence: str) -> tuple:
+        """
+        Parse any supported NMEA sentence.
+
+        Args:
+            nmea_sentence: Any NMEA sentence string
+
+        Returns:
+            tuple: (snr_values, average_snr, coordinates)
+                   - snr_values: list, "NO CONNECTION!!!", or None
+                   - average_snr: float (0 if no SNR data)
+                   - coordinates: str or None
+        """
+\end{lstlisting}
+
+\section{ImageSubscriber}
+
+\textbf{Location:} \texttt{guis/subscribers/RGBsubcriber.py}
+
+Subscriber for RealSense camera images (grayscale and depth).
+
+\begin{lstlisting}[language=python, caption={ImageSubscriber API}]
+class ImageSubscriber(Node):
+    """
+    Subscribes to RealSense camera image topics.
+
+    Handles both grayscale and depth images using CvBridge
+    for ROS-to-OpenCV conversion.
+
+    Topics:
+        - camera/gray/image_raw: Grayscale images (mono8)
+        - camera/depth/image_raw: Depth images (passthrough)
+    """
+
+    def __init__(self):
+        """
+        Initialize subscriptions for gray and depth images.
+
+        Creates CvBridge for image format conversion.
+        """
+
+    def gray_callback(self, msg):
+        """
+        Process incoming grayscale images.
+
+        Args:
+            msg (sensor_msgs/Image): ROS image message
+
+        Side Effects:
+            - Updates self.gray_image (numpy.ndarray)
+            - Displays image via cv2.imshow() if enabled
+
+        Encoding: mono8 (8-bit grayscale)
+        """
+
+    def depth_callback(self, msg):
+        """
+        Process incoming depth images.
+
+        Args:
+            msg (sensor_msgs/Image): ROS depth image message
+
+        Encoding: passthrough (native depth format)
+
+        Note: Display visualization commented out in production.
+              Uncomment cv2.convertScaleAbs() lines for
+              colormap visualization.
+        """
+
+# Utility function
+def array_to_image(array, filename) -> PILImage:
+    """
+    Convert numpy array to PIL Image and save to file.
+
+    Args:
+        array: 2D numpy array (clipped to 0-255)
+        filename: Output file path
+
+    Returns:
+        PIL.Image: Grayscale image (mode='L')
+    """
+\end{lstlisting}
+
+\textbf{Usage in GUI:}
+\begin{lstlisting}[language=python, caption={Integrating ImageSubscriber with PyQt5}]
+# In gen_gui.py CameraSubscriber (internal class)
+class CameraSubscriber(Node):
+    image_updated = pyqtSignal(object, bool)  # (frame, is_gray)
+
+    def gray_callback(self, msg):
+        cv_image = self.bridge.imgmsg_to_cv2(msg, 'mono8')
+        self.image_updated.emit(cv_image, True)
+
+# Connect to GUI update
+camera_sub.image_updated.connect(self.update_camera_display)
+\end{lstlisting}
+
+\section{Bridge Classes}
+
+All bridge classes inherit from \texttt{ArduinoBridgeBase} and run on the Jetson container.
+
+\subsection{MotorBridge}
+
+\begin{lstlisting}[language=python, caption={MotorBridge Subscriptions}]
+class MotorBridge(ArduinoBridgeBase):
+    """
+    Motor control bridge with multiple input sources.
+
+    Subscriptions (any can control motors):
+        - cmd_vel (Twist): Standard ROS teleop messages
+        - motor_control_input (String): GUI 6-value format
+        - drive_arduino_commands (String): Legacy format
+
+    Publisher:
+        - drive_data (String): Arduino response data
+
+    Serial Port: /dev/ttyACM1 (hardcoded)
+    """
+\end{lstlisting}
+
+\subsection{Other Bridges}
+
+\begin{table}[H]
+\centering
+\caption{Sensor Bridge Summary}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Class} & \textbf{Topic} & \textbf{Default Port} & \textbf{Data Format} \\
+\midrule
+GPSBridge & gps\_data & /dev/ttyACM0 & NMEA sentences \\
+IMUBridge & imu\_data & Auto-detect & "X: \textbackslash tY: \textbackslash tZ:" \\
+UltrasonicBridge & ultrasonic\_data & /dev/ttyACM0 & "d1, d2, d3, " \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 %=============================================================================
 % Appendices
