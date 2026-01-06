@@ -18,6 +18,7 @@
 \usepackage{tocloft}
 \usepackage{enumitem}
 \usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc, decorations.pathreplacing}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -46,6 +47,8 @@
 \definecolor{backcolour}{RGB}{245, 245, 245}
 \definecolor{terminalblack}{RGB}{30, 30, 30}
 \definecolor{terminalgreen}{RGB}{0, 255, 0}
+\definecolor{jetsongreen}{RGB}{118, 185, 0}
+\definecolor{arduinoblue}{RGB}{0, 151, 156}
 
 % Hyperref setup
 \hypersetup{
@@ -151,6 +154,8 @@
 % Document info
 \title{
     \vspace{-2cm}
+    % \includegraphics[width=0.3\textwidth]{logo.png}\\ % Uncomment when logo file is available
+    \vspace{1cm}
     {\color{pittblue}\Huge\bfseries University Rover Challenge}\\
     \vspace{0.5cm}
     {\color{pittblue!70}\LARGE Complete Technical Documentation}\\
@@ -193,6 +198,7 @@
 
 %=============================================================================
 \chapter{Project Overview}
+\label{chap:overview}
 %=============================================================================
 
 \section{Introduction}
@@ -352,7 +358,39 @@ Motors/Sensors & Rover (Physical) & Physical actuation and sensing \\
 
 %=============================================================================
 \chapter{System Architecture}
+\label{chap:architecture}
 %=============================================================================
+
+\section{Technology Stack}
+
+The rover system leverages a modern technology stack for robotics development:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.3cm,
+    box/.style={rectangle, rounded corners, draw=pittblue, fill=pittblue!10, minimum width=2cm, minimum height=0.7cm, font=\small\bfseries},
+    label/.style={font=\scriptsize, gray}
+]
+\node[box] (ros) {ROS2 Humble};
+\node[box, right=of ros] (docker) {Docker};
+\node[box, right=of docker] (python) {Python 3};
+\node[box, right=of python] (pyqt) {PyQt5};
+\node[box, right=of pyqt] (opencv) {OpenCV};
+\node[box, right=of opencv] (arduino) {Arduino};
+\node[box, right=of arduino] (gazebo) {Gazebo};
+
+\node[label, below=2pt of ros] {Middleware};
+\node[label, below=2pt of docker] {Containers};
+\node[label, below=2pt of python] {Backend};
+\node[label, below=2pt of pyqt] {GUI};
+\node[label, below=2pt of opencv] {Vision};
+\node[label, below=2pt of arduino] {Embedded};
+\node[label, below=2pt of gazebo] {Simulation};
+\end{tikzpicture}
+\caption{Technology Stack}
+\label{fig:tech-stack}
+\end{figure}
 
 \section{High-Level Architecture}
 
@@ -410,19 +448,165 @@ The rover system uses a \textbf{dual-container architecture} for optimal perform
 \caption{System Architecture Overview}
 \end{figure}
 
-\section{Dual-Container Architecture}
+\section{Detailed Hardware Architecture}
+
+The following diagram shows the complete hardware interconnections of the rover system, including power distribution, communication pathways, and all sensor subsystems.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    scale=0.65,
+    transform shape,
+    box/.style={rectangle, rounded corners=3pt, draw, minimum height=0.6cm, font=\scriptsize, align=center, text width=1.6cm},
+    smallbox/.style={rectangle, rounded corners=2pt, draw, minimum height=0.5cm, font=\tiny, align=center, text width=1.1cm},
+    motor/.style={regular polygon, regular polygon sides=6, draw=pittgold!80, fill=pittgold!25, minimum size=0.5cm, font=\tiny},
+    sensor/.style={rectangle, rounded corners=2pt, draw=jetsongreen!80, fill=jetsongreen!15, minimum height=0.42cm, font=\tiny, text width=1.1cm, align=center},
+    arr/.style={-{Stealth[scale=0.5]}, thick},
+    darr/.style={-{Stealth[scale=0.5]}, dashed}
+]
+
+% === POWER SYSTEM (top, y=5) ===
+\node[smallbox, fill=red!10, draw=red!50] (batt) at (10,5) {Batteries\\$4\times$ 40V};
+\node[box, fill=red!25, draw=red!70, text width=1.3cm] (estop) at (7,5) {Emergency\\Stop};
+\node[box, fill=red!15, draw=red!60, text width=1.7cm] (pdu) at (3.5,5) {Power Dist.\\Module};
+\node[smallbox, fill=orange!20, draw=orange!60] (vreg1) at (0,5) {Voltage\\Reg \#1};
+
+\draw[arr, red!60] (batt) -- (estop);
+\draw[arr, red!60] (estop) -- (pdu);
+\draw[arr, red!60] (pdu) -- (vreg1);
+
+% V-Reg #2 (directly below PDU)
+\node[smallbox, fill=orange!20, draw=orange!60] (vreg2) at (3.5,3.8) {Voltage\\Reg \#2};
+\draw[arr, red!60] (pdu.south) -- (vreg2.north);
+
+% === COMMUNICATION (left side) ===
+\node[box, fill=blue!8, draw=blue!50, text width=1.4cm] (base) at (-8,5) {Base\\Station};
+\node[box, fill=blue!12, draw=blue!60, text width=1.3cm] (router) at (-8,3.5) {WiFi\\Router};
+\node[smallbox, fill=blue!15, draw=blue!60] (tx) at (-8,2) {Trans-\\mitter};
+\node[smallbox, fill=blue!15, draw=blue!60] (rx) at (-5,2) {Receiver};
+
+\draw[arr] (base) -- (router);
+\draw[arr] (router) -- (tx);
+\draw[darr, blue!60] (tx) -- node[above, font=\tiny] {WiFi} (rx);
+
+% === JETSON NANO (center, y=2) ===
+\node[box, fill=jetsongreen!30, draw=jetsongreen, text width=2.2cm, minimum height=1cm, font=\small\bfseries] (jetson) at (-1,2) {Jetson\\Nano};
+
+% Rx to Jetson
+\draw[arr, blue!60] (rx) -- (jetson);
+
+% V-Reg #1 to Jetson
+\draw[arr, orange!60] (vreg1.south) -- ++(0,-1) -- ++(-1,0) -- (jetson.north);
+
+% === CAMERAS (y=0.5, below Jetson) ===
+\node[sensor] (camf) at (-2.5,0.5) {RealSense\\(Front)};
+\node[sensor] (camb) at (-1,0.5) {RealSense\\(Back)};
+\node[sensor] (cama) at (0.5,0.5) {RealSense\\(Arm)};
+
+\draw[arr, jetsongreen!70] (jetson.south) ++(-0.5,0) -- (camf.north);
+\draw[arr, jetsongreen!70] (jetson.south) -- (camb.north);
+\draw[arr, jetsongreen!70] (jetson.south) ++(0.5,0) -- (cama.north);
+
+% === MOTOR ARDUINO (x=-8, y=-0.8) ===
+\node[box, fill=arduinoblue!25, draw=arduinoblue, text width=1.6cm] (ardmotor) at (-8,-0.8) {Arduino Duo\\(Motors)};
+
+% Jetson to Motor Arduino
+\draw[arr, blue!60] (jetson.west) ++(0,-0.3) -- (-4,1.7) -- (-4,-0.8) -- node[above, font=\tiny] {UART} (ardmotor.east);
+
+% === MOTOR CONTROLLERS (y=-2.5) ===
+\node[box, fill=pittgold!20, draw=pittgold!70, text width=1.1cm] (mcf) at (-10,-2.5) {Motor Ctrl\\Front};
+\node[box, fill=pittgold!20, draw=pittgold!70, text width=1.1cm] (mcm) at (-8,-2.5) {Motor Ctrl\\Middle};
+\node[box, fill=pittgold!20, draw=pittgold!70, text width=1.1cm] (mcb) at (-6,-2.5) {Motor Ctrl\\Back};
+
+\draw[arr, arduinoblue] (ardmotor.south) ++(-0.3,0) -- (mcf.north);
+\draw[arr, arduinoblue] (ardmotor.south) -- (mcm.north);
+\draw[arr, arduinoblue] (ardmotor.south) ++(0.3,0) -- (mcb.north);
+
+% V-Reg #2 to Motor Controllers
+\draw[orange!60, thick] (vreg2.south) -- (3.5,-4);
+\draw[orange!60, thick] (3.5,-4) -- (-10,-4);
+\draw[arr, orange!60] (-10,-4) -- (-10,-2.85);
+\draw[arr, orange!60] (-8,-4) -- (-8,-2.85);
+\draw[arr, orange!60] (-6,-4) -- (-6,-2.85);
+
+% === MOTORS (y=-3.3) ===
+\node[motor] (m1) at (-10.5,-3.3) {M1};
+\node[motor] (m2) at (-9.5,-3.3) {M2};
+\node[motor] (m3) at (-8.5,-3.3) {M3};
+\node[motor] (m4) at (-7.5,-3.3) {M4};
+\node[motor] (m5) at (-6.5,-3.3) {M5};
+\node[motor] (m6) at (-5.5,-3.3) {M6};
+
+\draw[arr, pittgold!70] (mcf.south) ++(-0.25,0) -- (m1.north);
+\draw[arr, pittgold!70] (mcf.south) ++(0.25,0) -- (m2.north);
+\draw[arr, pittgold!70] (mcm.south) ++(-0.25,0) -- (m3.north);
+\draw[arr, pittgold!70] (mcm.south) ++(0.25,0) -- (m4.north);
+\draw[arr, pittgold!70] (mcb.south) ++(-0.25,0) -- (m5.north);
+\draw[arr, pittgold!70] (mcb.south) ++(0.25,0) -- (m6.north);
+
+% === IMU ARDUINO (x=3, y=0) ===
+\node[box, fill=arduinoblue!25, draw=arduinoblue, text width=1.4cm] (ardimu) at (3,0) {Arduino Duo\\(IMU)};
+\node[sensor] (imu) at (3,-1.5) {BNO055\\IMU};
+
+\draw[arr, blue!60] (jetson.east) ++(0,-0.15) -- node[above, font=\tiny] {UART} ++(1.8,0) |- (ardimu.west);
+\draw[arr, jetsongreen!70] (ardimu.south) -- node[right, font=\tiny] {I2C} (imu.north);
+
+% === GPS ARDUINO (x=6, y=-1.5) ===
+\node[box, fill=arduinoblue!25, draw=arduinoblue, text width=1.4cm] (ardgps) at (6,-1.5) {Arduino Duo\\(GPS)};
+\node[sensor] (gps) at (6,-3) {ZED-F9P\\RTK GPS};
+
+\draw[arr, blue!60] (jetson.east) ++(0,-0.35) -- ++(4,0) -- node[right, font=\tiny] {UART} (6,-1.1) -- (ardgps.north);
+\draw[arr, jetsongreen!70] (ardgps.south) -- (gps.north);
+
+% === ULTRASONIC ARDUINO (x=7, y=2) ===
+\node[box, fill=arduinoblue!25, draw=arduinoblue, text width=1.5cm] (ardus) at (7,2) {Arduino Duo\\(Ultrasonic)};
+
+\draw[arr, blue!60] (jetson.east) ++(0,0.2) -- node[above, font=\tiny] {UART} (ardus.west);
+
+% Ultrasonic sensors (3 sensors)
+\node[sensor, text width=0.5cm, minimum height=0.25cm] (us1) at (6.3,0.3) {US1};
+\node[sensor, text width=0.5cm, minimum height=0.25cm] (us2) at (7,0.3) {US2};
+\node[sensor, text width=0.5cm, minimum height=0.25cm] (us3) at (7.7,0.3) {US3};
+
+\draw[arr, jetsongreen!70] (ardus.south) -- ++(0,-0.3) -| (us1.north);
+\draw[arr, jetsongreen!70] (ardus.south) -- ++(0,-0.3) -| (us2.north);
+\draw[arr, jetsongreen!70] (ardus.south) -- ++(0,-0.3) -| (us3.north);
+
+% === ARM ARDUINO (x=10, y=2) ===
+\node[box, fill=arduinoblue!25, draw=arduinoblue, text width=1.4cm] (ardarm) at (10,2) {Arduino Duo\\(Arm)};
+\node[smallbox, fill=purple!10, draw=purple!40] (la1) at (9,0.5) {Linear\\Actuator};
+\node[smallbox, fill=purple!10, draw=purple!40] (la2) at (11,0.5) {Linear\\Actuator};
+\node[smallbox, fill=purple!10, draw=purple!40, text width=0.9cm] (grip) at (10,-0.5) {Gripper};
+
+\draw[arr, blue!60] (jetson.east) ++(0,0.4) -- ++(0,0.8) -- node[above, font=\tiny] {UART} (10,3.2) -- (ardarm.north);
+\draw[arr, purple!50] (ardarm.south) ++(-0.3,0) -- (la1.north);
+\draw[arr, purple!50] (ardarm.south) ++(0.3,0) -- (la2.north);
+\draw[arr, purple!50] (ardarm.south) -- (grip.north);
+
+\end{tikzpicture}
+\caption{Detailed Hardware System Architecture}
+\label{fig:hardware-architecture}
+\end{figure}
+
+\subsection{Hardware Subsystems Summary}
 
 \begin{table}[H]
 \centering
-\caption{Container Responsibilities}
-\begin{tabular}{@{}llp{7cm}@{}}
+\caption{Hardware Subsystem Overview}
+\begin{tabular}{@{}llp{6.5cm}@{}}
 \toprule
-\textbf{Container} & \textbf{Location} & \textbf{Purpose} \\
+\textbf{Subsystem} & \textbf{Components} & \textbf{Description} \\
 \midrule
-Jetson Container & On-board rover & Hardware bridges, sensor acquisition, motor control, camera feeds \\
-Local Container & Base station & GUI interfaces, visualization, high-level control, debugging \\
+Power & 4$\times$ 40V batteries, 2$\times$ voltage regulators, E-stop & Provides isolated power rails for compute and motors \\
+Communication & WiFi router, transmitter/receiver & Wireless link between base station and rover \\
+Compute & Jetson Nano & Central processing unit for all onboard operations \\
+Motors & 6$\times$ GoBilda motors, 3$\times$ motor controllers & 6-wheel differential drive system \\
+Vision & 3$\times$ Intel RealSense D400 cameras & Front, back, and arm-mounted RGB-D cameras \\
+Sensors & BNO055 IMU, ZED-F9P RTK GPS, 3$\times$ HC-SR04 & Navigation and obstacle detection sensors \\
+Arm & 2$\times$ linear actuators, gripper & 4-DOF robotic manipulator with 5kg payload \\
 \bottomrule
 \end{tabular}
+\label{tab:hardware-subsystems}
 \end{table}
 
 \begin{tipbox}
@@ -458,213 +642,55 @@ The dual-container architecture saves Jetson processing power for real-time cont
 \caption{Motor Control Communication Flow}
 \end{figure}
 
-\section{Sensor Data Flow}
+\section{Bidirectional Data Flow}
 
-Each sensor follows a parallel data pipeline from hardware to GUI display. Understanding these pipelines helps developers debug sensor issues and add new sensor types.
+The system supports bidirectional communication: commands flow from the base station to the rover, while sensor data flows from the rover back to the base station.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    scale=0.85,
-    node distance=0.6cm,
-    sensor/.style={rectangle, draw=pittgold, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=pittgold!20, font=\scriptsize},
-    bridge/.style={rectangle, draw=pittblue, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=pittblue!10, font=\scriptsize},
-    topic/.style={rectangle, draw=pittblue!50, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=pittblue!5, font=\scriptsize},
-    sub/.style={rectangle, draw=green!50!black, thick, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=green!10, font=\scriptsize},
-    arrow/.style={->, thick, >=stealth}
+    scale=0.75,
+    transform shape,
+    box/.style={rectangle, rounded corners=3pt, draw=pittblue, fill=pittblue!8, minimum width=2.3cm, minimum height=1.1cm, font=\scriptsize, align=center},
+    arr/.style={-{Stealth[scale=0.7]}, thick},
 ]
-    % IMU Pipeline
-    \node at (-4.5, 4) {\textbf{IMU}};
-    \node[sensor] (imu_hw) at (-4.5, 3) {BNO055\\(I2C)};
-    \node[sensor] (imu_ard) at (-4.5, 2) {Arduino\\imu\_serial.ino};
-    \node[bridge] (imu_bridge) at (-4.5, 1) {IMUBridge};
-    \node[topic] (imu_topic) at (-4.5, 0) {/imu\_data};
-    \node[sub] (imu_sub) at (-4.5, -1) {IMUSubscriber};
-    \node[sub] (imu_parse) at (-4.5, -2) {IMUDataParser};
 
-    % GPS Pipeline
-    \node at (-1.5, 4) {\textbf{GPS}};
-    \node[sensor] (gps_hw) at (-1.5, 3) {RTK GPS\\(Serial)};
-    \node[sensor] (gps_ard) at (-1.5, 2) {Arduino\\gps.ino};
-    \node[bridge] (gps_bridge) at (-1.5, 1) {GPSBridge};
-    \node[topic] (gps_topic) at (-1.5, 0) {/gps\_data};
-    \node[sub] (gps_sub) at (-1.5, -1) {GPSSubscriber};
-    \node[sub] (gps_parse) at (-1.5, -2) {GPSDataParser};
+% Commands flow (top)
+\node[box, fill=blue!12] (gui) at (0,0.9) {PyQt5 GUI\\publish()};
+\node[box] (ros1) at (3.3,0.9) {ROS2\\/cmd\_vel};
+\node[box, fill=blue!15] (wifi1) at (6.6,0.9) {WiFi\\Transmit};
+\node[box, fill=jetsongreen!15] (bridge1) at (9.9,0.9) {MotorBridge\\subscribe()};
+\node[box, fill=arduinoblue!15] (ard1) at (13.2,0.9) {Arduino\\Motors};
+\node[box, fill=pittgold!15] (hw1) at (16.5,0.9) {Motors\\Move};
 
-    % Ultrasonic Pipeline
-    \node at (1.5, 4) {\textbf{Ultrasonic}};
-    \node[sensor] (ultra_hw) at (1.5, 3) {3x HC-SR04\\(GPIO)};
-    \node[sensor] (ultra_ard) at (1.5, 2) {Arduino\\ultrasonic.ino};
-    \node[bridge] (ultra_bridge) at (1.5, 1) {UltrasonicBridge};
-    \node[topic] (ultra_topic) at (1.5, 0) {/ultrasonic\_data};
-    \node[sub] (ultra_sub) at (1.5, -1) {GenericSubscriber};
+\draw[arr, blue!70] (gui) -- (ros1);
+\draw[arr, blue!70] (ros1) -- (wifi1);
+\draw[arr, blue!70] (wifi1) -- (bridge1);
+\draw[arr, red!70] (bridge1) -- (ard1);
+\draw[arr, pittgold] (ard1) -- (hw1);
 
-    % Camera Pipeline
-    \node at (4.5, 4) {\textbf{Camera}};
-    \node[sensor] (cam_hw) at (4.5, 3) {RealSense D435\\(USB 3.0)};
-    \node[bridge] (cam_setup) at (4.5, 1.5) {setup.py\\(pyrealsense2)};
-    \node[topic] (cam_topic) at (4.5, 0) {/camera/*};
-    \node[sub] (cam_sub) at (4.5, -1) {ImageSubscriber};
+\node[font=\scriptsize\bfseries, blue!70] at (8.25,1.7) {Commands: Base Station $\rightarrow$ Rover};
 
-    % Arrows
-    \draw[arrow] (imu_hw) -- (imu_ard);
-    \draw[arrow] (imu_ard) -- (imu_bridge);
-    \draw[arrow] (imu_bridge) -- (imu_topic);
-    \draw[arrow] (imu_topic) -- (imu_sub);
-    \draw[arrow] (imu_sub) -- (imu_parse);
+% Sensor data flow (bottom)
+\node[box, fill=pittgold!15] (hw2) at (16.5,-0.9) {Sensors\\Read};
+\node[box, fill=arduinoblue!15] (ard2) at (13.2,-0.9) {Arduino\\Serialize};
+\node[box, fill=jetsongreen!15] (bridge2) at (9.9,-0.9) {IMUBridge\\publish()};
+\node[box, fill=blue!15] (wifi2) at (6.6,-0.9) {WiFi\\Receive};
+\node[box] (ros2) at (3.3,-0.9) {ROS2\\/imu\_data};
+\node[box, fill=blue!12] (gui2) at (0,-0.9) {PyQt5 GUI\\subscribe()};
 
-    \draw[arrow] (gps_hw) -- (gps_ard);
-    \draw[arrow] (gps_ard) -- (gps_bridge);
-    \draw[arrow] (gps_bridge) -- (gps_topic);
-    \draw[arrow] (gps_topic) -- (gps_sub);
-    \draw[arrow] (gps_sub) -- (gps_parse);
+\draw[arr, pittgold] (hw2) -- (ard2);
+\draw[arr, red!70] (ard2) -- (bridge2);
+\draw[arr, blue!70] (bridge2) -- (wifi2);
+\draw[arr, blue!70] (wifi2) -- (ros2);
+\draw[arr, blue!70] (ros2) -- (gui2);
 
-    \draw[arrow] (ultra_hw) -- (ultra_ard);
-    \draw[arrow] (ultra_ard) -- (ultra_bridge);
-    \draw[arrow] (ultra_bridge) -- (ultra_topic);
-    \draw[arrow] (ultra_topic) -- (ultra_sub);
-
-    \draw[arrow] (cam_hw) -- (cam_setup);
-    \draw[arrow] (cam_setup) -- (cam_topic);
-    \draw[arrow] (cam_topic) -- (cam_sub);
+\node[font=\scriptsize\bfseries, jetsongreen!70] at (8.25,-1.7) {Sensor Data: Rover $\rightarrow$ Base Station};
 
 \end{tikzpicture}
-\caption{Parallel Sensor Data Pipelines}
+\caption{Bidirectional Data Flow}
+\label{fig:data-flow}
 \end{figure}
-
-\section{Error Handling Architecture}
-
-The system implements error handling at multiple layers to ensure graceful degradation when components fail.
-
-\subsection{Serial Connection Errors}
-
-The \texttt{ArduinoBridgeBase} class handles serial connection failures:
-
-\begin{lstlisting}[language=python, caption={Reconnection Logic in ArduinoBridgeBase}]
-def _attempt_reconnection(self):
-    """Attempt to reconnect to the serial port"""
-    if self.serial:
-        try:
-            self.serial.close()
-        except:
-            pass
-        self.serial = None
-
-    # Manual restart required - logs warning
-    self.get_logger().warning(
-        "Serial connection lost. Manual restart required."
-    )
-\end{lstlisting}
-
-\subsection{Data Parsing Errors}
-
-Subscribers use sentinel values to indicate parse failures:
-
-\begin{table}[H]
-\centering
-\caption{Error Values by Subscriber}
-\begin{tabular}{@{}llp{6cm}@{}}
-\toprule
-\textbf{Subscriber} & \textbf{Error Value} & \textbf{Condition} \\
-\midrule
-IMUSubscriber & -0.1 & Parse exception in \texttt{IMUDataParser} \\
-GPSSubscriber & "NO CONNECTION!!!" & Empty NMEA sentence received \\
-GPSSubscriber & None & Invalid sentence type (not GAGSV/GNGLL) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{warningbox}
-When displaying sensor data in GUIs, always check for error values before showing data to the user. A value of -0.1 for IMU data indicates a parsing failure, not an actual sensor reading.
-\end{warningbox}
-
-\subsection{IMUBridge Port Auto-Detection}
-
-The \texttt{IMUBridge} class implements automatic port detection for cross-platform compatibility:
-
-\begin{lstlisting}[language=python, caption={IMU Port Auto-Detection}]
-possible_ports = [
-    "/dev/ttyACM0",      # Linux primary
-    "/dev/cu.usbmodem11201",  # macOS
-    "/dev/ttyUSB0"       # Linux USB-serial
-]
-
-for port in possible_ports:
-    try:
-        test_serial = serial.Serial(port, 115200, timeout=1)
-        test_serial.close()
-        working_port = port
-        break
-    except:
-        continue
-\end{lstlisting}
-
-\section{Message Format Specifications}
-
-Detailed field-by-field breakdown of all message formats used in the system.
-
-\subsection{Motor Control Input}
-
-\begin{table}[H]
-\centering
-\caption{Motor Command String Format}
-\begin{tabular}{@{}clp{6cm}@{}}
-\toprule
-\textbf{Field} & \textbf{Name} & \textbf{Description} \\
-\midrule
-0 & linear\_x & Forward/backward velocity (-100 to 100) \\
-1 & linear\_y & Left/right strafe (typically 0) \\
-2 & linear\_z & Up/down (typically 0) \\
-3 & angular\_x & Roll (typically 0) \\
-4 & angular\_y & Pitch (typically 0) \\
-5 & angular\_z & Yaw/turning (-100 to 100) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Example:} \texttt{"100,0,0,0,0,50"} = Forward at full speed with moderate right turn
-
-\subsection{IMU Data Format}
-
-\begin{lstlisting}[caption={IMU String Format}]
-Format: "X: <float>\tY: <float>\tZ: <float>"
-Fields: X = heading (0-360), Y = roll, Z = pitch
-Example: "X: 45.23\tY: -2.15\tZ: 0.89"
-\end{lstlisting}
-
-The \texttt{IMUDataParser} processes this into:
-\begin{itemize}
-    \item \textbf{distance} --- Euclidean distance from previous reading
-    \item \textbf{velocity} --- distance / time\_delta (meters/second)
-    \item \textbf{yz\_tilt\_angle} --- Vertical tilt in degrees
-    \item \textbf{yx\_tilt\_angle} --- Horizontal tilt in degrees
-\end{itemize}
-
-\subsection{GPS NMEA Formats}
-
-\textbf{GNGLL (Position):}
-\begin{lstlisting}[caption={GNGLL Sentence Structure}]
-$GNGLL,<lat>,<N/S>,<lon>,<E/W>,<time>,<status>,<mode>*<checksum>
-Example: $GNGLL,4024.12345,N,07952.12345,W,123456.00,A,A*6B
-
-Parsed output: "Latitude: 4024.12345 N Longitude: 07952.12345 W"
-\end{lstlisting}
-
-\textbf{GAGSV/GBGSV (Satellites):}
-\begin{lstlisting}[caption={GAGSV Sentence Structure}]
-$GAGSV,<total>,<msg#>,<sats>,<sat1_prn>,<elev>,<azim>,<snr>,...*<checksum>
-SNR values extracted from positions 7, 11, 15, 19... (every 4th field)
-
-Parsed output: List of SNR integers, average SNR float
-\end{lstlisting}
-
-\subsection{Ultrasonic Data Format}
-
-\begin{lstlisting}[caption={Ultrasonic String Format}]
-Format: "distance1_cm, distance2_cm, distance3_cm, "
-Example: "45, 120, 88, "
-Note: Trailing comma and space are part of the format
-\end{lstlisting}
 
 %=============================================================================
 \chapter{Directory Structure}
@@ -694,7 +720,7 @@ URC/
 |-- ros_bridge/               # ROS 2 hardware bridges
 |   |-- arduino_bridge_base/  # Base class for bridges
 |   |-- motor_bridge/         # Motor control system
-|   |-- motor_subscriber/     # Legacy motor control
+|   |-- motor_subscriber/     # Motor command handler
 |   |-- gps_bridge/           # GPS sensor bridge
 |   |-- imu_bridge/           # IMU sensor bridge
 |   +-- ultrasonic_bridge/    # Ultrasonic sensor bridge
@@ -708,8 +734,15 @@ URC/
 |   |-- subscribers/          # ROS 2 subscriber classes
 |   +-- camera/               # Camera utilities
 |
+|-- teleop/                   # Teleoperation system
+|   +-- teleop_string_publisher.py
+|
+|-- odometry/                 # Navigation and localization
+|   +-- gps/                  # GPS odometry utilities
+|
 |-- simulation/               # Gazebo simulation
 |   +-- colcon_ws/            # ROS 2 workspace
+|       +-- src/my_robot_description/
 |
 |-- README.md
 |-- CONTRIBUTING.md
@@ -851,6 +884,30 @@ from guis.subscribers.subscriber import IMUSubscriber
 \chapter{Hardware Requirements}
 %=============================================================================
 
+\section{Power System}
+
+The rover uses a distributed power architecture with isolated rails for compute and motor systems.
+
+\begin{table}[H]
+\centering
+\caption{Power System Specifications}
+\begin{tabular}{@{}llp{6cm}@{}}
+\toprule
+\textbf{Component} & \textbf{Specification} & \textbf{Purpose} \\
+\midrule
+Batteries & 4$\times$ 40V rechargeable & Main power source for entire rover \\
+Voltage Regulator \#1 & 40V $\rightarrow$ 5V & Dedicated power for Jetson Nano \\
+Voltage Regulator \#2 & 40V $\rightarrow$ motor voltage & Powers motor controllers \\
+Emergency Stop & Relay cutoff switch & Immediately disconnects all power \\
+Power Distribution & Central module & Routes power to subsystems \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{importantbox}
+The power system uses \textbf{isolated power rails} to prevent motor inrush current from causing brownouts on the Jetson Nano. Voltage Regulator \#1 provides dedicated, stable power to the compute unit.
+\end{importantbox}
+
 \section{On-Board Computer}
 
 \begin{table}[H]
@@ -870,22 +927,7 @@ Cooling & Active fan (recommended) \\
 
 \section{Motor System}
 
-\begin{table}[H]
-\centering
-\caption{Motor System Specifications}
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Component} & \textbf{Specification} \\
-\midrule
-Motors & 6x GoBilda motors \\
-Motor Controllers & 3x dual H-bridge controllers \\
-Arduino & Arduino Mega 2560 (recommended) \\
-PWM Range & 0--255 \\
-Wheel Base & 0.7384 meters \\
-Max Speed & 1.0 m/s \\
-\bottomrule
-\end{tabular}
-\end{table}
+The motor system uses 6$\times$ GoBilda motors with 3 dual H-bridge controllers. For complete specifications, see the Key Specifications table in Chapter~\ref{chap:overview} and the Hardware Subsystems table in Chapter~\ref{chap:architecture}.
 
 \subsection{Pin Configuration}
 
@@ -915,29 +957,22 @@ Back Right & 7 & 48 & Right \\
 \toprule
 \textbf{Sensor} & \textbf{Model} & \textbf{Connection} & \textbf{Rate} \\
 \midrule
-IMU & Adafruit BNO055 (9-axis) & Serial 115200 & 10 Hz \\
-GPS & RTK GPS module & Serial 115200 & 1 Hz \\
-Cameras & 2x Intel RealSense D435 & USB 3.0 & 30 Hz \\
-Ultrasonic & 3x HC-SR04 & Arduino GPIO & 10 Hz \\
+IMU & Adafruit BNO055 (9-axis) & I2C via Arduino & 10 Hz \\
+GPS & u-blox ZED-F9P RTK ($\pm$2cm) & Serial 115200 & 1 Hz \\
+Cameras & 3$\times$ Intel RealSense D400 & USB 3.0 & 30 Hz \\
+Ultrasonic & 3$\times$ HC-SR04 & Arduino GPIO & 10 Hz \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Ultrasonic Sensor Pins}
+\subsection{Sensor Details}
 
-\begin{table}[H]
-\centering
-\caption{Ultrasonic Sensor Pin Configuration}
-\begin{tabular}{@{}lcc@{}}
-\toprule
-\textbf{Sensor} & \textbf{Trigger Pin} & \textbf{Echo Pin} \\
-\midrule
-Sensor 1 & 8 & 9 \\
-Sensor 2 & 50 & 51 \\
-Sensor 3 & 48 & 49 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{itemize}
+    \item \textbf{RTK GPS (ZED-F9P):} Uses carrier phase measurements instead of code-based positioning, achieving $\pm$2cm accuracy vs $\pm$5m standard GPS. Requires base station corrections.
+    \item \textbf{IMU (BNO055):} 9-axis sensor (3-axis accelerometer, gyroscope, magnetometer) with onboard sensor fusion. Connected via I2C to dedicated Arduino.
+    \item \textbf{Cameras (RealSense D400):} RGB-D cameras providing both color and depth data. Mounted at front, back, and on the robotic arm for manipulation tasks.
+    \item \textbf{Ultrasonic (HC-SR04):} 3 sensors for obstacle detection. Range: 2cm--400cm. Pin configuration: Sensor 1 (Trigger=8, Echo=9), Sensor 2 (Trigger=50, Echo=51), Sensor 3 (Trigger=48, Echo=49).
+\end{itemize}
 
 \section{Serial Port Configuration}
 
@@ -948,17 +983,21 @@ Sensor 3 & 48 & 49 \\
 \toprule
 \textbf{Device} & \textbf{Port} & \textbf{Baud Rate} & \textbf{Arduino} & \textbf{Notes} \\
 \midrule
-Motors & /dev/ttyACM1 & 115200 & Motor (2nd) & Hardcoded in MotorBridge \\
-GPS & /dev/ttyACM0 & 115200 & Sensor (1st) & Configurable, default ACM0 \\
-IMU & /dev/ttyACM0 & 115200 & Sensor (1st) & Auto-detect tries ACM0 first \\
-Ultrasonic & /dev/ttyACM0 & 115200 & Sensor (1st) & Same Arduino as IMU/GPS \\
+Motors & /dev/ttyACM1 & 115200 & Hardcoded in motor\_subscriber \\
+GPS & /dev/ttyACM0 & 9600 & SoftwareSerial (RX=10, TX=11) \\
+IMU & TCP:8888 or Serial & 115200 & TCP in Docker, serial standalone \\
+Ultrasonic & /dev/ttyACM0 & 115200 & Shared with GPS/IMU Arduino \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{tipbox}
-\textbf{Which Arduino?} The ``Sensor (1st)'' Arduino handles all sensor data (IMU, GPS, ultrasonic) while the ``Motor (2nd)'' Arduino handles motor commands. The 1st/2nd refers to the required USB plug-in order on the Jetson.
-\end{tipbox}
+\begin{importantbox}
+\textbf{IMU Communication Options:} The IMU bridge supports two modes:
+\begin{itemize}
+    \item \textbf{TCP Mode (Docker):} Connects to \texttt{host.docker.internal:8888} for use inside containers
+    \item \textbf{Serial Mode (Standalone):} Auto-detects from \texttt{/dev/ttyACM0}, \texttt{/dev/ttyUSB0}, or \texttt{/dev/cu.usbmodem*}
+\end{itemize}
+\end{importantbox}
 
 %=============================================================================
 \chapter{Software Dependencies}
@@ -1139,13 +1178,7 @@ devices:
 
 \subsection{Environment Variables}
 
-\begin{lstlisting}[language=yaml, caption={Jetson Environment Variables}]
-environment:
-  - ROS_DOMAIN_ID=0
-  - ROS_LOCALHOST_ONLY=0
-  - NVIDIA_DRIVER_CAPABILITIES=all
-  - NVIDIA_VISIBLE_DEVICES=all
-\end{lstlisting}
+See Appendix~\ref{app:env-vars} for the complete environment variable reference. Key variables for Jetson include \texttt{ROS\_DOMAIN\_ID}, \texttt{NVIDIA\_DRIVER\_CAPABILITIES}, and \texttt{NVIDIA\_VISIBLE\_DEVICES}.
 
 \subsection{Supervised Processes}
 
@@ -1158,7 +1191,8 @@ environment:
 \midrule
 setup & RealSense camera initialization & Yes \\
 gps\_bridge & GPS data publisher & Yes \\
-motor\_bridge & Motor command handler & Yes \\
+motor\_subscriber & Motor command handler & Yes \\
+imu\_bridge & IMU orientation publisher & Yes \\
 ultrasonic\_bridge & Ultrasonic sensor publisher & Yes \\
 \bottomrule
 \end{tabular}
@@ -1187,29 +1221,67 @@ chmod +x start_linux.sh
 
 \subsection{Local Environment Variables}
 
-\begin{lstlisting}[language=yaml, caption={Local Container Environment}]
-environment:
-  - ROS_DOMAIN_ID=0
-  - ROS_LOCALHOST_ONLY=0
-  - QT_X11_NO_MITSHM=1
-  - DISPLAY=${DISPLAY}
-\end{lstlisting}
+See Appendix~\ref{app:env-vars} for the complete environment variable reference. Key variables for GUI display include \texttt{DISPLAY} and \texttt{QT\_X11\_NO\_MITSHM}.
 
 \section{Simulation Container}
 
+The simulation uses Gazebo with a custom URDF robot model.
+
+\subsection{Simulation Workspace Structure}
+
+\begin{lstlisting}[language=bash]
+simulation/colcon_ws/
++-- src/
+    +-- my_robot_description/
+        |-- launch/
+        |   |-- display.launch.py    # RViz visualization
+        |   +-- launch_sim.launch.py # Full Gazebo simulation
+        |-- urdf/
+        |   +-- RAS_Rover.urdf       # Robot description
+        +-- scripts/
+            +-- robot_controller.py  # Simulation control
+\end{lstlisting}
+
+\subsection{Building the Simulation}
+
+\begin{lstlisting}[language=bash, caption={Build Simulation Workspace}]
+cd simulation/colcon_ws
+colcon build --symlink-install
+source install/setup.bash
+\end{lstlisting}
+
+\subsection{Launching Simulation}
+
 \begin{lstlisting}[language=bash, caption={Simulation Startup}]
+# Option 1: Via Docker
 cd docker/local
 ./sim-launch.sh
 
-# Launch simulation
-ros2 launch my_robot_description display.launch.py use_sim_time:=true
+# Option 2: Direct launch for RViz visualization
+ros2 launch my_robot_description display.launch.py
+
+# Option 3: Full Gazebo simulation
+ros2 launch my_robot_description launch_sim.launch.py use_sim_time:=true
 \end{lstlisting}
 
 %=============================================================================
 \chapter{Quick Start Guide}
 %=============================================================================
 
+\begin{tipbox}
+This chapter provides a condensed overview of the startup process. For comprehensive step-by-step procedures, troubleshooting, and verification commands, see Chapter~\ref{chap:detailed-startup}: \textbf{Detailed Startup Procedures}.
+\end{tipbox}
+
 \section{Prerequisites}
+
+\begin{warningbox}
+\textbf{Linux Base Station Required:} To communicate with the rover Jetson, you must use a Linux-based base station. This can be:
+\begin{itemize}
+    \item A laptop or desktop running Linux (Ubuntu 22.04 recommended)
+    \item Another Jetson device running the \texttt{jetson\_local} configuration
+\end{itemize}
+macOS support is limited to simulation and local development only.
+\end{warningbox}
 
 \subsection{Install Docker}
 
@@ -1232,31 +1304,23 @@ cd URC
 \subsection{Connect Hardware}
 
 \begin{warningbox}
-\textbf{CRITICAL: Arduino Plug-In Order Determines Port Numbers}
-
-The order you plug in the Arduinos determines their \texttt{/dev/ttyACM*} port numbers. You must follow this exact order \textbf{every time before starting Docker}:
+\textbf{USB Connection Order is Critical!} The motor Arduino is hardcoded to \texttt{/dev/ttyACM1}. Linux assigns device numbers in the order USB devices are plugged in.
 \end{warningbox}
 
 \begin{enumerate}
-    \item \textbf{Ensure Arduinos are UNPLUGGED} from Jetson
-    \item Power on Jetson and wait for full boot (~60-90 seconds)
-    \item \textbf{Plug in SENSOR Arduino FIRST} $\rightarrow$ becomes \texttt{/dev/ttyACM0}
-    \begin{itemize}
-        \item This Arduino runs IMU, GPS, and ultrasonic firmware
-        \item Wait 2 seconds after plugging in
-    \end{itemize}
-    \item \textbf{Plug in MOTOR Arduino SECOND} $\rightarrow$ becomes \texttt{/dev/ttyACM1}
-    \begin{itemize}
-        \item This Arduino runs motor control firmware
-        \item Wait 2 seconds after plugging in
-    \end{itemize}
+    \item \textbf{First:} Plug in IMU/GPS Arduino (gets \texttt{/dev/ttyACM0})
+    \item \textbf{Second:} Plug in Motor Arduino (gets \texttt{/dev/ttyACM1})
     \item Connect RealSense cameras to USB 3.0 ports
     \item Power on motor controllers
-    \item Verify serial ports: \texttt{ls /dev/ttyACM*}
-    \begin{itemize}
-        \item Must show both \texttt{ttyACM0} and \texttt{ttyACM1}
-    \end{itemize}
-    \item \textbf{NOW} start the Docker container
+    \item Verify serial ports: \texttt{ls /dev/ttyACM*} (should show ACM0 and ACM1)
+\end{enumerate}
+
+\subsection{Network Setup}
+
+\begin{enumerate}
+    \item Connect the rover (Jetson) to the team WiFi network
+    \item Connect the base station (Linux laptop/Jetson) to the \textbf{same WiFi network}
+    \item Verify connectivity: \texttt{ping <rover-ip-address>}
 \end{enumerate}
 
 \begin{tipbox}
@@ -1266,7 +1330,7 @@ The order you plug in the Arduinos determines their \texttt{/dev/ttyACM*} port n
 \section{Option A: Full System Startup}
 
 \begin{importantbox}
-This option requires both the rover (Jetson) and base station (local machine) to be on the same WiFi network.
+This option requires both the rover (Jetson) and base station (local machine) to be on the same WiFi network. The base station \textbf{must be running Linux} to communicate with the rover---use a Linux laptop or another Jetson with \texttt{jetson\_local}.
 \end{importantbox}
 
 \subsection{Step 1: Start Jetson Container (on rover)}
@@ -1279,6 +1343,22 @@ This option requires both the rover (Jetson) and base station (local machine) to
 # FIRST: Re-plug Arduinos (Sensor, then Motor)
 cd docker/jetson
 sudo ./start.sh
+\end{lstlisting}
+
+Enter the container and start the ROS bridges:
+
+\begin{lstlisting}[language=bash]
+# Enter the container
+sudo docker exec -it pitt_urc_jetson bash
+
+# Source ROS 2
+source /opt/ros/humble/local_setup.bash
+cd /app
+
+# Start bridges (run each in separate terminal or use screen/tmux)
+python3 -m ros_bridge.motor_subscriber.motor_subscriber
+python3 -m ros_bridge.gps_bridge.gps_bridge
+python3 -m ros_bridge.ultrasonic_bridge.ultrasonic_bridge
 \end{lstlisting}
 
 \subsection{Step 2: Start Local Container (on base station)}
@@ -1302,75 +1382,38 @@ cd /app
 python3 -m guis.gen_gui
 \end{lstlisting}
 
-\section{Option B: Simulation Only}
-
-\begin{lstlisting}[language=bash]
-cd docker/local
-./sim-launch.sh
-
-# In another terminal (inside container)
-ros2 launch my_robot_description display.launch.py use_sim_time:=true
-\end{lstlisting}
-
-\section{Option C: Development Mode}
-
-\begin{lstlisting}[language=bash]
-# Start local container
-cd docker/local
-./start_linux.sh
-
-# Inside container
-source /opt/ros/humble/local_setup.bash
-cd /app
-
-# Run individual components
-python3 ros_bridge/motor_bridge/launch_motor_bridge.py
-python3 -m guis.arduino_gui
-\end{lstlisting}
-
-\section{Quick Start Troubleshooting}
-
-If something isn't working, check these common issues first:
-
-\begin{table}[H]
-\centering
-\caption{Quick Start Troubleshooting Reference}
-\begin{tabular}{@{}p{4cm}p{9cm}@{}}
-\toprule
-\textbf{Problem} & \textbf{Solution} \\
-\midrule
-Motors don't respond & \textbf{Re-plug Arduinos:} \texttt{docker-compose down} $\rightarrow$ unplug all $\rightarrow$ plug Sensor first $\rightarrow$ plug Motor second $\rightarrow$ \texttt{docker-compose up -d} \\
-\midrule
-No sensor data (IMU/GPS) & Same as above --- Sensor Arduino must be \texttt{/dev/ttyACM0} (plugged in first) \\
-\midrule
-\texttt{/dev/ttyACM*} missing & Arduinos not plugged in, or USB cable issue. Try different USB port/cable \\
-\midrule
-Container won't start & Check \texttt{docker ps -a} for error. Run \texttt{docker logs pitt\_urc\_jetson} \\
-\midrule
-ROS topics not visible & Ensure \texttt{ROS\_DOMAIN\_ID=0} on both Jetson and base station \\
-\midrule
-GUI won't display & Set \texttt{export DISPLAY=:0} or check X11 forwarding (XQuartz on macOS) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{importantbox}
-\textbf{90\% of startup failures} are caused by incorrect Arduino plug-in order. When in doubt:
-\begin{enumerate}
-    \item Stop Docker: \texttt{sudo docker-compose down}
-    \item Unplug ALL Arduinos
-    \item Plug in Sensor Arduino (wait 2 sec)
-    \item Plug in Motor Arduino (wait 2 sec)
-    \item Verify: \texttt{ls /dev/ttyACM*} shows ACM0 and ACM1
-    \item Start Docker: \texttt{sudo docker-compose up -d}
-\end{enumerate}
-\end{importantbox}
-
-For detailed troubleshooting, see Chapter~\ref{chap:troubleshooting}.
-
 %=============================================================================
 \chapter{Detailed Startup Procedures}
+\label{chap:detailed-startup}
 %=============================================================================
+
+\section{Prerequisites}
+
+\begin{warningbox}
+\textbf{Linux Base Station Required:} To communicate with the rover Jetson, you must use a Linux-based base station. This can be a laptop running Linux (Ubuntu 22.04 recommended) or another Jetson device running the \texttt{jetson\_local} configuration.
+\end{warningbox}
+
+\subsection{USB Connection Order}
+
+\begin{warningbox}
+\textbf{USB Connection Order is Critical!} The motor Arduino is hardcoded to \texttt{/dev/ttyACM1}. Linux assigns device numbers in the order USB devices are plugged in.
+\end{warningbox}
+
+\begin{enumerate}
+    \item \textbf{First:} Plug in IMU/GPS Arduino (gets \texttt{/dev/ttyACM0})
+    \item \textbf{Second:} Plug in Motor Arduino (gets \texttt{/dev/ttyACM1})
+    \item Connect RealSense cameras to USB 3.0 ports
+    \item Power on motor controllers
+    \item Verify serial ports: \texttt{ls /dev/ttyACM*} (should show ACM0 and ACM1)
+\end{enumerate}
+
+\subsection{Network Setup}
+
+\begin{enumerate}
+    \item Connect the rover (Jetson) to the team WiFi network
+    \item Connect the base station (Linux laptop/Jetson) to the \textbf{same WiFi network}
+    \item Verify connectivity: \texttt{ping <rover-ip-address>}
+\end{enumerate}
 
 \section{Jetson On-Board Startup}
 
@@ -1389,17 +1432,17 @@ sudo docker-compose up -d
 # 4. Verify container is running
 sudo docker ps
 
-# 5. Check supervised processes
-sudo docker exec -it pitt_urc_jetson supervisorctl status
+# 5. Enter the container
+sudo docker exec -it pitt_urc_jetson bash
 
-# Expected output:
-# gps_bridge          RUNNING   pid 123, uptime 0:01:00
-# motor_bridge        RUNNING   pid 124, uptime 0:01:00
-# setup               RUNNING   pid 125, uptime 0:01:00
-# ultrasonic_bridge   RUNNING   pid 126, uptime 0:01:00
+# 6. Source ROS 2 and navigate to app
+source /opt/ros/humble/local_setup.bash
+cd /app
 
-# 6. View logs
-sudo docker exec -it pitt_urc_jetson tail -f /app/motor_bridge.log
+# 7. Start ROS bridges (run each in separate terminal or use screen/tmux)
+python3 -m ros_bridge.motor_subscriber.motor_subscriber
+python3 -m ros_bridge.gps_bridge.gps_bridge
+python3 -m ros_bridge.ultrasonic_bridge.ultrasonic_bridge
 \end{lstlisting}
 
 \section{Base Station Startup}
@@ -1453,7 +1496,7 @@ python3 -m guis.gen_gui
 ros2 node list
 
 # Expected:
-# /motor_bridge
+# /motor_subscriber
 # /gps_bridge
 # /imu_bridge
 # /ultrasonic_bridge
@@ -1573,6 +1616,17 @@ gray\_and\_depth\_publisher & guis.camera & Camera feed publishing \\
 
 \section{Message Formats}
 
+\begin{importantbox}
+\textbf{Motor Control: Two Input Methods}
+
+The motor bridge accepts commands from two different topic types:
+\begin{itemize}
+    \item \texttt{/cmd\_vel} (geometry\_msgs/Twist) --- Standard ROS 2 velocity commands. Used by teleop\_twist\_keyboard, joystick drivers, and autonomous navigation nodes.
+    \item \texttt{/motor\_control\_input} (std\_msgs/String) --- Direct 6-value control. Used by custom GUIs for fine-grained motor testing.
+\end{itemize}
+Both are converted to PWM signals by the MotorBridge. Use \texttt{/cmd\_vel} for standard robot control; use \texttt{/motor\_control\_input} for direct hardware testing.
+\end{importantbox}
+
 \subsection{Motor Control Input (String)}
 
 \begin{lstlisting}[caption={Motor Command Format}]
@@ -1601,25 +1655,6 @@ $GAGSV,3,1,12,01,45,123,38,02,67,234,42,...
 Format: "distance1_cm, distance2_cm, distance3_cm, "
 Example: "45, 120, 88, "
 \end{lstlisting}
-
-\section{Bridge Class Hierarchy}
-
-\begin{lstlisting}[language=python, caption={Bridge Class Structure}]
-ArduinoBridgeBase(Node)           # Base class (248 lines)
-    |-- MotorBridge               # Motor control
-    |-- GPSBridge                 # GPS data
-    |-- IMUBridge                 # IMU data
-    +-- UltrasonicBridge          # Ultrasonic data
-\end{lstlisting}
-
-\textbf{Base Class Features:}
-\begin{itemize}
-    \item Serial port initialization (115200 baud)
-    \item Generic ROS 2 topic subscription/publishing
-    \item Timer-based Arduino reading (100ms default)
-    \item Error handling and logging
-    \item Automatic reconnection attempts
-\end{itemize}
 
 %=============================================================================
 \chapter{Hardware Interfaces}
@@ -1695,7 +1730,7 @@ GBGSV & BeiDou satellites in view + SNR \\
 
 \section{Ultrasonic Sensors}
 
-\textbf{Location:} \texttt{ros\_bridge/ultrasonic\_bridge/multiple\_untrasonic\_sensors/}
+\textbf{Location:} \texttt{ros\_bridge/ultrasonic\_bridge/multiple\_ultrasonic\_sensors/}
 
 \begin{lstlisting}[language=C, caption={Ultrasonic Distance Calculation}]
 duration = pulseIn(echoPin, HIGH);
@@ -1706,18 +1741,65 @@ distance_cm = (duration / 2) / 29.1;
 
 \textbf{Location:} \texttt{guis/camera/camera\_cv\_test.py}
 
+The rover uses Intel RealSense D435 RGB-D cameras for vision and depth sensing.
+
+\subsection{Camera Specifications}
+
+\begin{table}[H]
+\centering
+\caption{RealSense D435 Configuration}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Stream} & \textbf{Resolution} & \textbf{Format} \\
+\midrule
+Color & 640$\times$480 @ 30 FPS & BGR8 \\
+Depth & 640$\times$480 @ 30 FPS & Z16 (16-bit depth) \\
+Grayscale & 640$\times$480 @ 30 FPS & MONO8 (converted) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Published Topics}
+
+\begin{table}[H]
+\centering
+\caption{Camera ROS Topics}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Topic} & \textbf{Message Type} & \textbf{Description} \\
+\midrule
+/camera/gray/image\_raw & sensor\_msgs/Image & Grayscale image (mono8) \\
+/camera/depth/image\_raw & sensor\_msgs/Image & Depth image (16UC1) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Configuration Code}
+
 \begin{lstlisting}[language=python, caption={RealSense Configuration}]
 import pyrealsense2 as rs
 
-# Color stream
+# Initialize pipeline
+pipeline = rs.pipeline()
+config = rs.config()
+
+# Color stream (converted to grayscale for publishing)
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
 # Depth stream
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+
+# Start streaming
+pipeline.start(config)
 \end{lstlisting}
+
+\begin{tipbox}
+The camera publisher converts color frames to grayscale before publishing to reduce bandwidth. Connect cameras to USB 3.0 ports for optimal performance.
+\end{tipbox}
 
 %=============================================================================
 \chapter{GUI System}
+\label{chap:gui-system}
 %=============================================================================
 
 \section{Main Control GUI}
@@ -2660,21 +2742,7 @@ screen /dev/ttyACM0 115200
 
 \section{ROS 2 Debugging}
 
-\begin{lstlisting}[language=bash, caption={ROS 2 Debugging Commands}]
-# Check ROS environment
-echo $ROS_DOMAIN_ID
-echo $ROS_LOCALHOST_ONLY
-
-# Source ROS 2
-source /opt/ros/humble/local_setup.bash
-
-# Verify discovery
-ros2 daemon status
-ros2 daemon start
-
-# Check multicast
-ros2 multicast receive
-\end{lstlisting}
+For ROS 2 debugging commands (checking environment, sourcing, discovery verification), see Appendix~\ref{app:commands}: Quick Command Reference.
 
 \section{Docker Debugging}
 
@@ -2690,7 +2758,7 @@ docker exec -it pitt_urc_jetson bash
 
 # Check supervisor status (inside Jetson container)
 supervisorctl status
-supervisorctl restart motor_bridge
+supervisorctl restart motor_subscriber
 \end{lstlisting}
 
 \section{Log File Locations}
@@ -2740,451 +2808,9 @@ class ArduinoBridgeBase(Node):
         """Write data to Arduino serial port."""
 \end{lstlisting}
 
-\section{MotorPublisher}
-
-\begin{lstlisting}[language=python, caption={MotorPublisher API}]
-class MotorPublisher(GenericPublisher):
-    """Publisher for motor control commands."""
-
-    def publish_motor_command(self, motor_values: List[float]):
-        """
-        Publish motor command.
-
-        Args:
-            motor_values: List of 6 float values
-                         [linear_x, linear_y, linear_z,
-                          angular_x, angular_y, angular_z]
-        """
-
-    def set_motor_value(self, index: int, value: float):
-        """Set a specific motor value (0-5)."""
-
-    def set_all_motors(self, value: float):
-        """Set all motors to the same value."""
-
-    def stop_all_motors(self):
-        """Emergency stop - set all motors to 0."""
-\end{lstlisting}
-
-\section{TwistPublisher}
-
-\begin{lstlisting}[language=python, caption={TwistPublisher API}]
-class TwistPublisher(GenericPublisher):
-    """Publisher for geometry_msgs/Twist messages."""
-
-    def publish_twist(self, linear_x=0, linear_y=0, linear_z=0,
-                     angular_x=0, angular_y=0, angular_z=0):
-        """Publish a full Twist message."""
-
-    def move_forward(self, speed: float):
-        """Move forward at specified speed."""
-
-    def move_backward(self, speed: float):
-        """Move backward at specified speed."""
-
-    def turn_left(self, angular_speed: float):
-        """Turn left at specified angular speed."""
-
-    def turn_right(self, angular_speed: float):
-        """Turn right at specified angular speed."""
-
-    def stop(self):
-        """Stop all motion."""
-\end{lstlisting}
-
-\section{GenericPublisher}
-
-\textbf{Location:} \texttt{guis/publishers/publisher.py}
-
-Base class for all ROS 2 publishers in the GUI system.
-
-\begin{lstlisting}[language=python, caption={GenericPublisher API}]
-class GenericPublisher(Node):
-    """
-    Base class for ROS 2 publishers.
-
-    Extends rclpy.node.Node to provide a simple interface
-    for publishing messages to ROS 2 topics.
-    """
-
-    def __init__(self, topic_name: str, msg_type,
-                 node_name: str = 'generic_publisher',
-                 queue_size: int = 10):
-        """
-        Initialize the publisher.
-
-        Args:
-            topic_name: Name of the ROS 2 topic to publish to
-            msg_type: Message type (e.g., String, Twist)
-            node_name: Unique name for this ROS 2 node
-            queue_size: Publisher queue depth (default: 10)
-        """
-
-    def publish_message(self, message):
-        """
-        Publish a message to the topic.
-
-        Args:
-            message: Message instance of the correct type
-        """
-\end{lstlisting}
-
-\section{GenericSubscriber}
-
-\textbf{Location:} \texttt{guis/subscribers/subscriber.py}
-
-Base class for all ROS 2 subscribers in the GUI system.
-
-\begin{lstlisting}[language=python, caption={GenericSubscriber API}]
-class GenericSubscriber(Node):
-    """
-    Base class for ROS 2 subscribers.
-
-    Provides subscription to ROS 2 topics with customizable
-    callback functions for message processing.
-    """
-
-    def __init__(self, topic_name: str, msg_type,
-                 node_name: str = 'generic_subscriber',
-                 callback=None):
-        """
-        Initialize the subscriber.
-
-        Args:
-            topic_name: Name of the ROS 2 topic to subscribe to
-            msg_type: Expected message type
-            node_name: Unique name for this ROS 2 node
-            callback: Custom callback function (uses default if None)
-        """
-
-    def default_callback(self, msg):
-        """
-        Default message handler - logs received messages.
-
-        Override in subclasses for custom processing.
-
-        Args:
-            msg: The received ROS 2 message
-        """
-\end{lstlisting}
-
-\section{IMUSubscriber}
-
-\textbf{Location:} \texttt{guis/subscribers/subscriber.py}
-
-Specialized subscriber for IMU data with PyQt5 signal integration.
-
-\begin{lstlisting}[language=python, caption={IMUSubscriber API}]
-class IMUSubscriber(GenericSubscriber, QObject):
-    """
-    Subscriber for IMU data with Qt signal support.
-
-    Parses incoming IMU messages and emits signals for
-    thread-safe GUI updates.
-    """
-
-    # PyQt5 Signal: emitted when new IMU data is parsed
-    imu_data_updated = pyqtSignal(float, float, float)
-    # Parameters: velocity, vertical_tilt, horizontal_tilt
-
-    def __init__(self, topic_name: str = 'imu_data',
-                 msg_type=String,
-                 node_name: str = 'imu_subscriber'):
-        """Initialize with default IMU topic."""
-
-    @property
-    def imu_distance(self) -> float:
-        """Cumulative distance traveled (meters)."""
-
-    @property
-    def imu_velocity(self) -> float:
-        """Current velocity (meters/second)."""
-
-    @property
-    def imu_vertical_tilt_angle(self) -> float:
-        """Vertical tilt angle (degrees)."""
-
-    @property
-    def imu_horizontal_tilt_angle(self) -> float:
-        """Horizontal tilt angle (degrees)."""
-
-    # Error Behavior:
-    # On parse failure, all properties return -0.1
-\end{lstlisting}
-
-\section{GPSSubscriber}
-
-\textbf{Location:} \texttt{guis/subscribers/subscriber.py}
-
-Specialized subscriber for GPS NMEA data.
-
-\begin{lstlisting}[language=python, caption={GPSSubscriber API}]
-class GPSSubscriber(GenericSubscriber):
-    """
-    Subscriber for GPS NMEA sentence data.
-
-    Parses GAGSV/GBGSV (satellite) and GNGLL (position)
-    sentences using GPSDataParser.
-    """
-
-    def __init__(self, topic_name: str = 'gps_data',
-                 msg_type=String,
-                 node_name: str = 'gps_subscriber'):
-        """Initialize with default GPS topic."""
-
-    def default_callback(self, msg):
-        """
-        Parse GPS message and log results.
-
-        Logs: SNR values, average SNR, coordinates
-        Returns "NO CONNECTION!!!" on empty input
-        """
-\end{lstlisting}
-
-\section{IMUDataParser}
-
-\textbf{Location:} \texttt{guis/subscribers/IMUDataParser.py}
-
-Stateful parser that computes derived values from IMU orientation data.
-
-\begin{lstlisting}[language=python, caption={IMUDataParser API}]
-class IMUDataParser:
-    """
-    Parses IMU orientation strings and computes motion metrics.
-
-    Maintains state between readings to calculate distance
-    and velocity. Uses Euclidean distance in 3D space.
-    """
-
-    def __init__(self):
-        """Initialize with no previous data."""
-
-    def parse_imu_data(self, imu_message: str) -> tuple:
-        """
-        Parse IMU message and compute derived values.
-
-        Args:
-            imu_message: String in format "X: <f>\tY: <f>\tZ: <f>"
-
-        Returns:
-            tuple: (distance, velocity, vert_tilt, horiz_tilt)
-                   Returns (0.0, 0.0, 0.0, 0.0) on first call
-        """
-
-    @staticmethod
-    def parse_coordinates(imu_coordinates_data: str) -> list[float]:
-        """
-        Extract [X, Y, Z] floats from IMU string.
-
-        Args:
-            imu_coordinates_data: "X: val\tY: val\tZ: val"
-
-        Returns:
-            list: [x, y, z] as floats
-        """
-
-    @staticmethod
-    def calculate_distance(past: list, current: list) -> float:
-        """
-        Compute Euclidean distance between 3D points.
-
-        Args:
-            past: [x, y, z] previous coordinates
-            current: [x, y, z] current coordinates
-
-        Returns:
-            float: Distance in coordinate units
-        """
-\end{lstlisting}
-
-\section{GPSDataParser}
-
-\textbf{Location:} \texttt{guis/subscribers/GPSDataParser.py}
-
-Parser for NMEA GPS sentences (GAGSV, GBGSV, GNGLL).
-
-\begin{lstlisting}[language=python, caption={GPSDataParser API}]
-class GPSDataParser:
-    """
-    Parses NMEA sentences for GPS position and signal quality.
-
-    Supports:
-    - GAGSV/GBGSV: Satellite SNR (signal-to-noise ratio)
-    - GNGLL: Geographic position (lat/lon)
-    """
-
-    def parse_gagsv(self, nmea_sentence: str) -> list[int] | str | None:
-        """
-        Extract SNR values from satellite sentence.
-
-        Args:
-            nmea_sentence: NMEA GAGSV or GBGSV sentence
-
-        Returns:
-            list[int]: SNR values for visible satellites
-            str: "NO CONNECTION!!!" if empty input
-            None: If not a valid GAGSV/GBGSV sentence
-        """
-
-    def compute_average_snr(self, snr_values: list[int]) -> float:
-        """
-        Calculate average signal-to-noise ratio.
-
-        Args:
-            snr_values: List of SNR integers
-
-        Returns:
-            float: Average SNR, or 0 if empty list
-        """
-
-    def parse_gngll(self, nmea_sentence: str) -> str | None:
-        """
-        Extract coordinates from position sentence.
-
-        Args:
-            nmea_sentence: NMEA GNGLL sentence
-
-        Returns:
-            str: "Latitude: <lat> <dir> Longitude: <lon> <dir>"
-            str: "NO CONNECTION!!!" if empty input
-            None: If not a valid GNGLL sentence
-        """
-
-    def parse_message(self, nmea_sentence: str) -> tuple:
-        """
-        Parse any supported NMEA sentence.
-
-        Args:
-            nmea_sentence: Any NMEA sentence string
-
-        Returns:
-            tuple: (snr_values, average_snr, coordinates)
-                   - snr_values: list, "NO CONNECTION!!!", or None
-                   - average_snr: float (0 if no SNR data)
-                   - coordinates: str or None
-        """
-\end{lstlisting}
-
-\section{ImageSubscriber}
-
-\textbf{Location:} \texttt{guis/subscribers/RGBsubcriber.py}
-
-Subscriber for RealSense camera images (grayscale and depth).
-
-\begin{lstlisting}[language=python, caption={ImageSubscriber API}]
-class ImageSubscriber(Node):
-    """
-    Subscribes to RealSense camera image topics.
-
-    Handles both grayscale and depth images using CvBridge
-    for ROS-to-OpenCV conversion.
-
-    Topics:
-        - camera/gray/image_raw: Grayscale images (mono8)
-        - camera/depth/image_raw: Depth images (passthrough)
-    """
-
-    def __init__(self):
-        """
-        Initialize subscriptions for gray and depth images.
-
-        Creates CvBridge for image format conversion.
-        """
-
-    def gray_callback(self, msg):
-        """
-        Process incoming grayscale images.
-
-        Args:
-            msg (sensor_msgs/Image): ROS image message
-
-        Side Effects:
-            - Updates self.gray_image (numpy.ndarray)
-            - Displays image via cv2.imshow() if enabled
-
-        Encoding: mono8 (8-bit grayscale)
-        """
-
-    def depth_callback(self, msg):
-        """
-        Process incoming depth images.
-
-        Args:
-            msg (sensor_msgs/Image): ROS depth image message
-
-        Encoding: passthrough (native depth format)
-
-        Note: Display visualization commented out in production.
-              Uncomment cv2.convertScaleAbs() lines for
-              colormap visualization.
-        """
-
-# Utility function
-def array_to_image(array, filename) -> PILImage:
-    """
-    Convert numpy array to PIL Image and save to file.
-
-    Args:
-        array: 2D numpy array (clipped to 0-255)
-        filename: Output file path
-
-    Returns:
-        PIL.Image: Grayscale image (mode='L')
-    """
-\end{lstlisting}
-
-\textbf{Usage in GUI:}
-\begin{lstlisting}[language=python, caption={Integrating ImageSubscriber with PyQt5}]
-# In gen_gui.py CameraSubscriber (internal class)
-class CameraSubscriber(Node):
-    image_updated = pyqtSignal(object, bool)  # (frame, is_gray)
-
-    def gray_callback(self, msg):
-        cv_image = self.bridge.imgmsg_to_cv2(msg, 'mono8')
-        self.image_updated.emit(cv_image, True)
-
-# Connect to GUI update
-camera_sub.image_updated.connect(self.update_camera_display)
-\end{lstlisting}
-
-\section{Bridge Classes}
-
-All bridge classes inherit from \texttt{ArduinoBridgeBase} and run on the Jetson container.
-
-\subsection{MotorBridge}
-
-\begin{lstlisting}[language=python, caption={MotorBridge Subscriptions}]
-class MotorBridge(ArduinoBridgeBase):
-    """
-    Motor control bridge with multiple input sources.
-
-    Subscriptions (any can control motors):
-        - cmd_vel (Twist): Standard ROS teleop messages
-        - motor_control_input (String): GUI 6-value format
-        - drive_arduino_commands (String): Legacy format
-
-    Publisher:
-        - drive_data (String): Arduino response data
-
-    Serial Port: /dev/ttyACM1 (hardcoded)
-    """
-\end{lstlisting}
-
-\subsection{Other Bridges}
-
-\begin{table}[H]
-\centering
-\caption{Sensor Bridge Summary}
-\begin{tabular}{@{}llll@{}}
-\toprule
-\textbf{Class} & \textbf{Topic} & \textbf{Default Port} & \textbf{Data Format} \\
-\midrule
-GPSBridge & gps\_data & /dev/ttyACM0 & NMEA sentences \\
-IMUBridge & imu\_data & Auto-detect & "X: \textbackslash tY: \textbackslash tZ:" \\
-UltrasonicBridge & ultrasonic\_data & /dev/ttyACM0 & "d1, d2, d3, " \\
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{tipbox}
+For MotorPublisher and TwistPublisher API documentation, see the Publisher Classes section in Chapter~\ref{chap:gui-system} (GUI System).
+\end{tipbox}
 
 %=============================================================================
 % Appendices
@@ -3192,6 +2818,7 @@ UltrasonicBridge & ultrasonic\_data & /dev/ttyACM0 & "d1, d2, d3, " \\
 \appendix
 
 \chapter{Environment Variables}
+\label{app:env-vars}
 
 \begin{table}[H]
 \centering
@@ -3211,6 +2838,7 @@ NVIDIA\_DRIVER\_CAPABILITIES & all & GPU capabilities (Jetson) \\
 \end{table}
 
 \chapter{Quick Command Reference}
+\label{app:commands}
 
 \begin{lstlisting}[language=bash, caption={Quick Command Reference}]
 # Docker
@@ -3233,8 +2861,8 @@ python3 -m guis.json_motorGUI
 
 # Supervisor (inside Jetson container)
 supervisorctl status
-supervisorctl restart motor_bridge
-supervisorctl tail -f motor_bridge
+supervisorctl restart motor_subscriber
+supervisorctl tail -f motor_subscriber
 
 # Serial
 ls /dev/ttyACM*
