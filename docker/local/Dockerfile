@@ -25,7 +25,16 @@ RUN apt-get update && apt-get install ros-humble-desktop -y
 
 RUN apt-get install ros-dev-tools -y
 
-RUN apt-get update -y && apt-get install -y python3-pip &&\
+RUN apt-get update -y && apt-get install -y python3-pip \
+    python3-pyqt5 \
+    python3-pyqt5.qtsvg \
+    libxcb-xinerama0 \
+    libxcb-cursor0 \
+    libxkbcommon-x11-0 \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    mesa-utils \
+    x11-apps &&\
     pip install supervisor &&\
     pip3 install --no-cache-dir pyserial
 

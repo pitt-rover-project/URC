@@ -9,12 +9,12 @@ services:
     pid: host
     ipc: host
     environment:
-      - DISPLAY=:0
+      - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - LIBGL_ALWAYS_INDIRECT=1
       - ROS_DOMAIN_ID=0
       - ROS_LOCALHOST_ONLY=0
       - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-      - FASTRTPS_DEFAULT_PROFILES_FILE=/app/docker/local/fastdds_profile.xml
     volumes:
       - ./../../:/app
-      - /tmp/.X11-unix:/tmp/.X11-unix

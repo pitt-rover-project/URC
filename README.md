@@ -47,12 +47,12 @@ cd docker/local
 
 ```bash
 # Start main control interface
-python3 guis/gen_gui.py
+python3 -m guis.gen_gui
 
 # Launch specific subsystems
-python3 guis/arduino_gui.py      # Hardware communication
-python3 guis/auto_gui.py         # Autonomous navigation
-python3 guis/equip_serv_gui.py   # Equipment servicing
+python3 -m guis.arduino_gui      # Hardware communication
+python3 -m guis.auto_gui         # Autonomous navigation
+python3 -m guis.equip_serv_gui   # Equipment servicing
 ```
 
 ## 🏗️ System Architecture
