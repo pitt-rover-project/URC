@@ -195,6 +195,16 @@ class MotorBridge(ArduinoBridgeBase):
             self.get_logger().error(f"Failed to send motor command to Arduino: {e}")
             self._attempt_reconnection()
 
+#arm bridge class
+class MotorBridge(ArduinoBridgeBase):
+    def __init__(self):
+        super().__init__(
+            node_name="arm_bridge",
+            topic_name="arm_data",
+            serial_port="/dev/ttyACM2",
+            baud_rate=115200,
+            timer_period=0.1,
+        )
 
 # Ultrasonic Bridge Class
 class UltrasonicBridge(ArduinoBridgeBase):
