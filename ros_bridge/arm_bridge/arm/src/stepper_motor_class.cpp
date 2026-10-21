@@ -26,6 +26,11 @@ void StepperMotor::move(int steps)
   stepper.move((long)(steps * STEPS_PER_REV));
 }
 
+uint16_t StepperMotor::getCurrentPosition()
+{
+  return driver.MSCNT();
+}
+
 void StepperMotor::setup()
 {
   pinMode(enPin, OUTPUT);

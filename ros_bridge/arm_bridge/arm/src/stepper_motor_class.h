@@ -16,6 +16,7 @@ class StepperMotor {
     void setup();
     bool testConnection();
     void move(int steps);
+    uint16_t getCurrentPosition();
 
   private:
     int enPin;
