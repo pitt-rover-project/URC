@@ -15,8 +15,9 @@ class StepperMotor {
     void run();
     void setup();
     bool testConnection();
-    void move(int steps);
-    uint16_t getCurrentPosition();
+    void moveTo(float degrees);
+    float getCurrentPosition();
+    bool isDone();
 
   private:
     int enPin;

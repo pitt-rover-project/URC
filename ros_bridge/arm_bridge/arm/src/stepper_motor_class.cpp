@@ -21,14 +21,19 @@ bool StepperMotor::testConnection()
   return driver.test_connection() == 0 ? true : false;
 }
 
-void StepperMotor::move(int steps)
+void StepperMotor::moveTo(float degrees)
 {
-  stepper.move((long)(steps * STEPS_PER_REV));
+  stepper.moveTo(lround(degrees * STEPS_PER_REV / 360.0));
 }
 
-uint16_t StepperMotor::getCurrentPosition()
+float StepperMotor::getCurrentPosition()
 {
-  return driver.MSCNT();
+ return stepper.currentPosition() * 360.0 / STEPS_PER_REV;
+}
+
+bool StepperMotor::isDone()
+{
+    return stepper.distanceToGo() == 0;
 }
 
 void StepperMotor::setup()
