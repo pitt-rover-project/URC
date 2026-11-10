@@ -16,10 +16,8 @@ class Arm {
     Arm();
     bool armSetup();
     void runWrist();
-    void angleWrist(float degrees);
-    void rotateWrist(float degrees);
     WristPosition getPosition();
-    bool readSerial(String message);
+    bool parseSerial(String message);
     bool writeSerial(String message);
     bool wristDone();
 

@@ -16,25 +16,25 @@ void setup() {
     Serial.println("Stepper driver commds FAILED");
     return;
   }
-  arm.rotateWrist(-45);
-  WristPosition pos = arm.getPosition();
-  Serial.println("Starting positions:");
-  Serial.print("Stepper 1: ");
-  Serial.println(pos.stepper1);
-  Serial.print("Stepper 2: ");
-  Serial.println(pos.stepper2);
+  // arm.rotateWrist(-45);
+  // WristPosition pos = arm.getPosition();
+  // Serial.println("Starting positions:");
+  // Serial.print("Stepper 1: ");
+  // Serial.println(pos.stepper1);
+  // Serial.print("Stepper 2: ");
+  // Serial.println(pos.stepper2);
 
 }
 
 void loop() {
-  arm.runWrist();
-  if (!done && arm.wristDone())
-  {
-    WristPosition pos = arm.getPosition();
-    Serial.print("Move complete: ");
-    Serial.print(pos.stepper1);
-    Serial.print(", ");
-    Serial.println(pos.stepper2);
-    done = true;
-  }
+  // arm.runWrist();
+  // if (!done && arm.wristDone())
+  // {
+  //   WristPosition pos = arm.getPosition();
+  //   Serial.print("Move complete: ");
+  //   Serial.print(pos.stepper1);
+  //   Serial.print(", ");
+  //   Serial.println(pos.stepper2);
+  //   done = true;
+  // }
 }

@@ -20,18 +20,6 @@ void Arm::runWrist()
     stepper2.run();
 }
 
-void Arm::angleWrist(float degrees)
-{
-  pitchTarget = degrees;
-  updateMotors();
-}
-
-void Arm::rotateWrist(float degrees)
-{
-  rollTarget = degrees;
-  updateMotors();
-}
-
 WristPosition Arm::getPosition()
 {
   WristPosition pos;
@@ -40,10 +28,24 @@ WristPosition Arm::getPosition()
   return pos;
 }
 
-bool Arm::readSerial(String message)
+bool Arm::parseSerial(String message)
 {
-    return false;
+  // message format: "pitch,roll"   e.g. "30,-45"
+  int comma = message.indexOf(',');
+  if (comma < 0) return false;                 // no comma -> bad message
+
+  String pitchStr = message.substring(0, comma);
+  String rollStr  = message.substring(comma + 1);
+  pitchStr.trim();                             // remove spaces / \r
+  rollStr.trim();
+  if (pitchStr.length() == 0 || rollStr.length() == 0) return false;
+
+  pitchTarget = pitchStr.toFloat();
+  rollTarget  = rollStr.toFloat();
+  updateMotors();
+  return true;                                 // success
 }
+
 
 bool Arm::writeSerial(String message)
 {
