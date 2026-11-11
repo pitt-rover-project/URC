@@ -4,6 +4,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import serial
 import time
+import math
 from geometry_msgs.msg import Twist
 
 
@@ -196,7 +197,7 @@ class MotorBridge(ArduinoBridgeBase):
             self._attempt_reconnection()
 
 #arm bridge class
-class MotorBridge(ArduinoBridgeBase):
+class ArmBridge(ArduinoBridgeBase):
     def __init__(self):
         super().__init__(
             node_name="arm_bridge",
@@ -205,6 +206,52 @@ class MotorBridge(ArduinoBridgeBase):
             baud_rate=115200,
             timer_period=0.1,
         )
+
+        self.arm_control_subscriber = self.create_subscription(
+            String, "arm_control_input", self.arm_command_callback, 10
+        ) 
+
+    def arm_command_callback(self,msg):
+        #TODO: check values that they don't exceed wrist limits pitch and roll
+        """Handle arm commands from GUI publishers in 2-value comma-separated format"""
+        if self.serial is None:
+            self.get_logger().warning(
+                "Cannot send arm command: serial connection not available"
+            )
+            return
+
+        try:
+            # Validate the command format (should be 2 comma-separated values)
+            command_data = msg.data.strip()
+            values = command_data.split(",")
+
+            if len(values) == 2:
+                # Validate that all values are numeric
+                try:
+                    pitch, roll = (float(v) for v in values)
+                    if not (math.isfinite(pitch) and math.isfinite(roll)):
+                        self.get_logger().warning(
+                            f"Arm command must be finite numbers: {command_data}"
+                        )
+                        return
+                    # Send command directly to Arduino
+                    formatted_command = f"{pitch},{roll}\n"
+                    self.serial.write(formatted_command.encode())
+                    self.get_logger().info(
+                        f"Sent arm command to Arduino: {formatted_command.strip()}"
+                    )
+                except ValueError:
+                    self.get_logger().warning(
+                        f"Invalid numeric values in arm command: {command_data}"
+                    )
+            else:
+                self.get_logger().warning(
+                    f"Invalid arm command format. Expected 2 values, got {len(values)}: {command_data}"
+                )
+
+        except serial.SerialException as e:
+            self.get_logger().error(f"Failed to send arm command to Arduino: {e}")
+            self._attempt_reconnection()
 
 # Ultrasonic Bridge Class
 class UltrasonicBridge(ArduinoBridgeBase):

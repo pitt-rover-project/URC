@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include "stepper_motor_class.h"
 
+//TODO: 
+//add wrist limits for pitch and roll
+
 const float deadband = 1.0;
 
 struct WristPosition {
