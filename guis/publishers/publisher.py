@@ -155,6 +155,62 @@ class MotorPublisher(GenericPublisher, QObject):
         """
         return self.current_motor_values.copy()
 
+class ArmPublisher(GenericPublisher, QObject):
+    """
+    A ROS2 publisher specifically for arm commands that integrates with PyQt5.
+
+    This class publishes motor commands in the format "0,0" (pitch, roll) to the
+    'arm_control_input' topic, which can be consumed by the arm subscriber
+    in the ros_bridge.
+    """
+
+    message_published = pyqtSignal(str)  # Signal emitted when a message is published
+
+    def __init__(self, topic_name: str = 'arm_control_input', node_name: str = 'arm_publisher'):
+        """
+        Initialize the MotorPublisher.
+
+        Args:
+            topic_name (str, optional): The topic to publish to. Defaults to 'motor_control_input'.
+            node_name (str, optional): The ROS2 node name. Defaults to 'motor_publisher'.
+        """
+        GenericPublisher.__init__(self, topic_name, String, node_name)
+        QObject.__init__(self)
+
+        # Initialize with default motor values
+        #TODO: maybe implement this similar to MotorPublisher
+        #self.current_motor_values = [0, 0, 0, 0, 0, 0]
+
+    def publish_arm_command(self, arm_values = None):
+        if arm_values is None:
+            return 
+
+        # Validate input
+        if not isinstance(arm_values, (list, tuple)) or len(arm_values) != 2:
+            self.get_logger().warning(f"Invalid motor_values format. Expected list of 2 values, got: {arm_values}")
+            return
+
+        # Convert all values to strings and join with commas
+        try:
+            command_string = ",".join(str(val) for val in arm_values)
+
+            # Create and publish the message
+            msg = String()
+            msg.data = command_string
+            self.publish_message(msg)
+
+            # Update current values and emit signal TODO: Maybe will be needed
+            # self.current_motor_values = list(arm_values)
+            # self.message_published.emit(command_string)
+
+            self.get_logger().info(f"Published motor command: {command_string}")
+
+        except Exception as e:
+            self.get_logger().error(f"Failed to publish motor command: {e}")        
+
+    def get_current_positions(self):
+        #TODO: Implement that the arm returns all its current positions upon this function call
+        pass
 
 class TwistPublisher(GenericPublisher, QObject):
     """
