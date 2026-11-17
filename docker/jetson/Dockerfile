@@ -35,6 +35,8 @@ RUN apt-get install ros-humble-librealsense2* -y
 
 RUN apt-get install ros-humble-realsense2-* -y
 
+RUN pip3 install --no-cache-dir pyrealsense2
+
 RUN pip3 install --no-cache-dir "numpy<2.0"
 
 RUN apt update
