@@ -21,7 +21,7 @@ class GrayAndDepthPublisher(Node):
         self.pipeline = rs.pipeline()
         self.cfg = rs.config()
         self.cfg.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-        self.cfg.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+        self.cfg.enable_stream(rs.stream.depth)
         self.pipeline.start(self.cfg)
 
         # Timer to publish at 30 Hz
