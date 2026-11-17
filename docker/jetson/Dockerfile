@@ -31,15 +31,6 @@ RUN apt-get update -y && apt-get install -y python3-pip &&\
 
 RUN pip3 install --no-cache-dir "numpy<2.0" opencv-python
 
-RUN mkdir -p /etc/apt/keyrings &&\
-    curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | gpg --dearmor -o /etc/apt/keyrings/librealsense.gpg &&\
-    echo "deb [signed-by=/etc/apt/keyrings/librealsense.gpg] https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" > /etc/apt/sources.list.d/librealsense.list &&\
-    apt-get update &&\
-    apt-get install -y librealsense2-utils &&\
-    apt-get install -y librealsense2-dev
-
-RUN pip3 install --no-cache-dir pyrealsense2
-
 RUN apt-get install ros-humble-librealsense2* -y
 
 RUN apt-get install ros-humble-realsense2-* -y
