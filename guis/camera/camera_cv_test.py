@@ -34,17 +34,12 @@ class GrayPublisher(Node):
         color_image = np.asanyarray(color_frame.get_data())
         gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
 
-        cv2.imshow("Grayscale", gray_image)
-        if cv2.waitKey(1) & 0xFF == ord('x'):
-            rclpy.shutdown()
-
         gray_msg = self.bridge.cv2_to_imgmsg(gray_image, encoding='mono8')
         self.gray_pub.publish(gray_msg)
         self.get_logger().info('Published gray image')
 
     def destroy_node(self):
         self.pipeline.stop()
-        cv2.destroyAllWindows()
         super().destroy_node()
 
 
