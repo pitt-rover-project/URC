@@ -31,8 +31,10 @@ RUN apt-get update -y && apt-get install -y python3-pip &&\
 
 RUN pip3 install --no-cache-dir "numpy<2.0" opencv-python
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE &&\
-    add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u &&\
+RUN mkdir -p /etc/apt/keyrings &&\
+    curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | gpg --dearmor -o /etc/apt/keyrings/librealsense.gpg &&\
+    echo "deb [signed-by=/etc/apt/keyrings/librealsense.gpg] https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" > /etc/apt/sources.list.d/librealsense.list &&\
+    apt-get update &&\
     apt-get install -y librealsense2-utils &&\
     apt-get install -y librealsense2-dev
 

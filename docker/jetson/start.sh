@@ -1,4 +1,4 @@
 #!/bin/bash
 
 sudo docker build -t urc_jetson .
-sudo docker-compose up -d
+sudo docker compose up -d
